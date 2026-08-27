@@ -3,7 +3,7 @@ import { LandingHeaderComponent } from '../../components/landing-header/landing-
 import { LandingHeroComponent } from '../../components/landing-hero/landing-hero.component';
 import { ActionCardsComponent } from '../../components/action-cards/action-cards.component';
 import { PopularCategoriesComponent } from '../../components/popular-categories/popular-categories.component';
-import { WhyUsComponent } from '../../components/why-us/why-us.component';
+import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
 import { LandingFooterComponent } from '../../components/landing-footer/landing-footer.component';
 
 @Component({
@@ -14,7 +14,7 @@ import { LandingFooterComponent } from '../../components/landing-footer/landing-
     LandingHeroComponent,
     ActionCardsComponent,
     PopularCategoriesComponent,
-    WhyUsComponent,
+    HowItWorksComponent,
     LandingFooterComponent,
   ],
   host: {
@@ -22,10 +22,18 @@ import { LandingFooterComponent } from '../../components/landing-footer/landing-
   },
   template: `
     <app-landing-header />
-    <app-landing-hero />
-    <app-action-cards />
-    <app-popular-categories />
-    <app-why-us />
+    <div class="relative">
+      <app-landing-hero />
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20 translate-y-[90%]">
+        <div class="pointer-events-auto">
+          <app-action-cards />
+        </div>
+      </div>
+    </div>
+    <div class="pt-64 md:pt-72">
+      <app-popular-categories />
+    </div>
+    <app-how-it-works />
     <app-landing-footer />
   `,
 })

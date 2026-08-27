@@ -63,6 +63,11 @@ import { Component, input } from '@angular/core';
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 20s-7-4.4-7-9.2A3.8 3.8 0 0112 8a3.8 3.8 0 017 2.8C19 15.6 12 20 12 20z" />
         </svg>
       }
+      @case ('handshake') {
+        <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 13l2 2 3-3 2 2 3-3M7 11L4 8l3-3 4 4M17 11l3-3-3-3-4 4" />
+        </svg>
+      }
       @case ('sofa') {
         <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 14v4h2m12-4v4h2M4 14a2 2 0 012-2h12a2 2 0 012 2M8 12V9a2 2 0 012-2h4a2 2 0 012 2v3" />

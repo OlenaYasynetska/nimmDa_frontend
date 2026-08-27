@@ -1,88 +1,59 @@
-export const LANDING_BRAND = 'Oberösterreich Marktplatz';
-
-export const SEARCH_CATEGORIES = [
-  'Alle Kategorien',
-  'Möbel',
-  'Elektronik',
-  'Kleidung',
-  'Auto',
-  'Haus & Garten',
-  'Immobilien',
-  'Business',
-  'Haustiere',
-  'Renovierung',
-  'Hobby',
-  'Baby',
-] as const;
-
-export const SEARCH_RADII = ['+ 10 km', '+ 25 km', '+ 50 km', '+ 100 km'] as const;
+export const LANDING_BRAND = 'NimmDa';
+export const LANDING_TAGLINE = 'Dein lokaler Marktplatz.';
 
 export interface ActionCard {
   title: string;
   description: string;
   cta: string;
-  icon: 'bag' | 'tag' | 'wrench' | 'user' | 'gift' | 'search';
-  cardClass: string;
+  icon: 'bag' | 'wrench' | 'gift';
+  illustration: 'chair' | 'toolbox' | 'box';
+  titleClass: string;
   iconClass: string;
   buttonClass: string;
+  cardClass: string;
 }
 
 export const ACTION_CARDS: ActionCard[] = [
   {
     title: 'Kaufen',
-    description: 'Finde tolle Produkte',
-    cta: 'Produkte entdecken',
+    description: 'Finde tolle Produkte in deiner Nähe.',
+    cta: 'Zum Marktplatz',
     icon: 'bag',
-    cardClass: 'bg-[#eaf7ee]',
+    illustration: 'chair',
+    titleClass: 'text-[#2f9e57]',
     iconClass: 'text-[#2f9e57]',
-    buttonClass: 'bg-[#3daf66] hover:bg-[#34985a] text-white',
+    buttonClass: 'bg-[#2f9e57] hover:bg-[#278a4b] text-white',
+    cardClass: 'bg-[#eaf8ef]',
   },
   {
-    title: 'Verkaufen',
-    description: 'Verkaufe, was du nicht mehr brauchst',
-    cta: 'Anzeige aufgeben',
-    icon: 'tag',
-    cardClass: 'bg-[#eaf3fb]',
-    iconClass: 'text-[#2f6fb2]',
-    buttonClass: 'bg-[#2f6fb2] hover:bg-[#275d96] text-white',
-  },
-  {
-    title: 'Dienstleistungen finden',
-    description: 'Finde lokale Hilfe',
-    cta: 'Services suchen',
+    title: 'Dienstleistungen',
+    description: 'Finde Hilfe und Profis für dein Anliegen.',
+    cta: 'Dienstleistungen finden',
     icon: 'wrench',
-    cardClass: 'bg-[#fff3e8]',
-    iconClass: 'text-[#e67a22]',
-    buttonClass: 'bg-[#f08a2a] hover:bg-[#d9781e] text-white',
+    illustration: 'toolbox',
+    titleClass: 'text-[#6f4ea1]',
+    iconClass: 'text-[#6f4ea1]',
+    buttonClass: 'bg-[#6f4ea1] hover:bg-[#5d4188] text-white',
+    cardClass: 'bg-[#f3eef8]',
   },
   {
-    title: 'Dienstleistungen anbieten',
-    description: 'Biete deine Skills an',
-    cta: 'Service anbieten',
-    icon: 'user',
-    cardClass: 'bg-[#f4eef8]',
-    iconClass: 'text-[#8b4fad]',
-    buttonClass: 'bg-[#8b4fad] hover:bg-[#764294] text-white',
-  },
-  {
-    title: 'Verschenken',
-    description: 'Gib weiter, statt wegzuwerfen',
-    cta: 'Kostenlos inserieren',
+    title: 'Kostenlos',
+    description: 'Gib Dinge ab oder finde sie kostenlos.',
+    cta: 'Kostenlos entdecken',
     icon: 'gift',
-    cardClass: 'bg-[#eef8e4]',
-    iconClass: 'text-[#7cb342]',
-    buttonClass: 'bg-[#8bc34a] hover:bg-[#7ab03d] text-white',
-  },
-  {
-    title: 'Kostenlos finden',
-    description: 'Entdecke Gratis-Angebote',
-    cta: 'Gratis entdecken',
-    icon: 'search',
-    cardClass: 'bg-[#fff8e1]',
+    illustration: 'box',
+    titleClass: 'text-[#d4a017]',
     iconClass: 'text-[#d4a017]',
-    buttonClass: 'bg-[#f0c419] hover:bg-[#ddb310] text-slate-900',
+    buttonClass: 'bg-[#f5c400] hover:bg-[#e0b400] text-white',
+    cardClass: 'bg-[#fff8dc]',
   },
 ];
+
+export const HERO_USPS = [
+  { icon: 'shield', label: 'Sicher & vertrauensvoll', iconClass: 'text-[#2f6fb2]' },
+  { icon: 'pin', label: 'Lokal in Oberösterreich', iconClass: 'text-[#2f6fb2]' },
+  { icon: 'heart', label: 'Kostenlos & einfach', iconClass: 'text-[#e07a9a]' },
+] as const;
 
 export interface PopularCategory {
   name: string;
@@ -90,7 +61,7 @@ export interface PopularCategory {
 }
 
 export const POPULAR_CATEGORIES: PopularCategory[] = [
-  { name: 'Möbel', icon: 'sofa' },
+  { name: 'Möbel & Haushalt', icon: 'sofa' },
   { name: 'Elektronik', icon: 'monitor' },
   { name: 'Kleidung', icon: 'shirt' },
   { name: 'Auto', icon: 'car' },
@@ -104,32 +75,42 @@ export const POPULAR_CATEGORIES: PopularCategory[] = [
   { name: 'Weitere Kategorien', icon: 'more' },
 ];
 
-export interface WhyItem {
+export interface HowStep {
+  step: string;
   title: string;
   description: string;
-  icon: 'pin' | 'shield' | 'chat' | 'heart';
+  icon: 'search' | 'chat' | 'handshake' | 'heart';
+  circleClass: string;
 }
 
-export const WHY_ITEMS: WhyItem[] = [
+export const HOW_STEPS: HowStep[] = [
   {
-    title: 'Lokal & Regional',
-    description: 'Nur Angebote aus Oberösterreich – nah, persönlich, regional.',
-    icon: 'pin',
+    step: '01',
+    title: 'Finden',
+    description: 'Suche nach dem, was du brauchst – in deiner Nähe.',
+    icon: 'search',
+    circleClass: 'bg-[#2f9e57] text-white',
   },
   {
-    title: 'Sicher & Vertrauensvoll',
-    description: 'Klare Regeln, Hinweise zur sicheren Übergabe, keine versteckten Kosten.',
-    icon: 'shield',
-  },
-  {
-    title: 'Einfach & Schnell',
-    description: 'In wenigen Klicks inserieren, suchen und Kontakt aufnehmen.',
+    step: '02',
+    title: 'Kontaktieren',
+    description: 'Schreib der Person direkt über NimmDa.',
     icon: 'chat',
+    circleClass: 'bg-[#6f4ea1] text-white',
   },
   {
-    title: 'Kostenlos starten',
-    description: 'Privat inserieren und suchen – ohne Abo und ohne Startgebühr.',
+    step: '03',
+    title: 'Treffen & Abwickeln',
+    description: 'Trefft euch lokal und wickelt den Deal sicher ab.',
+    icon: 'handshake',
+    circleClass: 'bg-[#f5c400] text-slate-900',
+  },
+  {
+    step: '04',
+    title: 'Weiterempfehlen',
+    description: 'Empfiehl NimmDa weiter und stärke die Region.',
     icon: 'heart',
+    circleClass: 'bg-[#e07a9a] text-white',
   },
 ];
 
@@ -145,4 +126,11 @@ export const FOOTER_BUSINESS_LINKS = [
   { label: 'Werbung schalten', href: '#' },
   { label: 'Profi-Profil', href: '#' },
   { label: 'Kooperationen', href: '#' },
+];
+
+export const FOOTER_ABOUT_LINKS = [
+  { label: 'Über NimmDa', href: '#' },
+  { label: 'Team', href: '#' },
+  { label: 'Presse', href: '#' },
+  { label: 'Kontakt', href: '#' },
 ];
