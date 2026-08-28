@@ -3,16 +3,39 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
     loadComponent: () =>
       import('./features/landing/pages/landing/landing.component').then(
         (m) => m.LandingComponent
       ),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/landing/pages/landing/landing.component').then(
+            (m) => m.EmptyOutletComponent
+          ),
+      },
+      {
+        path: 'auth/login',
+        loadComponent: () =>
+          import('./features/auth/pages/login/login.component').then(
+            (m) => m.LoginComponent
+          ),
+      },
+      {
+        path: 'auth/register',
+        loadComponent: () =>
+          import('./features/auth/pages/register/register.component').then(
+            (m) => m.RegisterComponent
+          ),
+      },
+    ],
   },
   {
     path: 'auth',
-    loadChildren: () =>
-      import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
+    pathMatch: 'full',
+    redirectTo: 'auth/login',
   },
   {
     path: '',

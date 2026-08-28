@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { LandingHeaderComponent } from '../../components/landing-header/landing-header.component';
 import { LandingHeroComponent } from '../../components/landing-hero/landing-hero.component';
 import { ActionCardsComponent } from '../../components/action-cards/action-cards.component';
@@ -7,9 +8,17 @@ import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.
 import { LandingFooterComponent } from '../../components/landing-footer/landing-footer.component';
 
 @Component({
+  selector: 'app-empty-outlet',
+  standalone: true,
+  template: '',
+})
+export class EmptyOutletComponent {}
+
+@Component({
   selector: 'app-landing',
   standalone: true,
   imports: [
+    RouterOutlet,
     LandingHeaderComponent,
     LandingHeroComponent,
     ActionCardsComponent,
@@ -35,6 +44,7 @@ import { LandingFooterComponent } from '../../components/landing-footer/landing-
     </div>
     <app-how-it-works />
     <app-landing-footer />
+    <router-outlet />
   `,
 })
 export class LandingComponent {}

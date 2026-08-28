@@ -7,6 +7,8 @@ export interface ActionCard {
   cta: string;
   icon: 'bag' | 'wrench' | 'gift';
   illustration: 'chair' | 'toolbox' | 'box';
+  imageSrc?: string;
+  imageAlt?: string;
   titleClass: string;
   iconClass: string;
   buttonClass: string;
@@ -20,17 +22,21 @@ export const ACTION_CARDS: ActionCard[] = [
     cta: 'Zum Marktplatz',
     icon: 'bag',
     illustration: 'chair',
+    imageSrc: '/assets/images/Furniture.png?v=5',
+    imageAlt: 'Furniture',
     titleClass: 'text-[#2f9e57]',
     iconClass: 'text-[#2f9e57]',
     buttonClass: 'bg-[#2f9e57] hover:bg-[#278a4b] text-white',
     cardClass: 'bg-[#eaf8ef]',
   },
   {
-    title: 'Dienstleistungen',
+    title: 'Services',
     description: 'Finde Hilfe und Profis für dein Anliegen.',
-    cta: 'Dienstleistungen finden',
+    cta: 'Find services',
     icon: 'wrench',
     illustration: 'toolbox',
+    imageSrc: '/assets/images/Services.png?v=3',
+    imageAlt: 'Services',
     titleClass: 'text-[#6f4ea1]',
     iconClass: 'text-[#6f4ea1]',
     buttonClass: 'bg-[#6f4ea1] hover:bg-[#5d4188] text-white',
@@ -42,6 +48,8 @@ export const ACTION_CARDS: ActionCard[] = [
     cta: 'Kostenlos entdecken',
     icon: 'gift',
     illustration: 'box',
+    imageSrc: '/assets/images/Free.png',
+    imageAlt: 'Free',
     titleClass: 'text-[#d4a017]',
     iconClass: 'text-[#d4a017]',
     buttonClass: 'bg-[#f5c400] hover:bg-[#e0b400] text-white',
@@ -61,7 +69,7 @@ export interface PopularCategory {
 }
 
 export const POPULAR_CATEGORIES: PopularCategory[] = [
-  { name: 'Möbel & Haushalt', icon: 'sofa' },
+  { name: 'Furniture', icon: 'sofa' },
   { name: 'Elektronik', icon: 'monitor' },
   { name: 'Kleidung', icon: 'shirt' },
   { name: 'Auto', icon: 'car' },

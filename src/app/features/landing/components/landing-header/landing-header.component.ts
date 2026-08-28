@@ -27,7 +27,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
             </svg>
           </a>
-          <a href="#dienstleistungen" class="hover:text-[#1b3a5f]">Dienstleistungen</a>
+          <a href="#services" class="hover:text-[#1b3a5f]">Services</a>
           <a href="#kostenlos" class="hover:text-[#1b3a5f]">Zu verschenken</a>
         </nav>
 
