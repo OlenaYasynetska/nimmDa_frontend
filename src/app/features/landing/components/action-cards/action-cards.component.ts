@@ -22,7 +22,15 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
             "
           >
             <div class="flex min-w-0 flex-1 flex-col">
-              <app-landing-icon [name]="card.icon" [svgClass]="'h-9 w-9 ' + card.iconClass" />
+              @if (card.iconSrc) {
+                <img
+                  [src]="card.iconSrc"
+                  [alt]="card.title"
+                  class="h-9 w-9 object-contain"
+                />
+              } @else {
+                <app-landing-icon [name]="card.icon" [svgClass]="'h-9 w-9 ' + card.iconClass" />
+              }
               <h2 class="mt-3 text-xl font-extrabold {{ card.titleClass }}">{{ card.title }}</h2>
               <p class="mt-2 max-w-[13.5rem] text-sm leading-relaxed text-slate-600">
                 {{ card.description }}

@@ -70,7 +70,9 @@ import { Component, input } from '@angular/core';
       }
       @case ('sofa') {
         <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 14v4h2m12-4v4h2M4 14a2 2 0 012-2h12a2 2 0 012 2M8 12V9a2 2 0 012-2h4a2 2 0 012 2v3" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 10V8a3 3 0 013-3h6a3 3 0 013 3v2" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 13a2 2 0 012-2h12a2 2 0 012 2v3H4v-3z" />
+          <path stroke-linecap="round" d="M6 16v3M18 16v3M8 19h8" />
         </svg>
       }
       @case ('monitor') {
@@ -86,12 +88,18 @@ import { Component, input } from '@angular/core';
       }
       @case ('car') {
         <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 14l2-5h12l2 5M5 17h14M7 17v2M17 17v2M7 14h10" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 16V12l2.2-4.2A2 2 0 019 6.8h6a2 2 0 011.8 1l2.2 4.2V16" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 16h14v2a1 1 0 01-1 1h-1.5M8.5 19H6a1 1 0 01-1-1v-2" />
+          <circle cx="7.5" cy="17.5" r="1.4" />
+          <circle cx="16.5" cy="17.5" r="1.4" />
+          <path stroke-linecap="round" d="M9 10h6" />
         </svg>
       }
       @case ('home') {
         <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 11l8-7 8 7v9H4v-9z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 20v-6h4v6" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.2 7.2c1.6-.2 2.8 1 2.4 2.5-1.3.2-2.4-.7-2.4-2.5z" />
         </svg>
       }
       @case ('building') {
@@ -118,6 +126,30 @@ import { Component, input } from '@angular/core';
       @case ('hammer') {
         <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l5 5-3 1-6 6-3-3 6-6 1-3zM5 19l4-4" />
+        </svg>
+      }
+      @case ('bike') {
+        <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+          <circle cx="6.5" cy="16.5" r="3" />
+          <circle cx="17.5" cy="16.5" r="3" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6.5 16.5L10.5 8h4.2M10.5 8l2.2 8.5M12.7 10.8h4.3M14.7 8l2.8 8.5" />
+        </svg>
+      }
+      @case ('stroller') {
+        <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+          <circle cx="8" cy="18.5" r="1.8" />
+          <circle cx="16.5" cy="18.5" r="1.8" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6.5 18.2L9 9h8.5l-1.8 9.2" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 9V5.8h5.5A2.2 2.2 0 0116.7 8" />
+          <path stroke-linecap="round" d="M4.8 8.5h3.4" />
+        </svg>
+      }
+      @case ('grid') {
+        <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+          <rect x="4" y="4" width="6.5" height="6.5" rx="1.4" />
+          <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.4" />
+          <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.4" />
+          <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.4" />
         </svg>
       }
       @case ('palette') {

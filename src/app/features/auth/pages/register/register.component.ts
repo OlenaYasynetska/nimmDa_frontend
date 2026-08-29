@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { useAuthPlaceholderForm } from '../../../../shared/hooks/use-auth-placeholder-form.hook';
 import { usePasswordVisibility } from '../../../../shared/hooks/use-password-visibility.hook';
@@ -13,10 +14,10 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
   template: `
     <app-auth-modal titleId="register-title" closeLabel="Registrierung schließen">
       <h1 id="register-title" class="mb-2 text-center text-2xl font-bold text-slate-900">
-        Registrieren
+        Als Verkäufer registrieren
       </h1>
       <p class="mb-6 text-center text-sm text-slate-500">
-        Registrierung kommt später. Diese Seite ist ein Platzhalter.
+        Nach der Registrierung öffnet sich dein Verkäuferprofil.
       </p>
       <form [formGroup]="form" class="space-y-4" (ngSubmit)="onSubmit()" novalidate>
         <div>
@@ -52,7 +53,7 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
             </button>
           </div>
         </div>
-        <app-button type="submit" [disabled]="true">Konto erstellen</app-button>
+        <app-button type="submit" [disabled]="form.invalid">Konto erstellen</app-button>
       </form>
       <p class="mt-4 text-center text-sm">
         <a routerLink="/" class="text-primary hover:underline">Zur Startseite</a>
@@ -61,10 +62,18 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
   `,
 })
 export class RegisterComponent {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
   readonly password = usePasswordVisibility();
   readonly form = useAuthPlaceholderForm();
 
   onSubmit(): void {
-    // Auth endpoints will be wired when the backend adds them.
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.auth.registerSeller(this.form.controls.email.value);
+    void this.router.navigateByUrl('/seller');
   }
 }

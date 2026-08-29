@@ -38,6 +38,55 @@ export const routes: Routes = [
     redirectTo: 'auth/login',
   },
   {
+    path: 'anzeigen',
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/marketplace/pages/category-listings/category-listings.component').then(
+            (m) => m.CategoryListingsComponent
+          ),
+      },
+      {
+        path: ':slug',
+        loadComponent: () =>
+          import('./features/marketplace/pages/category-listings/category-listings.component').then(
+            (m) => m.CategoryListingsComponent
+          ),
+      },
+    ],
+  },
+  {
+    path: 'seller',
+    loadComponent: () =>
+      import('./features/seller/layout/seller-layout.component').then(
+        (m) => m.SellerLayoutComponent
+      ),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/seller/pages/seller-dashboard/seller-dashboard.component').then(
+            (m) => m.SellerDashboardComponent
+          ),
+      },
+      {
+        path: 'listings/new',
+        loadComponent: () =>
+          import('./features/seller/pages/create-listing/create-listing.component').then(
+            (m) => m.CreateListingComponent
+          ),
+      },
+      {
+        path: 'messages',
+        loadComponent: () =>
+          import('./features/seller/pages/seller-messages/seller-messages.component').then(
+            (m) => m.SellerMessagesComponent
+          ),
+      },
+    ],
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./layout/main-layout/main-layout.component').then(

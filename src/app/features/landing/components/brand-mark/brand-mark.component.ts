@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -6,8 +6,11 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <a routerLink="/" class="inline-flex flex-col leading-none">
-      <span class="flex text-[1.7rem] font-extrabold tracking-tight">
+    <a [routerLink]="link()" class="inline-flex flex-col leading-none">
+      <span
+        class="flex font-extrabold tracking-tight"
+        [class]="compact() ? 'text-[1.45rem]' : 'text-[1.7rem]'"
+      >
         <span class="text-[#1b3a5f]">Nimm</span>
         <span class="relative text-[#f5c400]">
           D<span
@@ -16,8 +19,13 @@ import { RouterLink } from '@angular/router';
           ></span>a
         </span>
       </span>
-      <span class="mt-1 text-[11px] font-medium text-slate-500">Dein lokaler Marktplatz.</span>
+      @if (!compact()) {
+        <span class="mt-1 text-[11px] font-medium text-slate-500">Dein lokaler Marktplatz.</span>
+      }
     </a>
   `,
 })
-export class BrandMarkComponent {}
+export class BrandMarkComponent {
+  readonly compact = input(false);
+  readonly link = input('/');
+}

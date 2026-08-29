@@ -6,6 +6,7 @@ export interface ActionCard {
   description: string;
   cta: string;
   icon: 'bag' | 'wrench' | 'gift';
+  iconSrc?: string;
   illustration: 'chair' | 'toolbox' | 'box';
   imageSrc?: string;
   imageAlt?: string;
@@ -21,6 +22,7 @@ export const ACTION_CARDS: ActionCard[] = [
     description: 'Finde tolle Produkte in deiner Nähe.',
     cta: 'Zum Marktplatz',
     icon: 'bag',
+    iconSrc: '/assets/icons/shopping_bag.svg',
     illustration: 'chair',
     imageSrc: '/assets/images/Furniture.png?v=5',
     imageAlt: 'Furniture',
@@ -65,23 +67,110 @@ export const HERO_USPS = [
 
 export interface PopularCategory {
   name: string;
+  slug: string;
   icon: string;
+  iconSrc?: string;
+  iconClass: string;
 }
 
 export const POPULAR_CATEGORIES: PopularCategory[] = [
-  { name: 'Furniture', icon: 'sofa' },
-  { name: 'Elektronik', icon: 'monitor' },
-  { name: 'Kleidung', icon: 'shirt' },
-  { name: 'Auto', icon: 'car' },
-  { name: 'Haus & Garten', icon: 'home' },
-  { name: 'Immobilien', icon: 'building' },
-  { name: 'Business', icon: 'briefcase' },
-  { name: 'Haustiere', icon: 'paw' },
-  { name: 'Renovierung', icon: 'hammer' },
-  { name: 'Hobby', icon: 'palette' },
-  { name: 'Baby', icon: 'baby' },
-  { name: 'Weitere Kategorien', icon: 'more' },
+  {
+    name: 'Möbel & Haushalt',
+    slug: 'moebel-haushalt',
+    icon: 'sofa',
+    iconSrc: '/assets/icons/sofa_icon.svg',
+    iconClass: 'text-[#1b3a5f]',
+  },
+  {
+    name: 'Elektronik',
+    slug: 'elektronik',
+    icon: 'monitor',
+    iconSrc: '/assets/icons/monitor_icon.svg',
+    iconClass: 'text-[#2f6fb2]',
+  },
+  {
+    name: 'Kleidung & Schuhe',
+    slug: 'kleidung-schuhe',
+    icon: 'shirt',
+    iconSrc: '/assets/icons/shirt_icon.svg',
+    iconClass: 'text-[#1b3a5f]',
+  },
+  {
+    name: 'Auto & Zubehör',
+    slug: 'auto-zubehoer',
+    icon: 'car',
+    iconSrc: '/assets/icons/car_icon.svg',
+    iconClass: 'text-[#1b3a5f]',
+  },
+  {
+    name: 'Haus & Garten',
+    slug: 'haus-garten',
+    icon: 'home',
+    iconSrc: '/assets/icons/home_garden_icon.svg',
+    iconClass: 'text-[#2f9e57]',
+  },
+  {
+    name: 'Immobilien',
+    slug: 'immobilien',
+    icon: 'building',
+    iconSrc: '/assets/icons/building_icon.svg',
+    iconClass: 'text-[#1b3a5f]',
+  },
+  {
+    name: 'Arbeitswelt & Business',
+    slug: 'arbeitswelt-business',
+    icon: 'briefcase',
+    iconSrc: '/assets/icons/briefcase_icon.svg',
+    iconClass: 'text-[#1b3a5f]',
+  },
+  {
+    name: 'Tiere & Zubehör',
+    slug: 'tiere-zubehoer',
+    icon: 'paw',
+    iconSrc: '/assets/icons/paw_icon.svg',
+    iconClass: 'text-[#2f9e57]',
+  },
+  {
+    name: 'Bau & Renovierung',
+    slug: 'bau-renovierung',
+    icon: 'hammer',
+    iconSrc: '/assets/icons/hammer_icon.svg',
+    iconClass: 'text-[#1b3a5f]',
+  },
+  {
+    name: 'Freizeit & Hobby',
+    slug: 'freizeit-hobby',
+    icon: 'bike',
+    iconSrc: '/assets/icons/bike_icon.svg',
+    iconClass: 'text-[#5b5fc7]',
+  },
+  {
+    name: 'Baby & Kind',
+    slug: 'baby-kind',
+    icon: 'stroller',
+    iconSrc: '/assets/icons/stroller_icon.svg',
+    iconClass: 'text-[#e05a6c]',
+  },
+  {
+    name: 'Weitere Kategorien',
+    slug: 'weitere',
+    icon: 'grid',
+    iconSrc: '/assets/icons/grid_icon.svg',
+    iconClass: 'text-[#1b3a5f]',
+  },
 ];
+
+export function categoryBySlug(slug: string): PopularCategory | undefined {
+  return POPULAR_CATEGORIES.find((category) => category.slug === slug);
+}
+
+export function categoryByName(name: string): PopularCategory | undefined {
+  return POPULAR_CATEGORIES.find((category) => category.name === name);
+}
+
+export function categoryListingsPath(category: PopularCategory): string {
+  return category.slug === 'weitere' ? '/anzeigen' : `/anzeigen/${category.slug}`;
+}
 
 export interface HowStep {
   step: string;
