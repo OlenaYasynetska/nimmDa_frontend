@@ -18,16 +18,23 @@ function columnsForWidth(width: number): number {
 export function useListingPageSize() {
   const columns = signal(columnsForWidth(window.innerWidth));
   const destroyRef = inject(DestroyRef);
+  let frame = 0;
 
   const onResize = (): void => {
-    const next = columnsForWidth(window.innerWidth);
-    if (next !== columns()) {
-      columns.set(next);
-    }
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      const next = columnsForWidth(window.innerWidth);
+      if (next !== columns()) {
+        columns.set(next);
+      }
+    });
   };
 
   window.addEventListener('resize', onResize);
-  destroyRef.onDestroy(() => window.removeEventListener('resize', onResize));
+  destroyRef.onDestroy(() => {
+    cancelAnimationFrame(frame);
+    window.removeEventListener('resize', onResize);
+  });
 
   return computed(() => columns() * LISTING_ROWS_PER_PAGE);
 }

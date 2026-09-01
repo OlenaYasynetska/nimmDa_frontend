@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../../core/services/auth.service';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
 import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 
@@ -33,28 +34,64 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 
         <div class="flex items-center justify-end gap-2 sm:gap-3">
           <a
-            href="#merkliste"
-            class="hidden items-center gap-1.5 px-2 py-2 text-sm font-medium text-slate-700 hover:text-[#1b3a5f] md:inline-flex"
+            class="hidden cursor-pointer items-center gap-1.5 px-2 py-2 text-sm font-medium text-slate-700 hover:text-[#1b3a5f] md:inline-flex"
+            (click)="openMerkliste($event)"
           >
             <app-landing-icon name="heart" svgClass="h-4 w-4" />
             Merkliste
           </a>
-          <a
-            routerLink="/auth/login"
-            class="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-slate-700 hover:text-[#1b3a5f]"
-          >
-            <app-landing-icon name="user" svgClass="h-4 w-4" />
-            Anmelden
-          </a>
-          <a
-            routerLink="/auth/register"
+          @if (auth.isAuthenticated()) {
+            <a
+              [routerLink]="auth.homePath()"
+              class="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-slate-700 hover:text-[#1b3a5f]"
+            >
+              <app-landing-icon name="user" svgClass="h-4 w-4" />
+              Konto
+            </a>
+          } @else {
+            <a
+              routerLink="/auth/login"
+              class="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-slate-700 hover:text-[#1b3a5f]"
+            >
+              <app-landing-icon name="user" svgClass="h-4 w-4" />
+              Anmelden
+            </a>
+          }
+          <button
+            type="button"
             class="rounded-lg bg-[#f5c400] px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-[#e0b400]"
+            (click)="postAd()"
           >
             Anzeige aufgeben
-          </a>
+          </button>
         </div>
       </div>
     </header>
   `,
 })
-export class LandingHeaderComponent {}
+export class LandingHeaderComponent {
+  readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
+  openMerkliste(event: Event): void {
+    event.preventDefault();
+    if (this.auth.isAuthenticated()) {
+      void this.router.navigateByUrl('/konto');
+      return;
+    }
+    void this.router.navigate(['/auth/login'], {
+      queryParams: { role: 'buyer', returnUrl: '/konto' },
+    });
+  }
+
+  postAd(): void {
+    if (this.auth.isAuthenticated()) {
+      this.auth.ensureSellerRole();
+      void this.router.navigateByUrl('/seller/listings/new');
+      return;
+    }
+    void this.router.navigate(['/auth/register'], {
+      queryParams: { role: 'seller' },
+    });
+  }
+}

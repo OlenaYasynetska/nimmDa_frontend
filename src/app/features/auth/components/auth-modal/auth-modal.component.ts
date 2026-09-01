@@ -22,7 +22,7 @@ import { useAuthModal } from '../../../../shared/hooks/use-auth-modal.hook';
         [attr.aria-label]="closeLabel()"
         (click)="modal.close()"
       ></button>
-      <div [class]="modal.panelClass" (click)="$event.stopPropagation()">
+      <div [class]="panelClass() || modal.panelClass" (click)="$event.stopPropagation()">
         <app-card>
           <div class="w-full">
             <ng-content />
@@ -36,4 +36,5 @@ export class AuthModalComponent {
   readonly modal = useAuthModal();
   readonly titleId = input.required<string>();
   readonly closeLabel = input('Close');
+  readonly panelClass = input('');
 }

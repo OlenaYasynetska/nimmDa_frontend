@@ -14,6 +14,7 @@ export interface ActionCard {
   iconClass: string;
   buttonClass: string;
   cardClass: string;
+  link: string;
 }
 
 export const ACTION_CARDS: ActionCard[] = [
@@ -30,6 +31,7 @@ export const ACTION_CARDS: ActionCard[] = [
     iconClass: 'text-[#2f9e57]',
     buttonClass: 'bg-[#2f9e57] hover:bg-[#278a4b] text-white',
     cardClass: 'bg-[#eaf8ef]',
+    link: '/anzeigen',
   },
   {
     title: 'Services',
@@ -43,6 +45,7 @@ export const ACTION_CARDS: ActionCard[] = [
     iconClass: 'text-[#6f4ea1]',
     buttonClass: 'bg-[#6f4ea1] hover:bg-[#5d4188] text-white',
     cardClass: 'bg-[#f3eef8]',
+    link: '/anzeigen',
   },
   {
     title: 'Kostenlos',
@@ -56,6 +59,7 @@ export const ACTION_CARDS: ActionCard[] = [
     iconClass: 'text-[#d4a017]',
     buttonClass: 'bg-[#f5c400] hover:bg-[#e0b400] text-white',
     cardClass: 'bg-[#fff8dc]',
+    link: '/anzeigen',
   },
 ];
 

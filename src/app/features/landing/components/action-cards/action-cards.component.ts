@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { ACTION_CARDS } from '../../data/landing.content';
 import { useActionCardImageSize } from '../../hooks/use-action-card-image.hook';
 import { LandingIconComponent } from '../landing-icon/landing-icon.component';
@@ -6,13 +7,14 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 @Component({
   selector: 'app-action-cards',
   standalone: true,
-  imports: [LandingIconComponent],
+  imports: [LandingIconComponent, RouterLink],
   template: `
     <section id="aktionen" class="container px-4 md:px-8">
       <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
         @for (card of cards; track card.title) {
-          <article
-            class="flex min-h-[16.5rem] overflow-hidden rounded-3xl p-6 shadow-[0_18px_44px_rgba(15,23,42,0.12)] {{ card.cardClass }}"
+          <a
+            [routerLink]="card.link"
+            class="flex min-h-[16.5rem] cursor-pointer overflow-hidden rounded-3xl p-6 shadow-[0_18px_44px_rgba(15,23,42,0.12)] {{ card.cardClass }}"
             [attr.id]="
               card.illustration === 'toolbox'
                 ? 'services'
@@ -35,13 +37,12 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
               <p class="mt-2 max-w-[13.5rem] text-sm leading-relaxed text-slate-600">
                 {{ card.description }}
               </p>
-              <button
-                type="button"
+              <span
                 class="mt-5 inline-flex w-fit items-center gap-1 rounded-lg px-4 py-2.5 text-sm font-semibold {{ card.buttonClass }}"
               >
                 {{ card.cta }}
                 <span aria-hidden="true">→</span>
-              </button>
+              </span>
             </div>
             <div [class]="imageSize.wrapClass">
               @if (card.imageSrc) {
@@ -78,7 +79,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
                 }
               }
             </div>
-          </article>
+          </a>
         }
       </div>
     </section>

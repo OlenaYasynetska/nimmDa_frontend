@@ -92,6 +92,11 @@ import { SellerMessagesService } from '../services/seller-messages.service';
         <a routerLink="/" class="mt-4 rounded-lg px-3 py-2 text-sm font-medium text-[#2f6fb2] hover:bg-slate-50">
           Zum Marktplatz
         </a>
+        @if (auth.canBuy()) {
+          <a routerLink="/konto" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Käuferbereich
+          </a>
+        }
       </aside>
       <main class="min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
         <router-outlet />
@@ -100,7 +105,7 @@ import { SellerMessagesService } from '../services/seller-messages.service';
   `,
 })
 export class SellerLayoutComponent {
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
   readonly messages = inject(SellerMessagesService);
   readonly nav = SELLER_NAV;
 

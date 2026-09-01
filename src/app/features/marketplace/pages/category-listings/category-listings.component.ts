@@ -34,22 +34,24 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
         </p>
       } @else {
         <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          @for (item of pagedListings(); track item.id) {
-            <li class="overflow-hidden rounded-2xl bg-white shadow-sm">
-              <img [src]="item.imageSrc" [alt]="item.title" class="h-44 w-full bg-slate-100 object-cover" />
-              <div class="p-4">
-                <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
-                <p class="mt-1 text-lg font-extrabold text-[#2f9e57]">
-                  @if (item.price === 0) {
-                    Kostenlos
-                  } @else {
-                    € {{ item.price }}
-                  }
-                </p>
-                <p class="mt-1 text-xs text-slate-400">{{ item.location }} · {{ item.category }}</p>
-              </div>
-            </li>
-          }
+            @for (item of pagedListings(); track item.id) {
+              <li class="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <a [routerLink]="['/anzeigen/artikel', item.id]" class="block cursor-pointer text-left">
+                  <img [src]="item.imageSrc" [alt]="item.title" class="h-44 w-full bg-slate-100 object-cover" />
+                  <div class="p-4">
+                    <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
+                    <p class="mt-1 text-lg font-extrabold text-[#2f9e57]">
+                      @if (item.price === 0) {
+                        Kostenlos
+                      } @else {
+                        € {{ item.price }}
+                      }
+                    </p>
+                    <p class="mt-1 text-xs text-slate-400">{{ item.location }} · {{ item.category }}</p>
+                  </div>
+                </a>
+              </li>
+            }
         </ul>
 
         @if (showPagination()) {

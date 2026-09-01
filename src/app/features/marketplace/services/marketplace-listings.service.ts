@@ -16,6 +16,10 @@ export class MarketplaceListingsService {
     return listings.filter((item) => item.category === categoryName);
   }
 
+  byId(id: string): MarketplaceListing | undefined {
+    return this.all().find((item) => item.id === id);
+  }
+
   private merge(): MarketplaceListing[] {
     const fromSellers: MarketplaceListing[] = this.sellerListings
       .listings()
