@@ -33,4 +33,5 @@ export type AuthFlowError =
   | 'unverified'
   | 'expired'
   | 'mismatch'
-  | 'mailFailed';
+  | 'mailFailed'
+  | 'network';

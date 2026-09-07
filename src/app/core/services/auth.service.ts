@@ -235,13 +235,16 @@ export class AuthService {
       throw error;
     }
     if (error instanceof HttpErrorResponse) {
+      if (error.status === 0) {
+        throw new AuthFlowException('network');
+      }
       const body = error.error as { code?: string } | string | null;
       const code = typeof body === 'object' && body?.code ? body.code : this.codeFromStatus(error.status);
       if (this.isAuthCode(code)) {
         throw new AuthFlowException(code);
       }
     }
-    throw new AuthFlowException('invalid');
+    throw new AuthFlowException('network');
   }
 
   private codeFromStatus(status: number): AuthFlowError {
@@ -261,7 +264,8 @@ export class AuthService {
       code === 'unverified' ||
       code === 'expired' ||
       code === 'mismatch' ||
-      code === 'mailFailed'
+      code === 'mailFailed' ||
+      code === 'network'
     );
   }
 

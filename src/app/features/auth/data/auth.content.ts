@@ -8,6 +8,7 @@ export const AUTH_ERRORS: Record<AuthFlowError, string> = {
   expired: 'Dieser Link ist ungültig oder abgelaufen.',
   mismatch: 'Die Passwörter stimmen nicht überein.',
   mailFailed: 'Die E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen.',
+  network: 'Keine Verbindung zum Server. Seite neu laden und nochmal versuchen.',
 };
 
 export function checkEmailCopy(type: AuthMailType): { title: string; body: string; action: string } {
