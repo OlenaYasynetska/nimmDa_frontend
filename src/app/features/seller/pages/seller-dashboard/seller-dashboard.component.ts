@@ -230,8 +230,8 @@ export class SellerDashboardComponent {
     return this.auth.currentUser()?.firstName || 'Verkäufer';
   }
 
-  toggleStatus(id: string, status: 'aktiv' | 'pausiert'): void {
-    this.listings.setStatus(id, status === 'aktiv' ? 'pausiert' : 'aktiv');
+  async toggleStatus(id: string, status: 'aktiv' | 'pausiert'): Promise<void> {
+    await this.listings.setStatus(id, status === 'aktiv' ? 'pausiert' : 'aktiv');
   }
 
   private toPoints(values: number[], max: number): string {

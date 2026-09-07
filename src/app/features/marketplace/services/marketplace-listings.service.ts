@@ -1,12 +1,30 @@
-import { Injectable, computed, inject } from '@angular/core';
-import { SellerListingsService } from '../../seller/services/seller-listings.service';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import { MARKETPLACE_LISTINGS, type MarketplaceListing } from '../data/marketplace.content';
+
+interface ListingDto {
+  id: string;
+  title: string;
+  price: number;
+  category: string;
+  location: string;
+  imageSrc: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceListingsService {
-  private readonly sellerListings = inject(SellerListingsService);
+  private readonly http = inject(HttpClient);
+  private readonly items = signal<MarketplaceListing[]>([]);
+  private readonly extras = signal<Record<string, MarketplaceListing>>({});
+  private readonly failed = signal(false);
 
-  readonly all = computed(() => this.merge());
+  readonly all = computed(() => (this.failed() ? MARKETPLACE_LISTINGS : this.items()));
+
+  constructor() {
+    void this.refresh();
+  }
 
   forCategory(categoryName: string | null): MarketplaceListing[] {
     const listings = this.all();
@@ -17,24 +35,48 @@ export class MarketplaceListingsService {
   }
 
   byId(id: string): MarketplaceListing | undefined {
-    return this.all().find((item) => item.id === id);
+    return this.extras()[id] ?? this.all().find((item) => item.id === id);
   }
 
-  private merge(): MarketplaceListing[] {
-    const fromSellers: MarketplaceListing[] = this.sellerListings
-      .listings()
-      .filter((item) => item.status === 'aktiv')
-      .map((item) => ({
-        id: `seller-${item.id}`,
-        title: item.title,
-        price: item.price,
-        imageSrc: item.imageSrc,
-        category: item.category || 'Möbel & Haushalt',
-        location: 'Linz',
-      }));
-
-    const sellerTitles = new Set(fromSellers.map((item) => item.title));
-    const published = MARKETPLACE_LISTINGS.filter((item) => !sellerTitles.has(item.title));
-    return [...fromSellers, ...published];
+  async refresh(): Promise<void> {
+    try {
+      const rows = await firstValueFrom(this.http.get<ListingDto[]>(`${environment.apiUrl}/listings`));
+      this.items.set(rows.map(toMarketplaceListing));
+      this.failed.set(false);
+    } catch {
+      this.failed.set(true);
+      this.items.set([]);
+    }
   }
+
+  async ensure(id: string): Promise<void> {
+    if (!id) {
+      return;
+    }
+    try {
+      const row = await firstValueFrom(
+        this.http.get<ListingDto>(`${environment.apiUrl}/listings/${id}`)
+      );
+      this.extras.update((current) => ({ ...current, [id]: toMarketplaceListing(row) }));
+    } catch {
+      /* listing stays missing */
+    }
+  }
+
+  async sendInquiry(listingId: string, message: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${environment.apiUrl}/listings/${listingId}/inquiries`, { message })
+    );
+  }
+}
+
+function toMarketplaceListing(row: ListingDto): MarketplaceListing {
+  return {
+    id: row.id,
+    title: row.title,
+    price: Number(row.price),
+    imageSrc: row.imageSrc,
+    category: row.category,
+    location: row.location,
+  };
 }

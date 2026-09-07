@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -62,14 +62,17 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
                 <button
                   type="submit"
                   class="rounded-lg bg-[#1b3a5f] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                  [disabled]="!draft.trim()"
+                  [disabled]="!draft.trim() || sending()"
                 >
                   Senden
                 </button>
               </form>
             }
             @if (sent()) {
-              <p class="mt-3 text-sm font-medium text-[#2f9e57]">Nachricht gespeichert. Der Verkäufer sieht sie in den Anfragen.</p>
+              <p class="mt-3 text-sm font-medium text-[#2f9e57]">Nachricht gesendet. Der Verkäufer sieht sie in den Anfragen.</p>
+            }
+            @if (sendError()) {
+              <p class="mt-3 text-sm text-red-600">{{ sendError() }}</p>
             }
           </div>
         </article>
@@ -97,13 +100,21 @@ export class ListingDetailComponent {
   readonly listing = computed(() => this.marketplace.byId(this.listingId()) ?? undefined);
   readonly showMessage = signal(false);
   readonly sent = signal(false);
+  readonly sending = signal(false);
+  readonly sendError = signal<string | null>(null);
   draft = '';
 
   constructor() {
-    const item = this.listing();
-    if (item) {
-      untracked(() => this.activity.trackView(item));
-    }
+    effect(() => {
+      const id = this.listingId();
+      untracked(() => void this.marketplace.ensure(id));
+    });
+    effect(() => {
+      const item = this.listing();
+      if (item) {
+        untracked(() => this.activity.trackView(item));
+      }
+    });
   }
 
   toggleFavorite(): void {
@@ -126,15 +137,24 @@ export class ListingDetailComponent {
     this.showMessage.set(true);
   }
 
-  send(): void {
+  async send(): Promise<void> {
     const item = this.listing();
-    if (!item || !this.draft.trim()) {
+    if (!item || !this.draft.trim() || this.sending()) {
       return;
     }
-    this.activity.addInquiry(item, this.draft);
-    this.draft = '';
-    this.sent.set(true);
-    this.showMessage.set(false);
+    this.sending.set(true);
+    this.sendError.set(null);
+    try {
+      await this.marketplace.sendInquiry(item.id, this.draft);
+      this.activity.addInquiry(item, this.draft);
+      this.draft = '';
+      this.sent.set(true);
+      this.showMessage.set(false);
+    } catch {
+      this.sendError.set('Nachricht konnte nicht gesendet werden. Bitte erneut anmelden.');
+    } finally {
+      this.sending.set(false);
+    }
   }
 
   private goAuth(): void {

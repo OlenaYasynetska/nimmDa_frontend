@@ -104,10 +104,13 @@ import { SellerListingsService } from '../../services/seller-listings.service';
         <button
           type="submit"
           class="rounded-lg bg-[#2f9e57] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
-          [disabled]="form.invalid || photoBusy()"
+          [disabled]="form.invalid || photoBusy() || saving()"
         >
-          Anzeige speichern
+          {{ saving() ? 'Wird gespeichert…' : 'Anzeige speichern' }}
         </button>
+        @if (saveError()) {
+          <p class="text-xs text-red-600">{{ saveError() }}</p>
+        }
       </form>
     </div>
   `,
@@ -122,6 +125,8 @@ export class CreateListingComponent {
   readonly photoName = signal<string | null>(null);
   readonly photoError = signal<string | null>(null);
   readonly photoBusy = signal(false);
+  readonly saving = signal(false);
+  readonly saveError = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     title: ['', Validators.required],
@@ -167,19 +172,27 @@ export class CreateListingComponent {
     this.photoError.set(null);
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
+  async onSubmit(): Promise<void> {
+    if (this.form.invalid || this.saving()) {
       this.form.markAllAsTouched();
       return;
     }
     const value = this.form.getRawValue();
-    this.listings.add({
-      title: value.title,
-      price: value.price,
-      imageSrc: this.photoPreview() ?? undefined,
-      category: value.category,
-    });
-    void this.router.navigateByUrl('/seller');
+    this.saving.set(true);
+    this.saveError.set(null);
+    try {
+      await this.listings.add({
+        title: value.title,
+        price: value.price,
+        imageSrc: this.photoPreview() ?? undefined,
+        category: value.category,
+      });
+      void this.router.navigateByUrl('/seller');
+    } catch {
+      this.saveError.set('Die Anzeige konnte nicht gespeichert werden. Bitte erneut anmelden und nochmal versuchen.');
+    } finally {
+      this.saving.set(false);
+    }
   }
 
   private readAsDataUrl(file: File): Promise<string> {

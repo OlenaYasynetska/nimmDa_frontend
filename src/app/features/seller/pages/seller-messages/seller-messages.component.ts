@@ -94,8 +94,8 @@ export class SellerMessagesComponent implements OnInit {
     }
   }
 
-  send(): void {
-    this.messages.reply(this.draft);
+  async send(): Promise<void> {
+    await this.messages.reply(this.draft);
     this.draft = '';
   }
 }
