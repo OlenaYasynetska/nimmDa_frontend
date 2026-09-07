@@ -3,9 +3,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import type { AuthMailType } from '../../../../core/models/auth-account.model';
-import { AuthService } from '../../../../core/services/auth.service';
+import { AuthFlowException, AuthService } from '../../../../core/services/auth.service';
 import { AuthModalComponent } from '../../components/auth-modal/auth-modal.component';
-import { checkEmailCopy } from '../../data/auth.content';
+import { AUTH_ERRORS, checkEmailCopy } from '../../data/auth.content';
 
 @Component({
   selector: 'app-check-email',
@@ -17,11 +17,7 @@ import { checkEmailCopy } from '../../data/auth.content';
         {{ copy().title }}
       </h1>
       <p class="mb-2 text-center text-sm text-slate-500">
-        @if (mailSent()) {
-          {{ copy().body }}
-        } @else {
-          Die E-Mail konnte noch nicht zugestellt werden. Öffne den Bestätigungslink hier, um fortzufahren.
-        }
+        {{ copy().body }}
       </p>
       @if (email()) {
         <p class="mb-6 text-center text-sm font-medium text-slate-700">{{ email() }}</p>
@@ -34,14 +30,6 @@ import { checkEmailCopy } from '../../data/auth.content';
           {{ copy().action }}
         </a>
       }
-      @if (mailtoHref()) {
-        <a
-          [href]="mailtoHref()"
-          class="mb-3 block text-center text-sm text-primary hover:underline"
-        >
-          In E-Mail-App öffnen
-        </a>
-      }
       <button
         type="button"
         class="w-full text-center text-sm text-primary hover:underline disabled:opacity-50"
@@ -52,6 +40,9 @@ import { checkEmailCopy } from '../../data/auth.content';
       </button>
       @if (resent()) {
         <p class="mt-2 text-center text-xs text-slate-500">Neue E-Mail wurde gesendet.</p>
+      }
+      @if (error()) {
+        <p class="mt-2 text-center text-sm text-red-600">{{ error() }}</p>
       }
       <p class="mt-4 text-center text-sm">
         <a routerLink="/auth/login" class="text-primary hover:underline">Zur Anmeldung</a>
@@ -84,23 +75,13 @@ export class CheckEmailComponent {
   readonly type = computed(() => this.params().type);
   readonly copy = computed(() => checkEmailCopy(this.type()));
   readonly mailUrl = computed(() => this.auth.mailLinkFor(this.email(), this.type()));
-  readonly mailSent = computed(() => this.auth.lastMail()?.mailSent === true);
-  readonly mailtoHref = computed(() => {
-    const email = this.email();
-    const url = this.mailUrl();
-    if (!email || !url) {
-      return null;
-    }
-    const subject =
-      this.type() === 'reset' ? 'NimmDa: Passwort zurücksetzen' : 'NimmDa: E-Mail bestätigen';
-    const body = `Hallo,\n\nbitte öffne diesen Link:\n${url}\n`;
-    return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  });
   readonly busy = signal(false);
   readonly resent = signal(false);
+  readonly error = signal<string | null>(null);
 
   async resend(): Promise<void> {
     this.busy.set(true);
+    this.error.set(null);
     try {
       if (this.type() === 'reset') {
         await this.auth.requestPasswordReset(this.email());
@@ -108,6 +89,9 @@ export class CheckEmailComponent {
         await this.auth.resendVerification(this.email());
       }
       this.resent.set(true);
+    } catch (err) {
+      const code = err instanceof AuthFlowException ? err.code : 'mailFailed';
+      this.error.set(AUTH_ERRORS[code] ?? AUTH_ERRORS.mailFailed);
     } finally {
       this.busy.set(false);
     }

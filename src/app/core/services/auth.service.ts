@@ -153,7 +153,12 @@ export class AuthService {
 
   mailLinkFor(email: string, type: AuthMailType): string | null {
     const last = this.lastMailSignal();
-    if (last && last.email === this.normalizeEmail(email) && last.type === type) {
+    if (
+      last &&
+      last.email === this.normalizeEmail(email) &&
+      last.type === type &&
+      last.url
+    ) {
       return last.url;
     }
     return null;
@@ -244,6 +249,7 @@ export class AuthService {
     if (status === 404) return 'notFound';
     if (status === 403) return 'unverified';
     if (status === 400) return 'expired';
+    if (status === 503) return 'mailFailed';
     return 'invalid';
   }
 
@@ -254,7 +260,8 @@ export class AuthService {
       code === 'notFound' ||
       code === 'unverified' ||
       code === 'expired' ||
-      code === 'mismatch'
+      code === 'mismatch' ||
+      code === 'mailFailed'
     );
   }
 

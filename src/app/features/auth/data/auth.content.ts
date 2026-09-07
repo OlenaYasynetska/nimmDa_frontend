@@ -7,6 +7,7 @@ export const AUTH_ERRORS: Record<AuthFlowError, string> = {
   unverified: 'Bitte bestätige zuerst deine E-Mail.',
   expired: 'Dieser Link ist ungültig oder abgelaufen.',
   mismatch: 'Die Passwörter stimmen nicht überein.',
+  mailFailed: 'Die E-Mail konnte nicht gesendet werden. Bitte später erneut versuchen.',
 };
 
 export function checkEmailCopy(type: AuthMailType): { title: string; body: string; action: string } {
@@ -19,7 +20,7 @@ export function checkEmailCopy(type: AuthMailType): { title: string; body: strin
   }
   return {
     title: 'E-Mail bestätigen',
-    body: 'Wir haben dir einen Bestätigungslink an deine E-Mail gesendet. Bitte prüfe Posteingang und Spam.',
+      body: 'Wir haben dir einen Bestätigungslink an deine E-Mail gesendet. Bitte prüfe Posteingang und Spam. Nach dem Klick auf den Link kannst du dich anmelden.',
     action: 'Bestätigungslink öffnen',
   };
 }
