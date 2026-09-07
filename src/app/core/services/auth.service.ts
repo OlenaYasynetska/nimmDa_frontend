@@ -119,9 +119,17 @@ export class AuthService {
     this.setSession(this.toUser(session));
   }
 
-  async verifyEmail(token: string): Promise<void> {
-    const session = await this.postSession('/auth/verify', { token });
-    this.setSession(this.toUser(session));
+  async verifyEmail(token: string): Promise<{ message: string; verified: boolean }> {
+    try {
+      return await firstValueFrom(
+        this.http.get<{ message: string; verified: boolean }>(
+          `${environment.apiUrl}/auth/verify-email`,
+          { params: { token } }
+        )
+      );
+    } catch (error) {
+      return this.throwAuth(error);
+    }
   }
 
   async requestPasswordReset(email: string): Promise<void> {

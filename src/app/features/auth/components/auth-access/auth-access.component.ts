@@ -28,6 +28,11 @@ type AccountStatus = 'new' | 'existing';
       >
         {{ status() === 'new' ? 'Konto erstellen' : 'Anmelden' }}
       </h1>
+      @if (verifiedNotice()) {
+        <p class="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-center text-sm text-emerald-800">
+          E-Mail bestätigt. Du kannst dich jetzt anmelden.
+        </p>
+      }
       <p class="mb-5 text-center text-sm text-slate-500">{{ hint() }}</p>
 
       <form [formGroup]="form" class="space-y-4" (ngSubmit)="onSubmit()" novalidate>
@@ -137,6 +142,7 @@ export class AuthAccessComponent implements OnInit {
   readonly error = signal<string | null>(null);
   readonly busy = signal(false);
   readonly hint = signal('Wähle, ob du neu bist, und ob du kaufen oder verkaufen möchtest.');
+  readonly verifiedNotice = signal(false);
   readonly roles: { value: AccountRole; label: string }[] = [
     { value: 'buyer', label: 'Käufer' },
     { value: 'seller', label: 'Verkäufer' },
@@ -163,6 +169,10 @@ export class AuthAccessComponent implements OnInit {
     const password = (history.state as { password?: string } | null)?.password;
     if (password) {
       this.form.controls.password.setValue(password);
+    }
+    if (params.get('verified') === '1') {
+      this.verifiedNotice.set(true);
+      this.status.set('existing');
     }
     if (params.get('intent') === 'contact') {
       this.hint.set('Um den Verkäufer zu kontaktieren, melde dich an oder erstelle ein Konto.');
