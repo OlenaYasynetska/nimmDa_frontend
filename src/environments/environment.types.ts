@@ -4,7 +4,4 @@
 export interface AppEnvironment {
   production: boolean;
   apiUrl: string;
-  enableLocalSuperAdminLogin: boolean;
-  superAdminEmail: string;
-  superAdminPassword: string;
 }

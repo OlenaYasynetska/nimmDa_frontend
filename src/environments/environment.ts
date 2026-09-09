@@ -8,7 +8,4 @@ import type { AppEnvironment } from './environment.types';
 export const environment: AppEnvironment = {
   production: false,
   apiUrl: '/api',
-  enableLocalSuperAdminLogin: true,
-  superAdminEmail: 'superadmin@nimmda.local',
-  superAdminPassword: 'SuperAdmin!ChangeMe',
 };

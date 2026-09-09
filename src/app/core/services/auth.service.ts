@@ -138,42 +138,8 @@ export class AuthService {
   }
 
   async login(email: string, password: string, role?: AccountRole): Promise<void> {
-    try {
-      const session = await this.postSession('/auth/login', { email, password, role });
-      this.setSession(this.toUser(session));
-    } catch (error) {
-      if (this.loginAsSuperAdminIfValid(email, password)) {
-        return;
-      }
-      throw error;
-    }
-  }
-
-  loginAsSuperAdminIfValid(identifier: string, password: string): boolean {
-    if (!environment.enableLocalSuperAdminLogin) {
-      return false;
-    }
-    const email = identifier.trim().toLowerCase();
-    const expectedEmail = environment.superAdminEmail.trim().toLowerCase();
-    if (
-      !expectedEmail ||
-      !environment.superAdminPassword ||
-      email !== expectedEmail ||
-      password !== environment.superAdminPassword
-    ) {
-      return false;
-    }
-    this.setSession({
-      id: 'nimmda-admin',
-      email: environment.superAdminEmail,
-      firstName: 'Super',
-      lastName: 'Admin',
-      role: 'admin',
-      accountMode: 'both',
-      accessToken: 'local-super-admin',
-      expiresAt: Date.now() + 86400000 * 7,
-    });
-    return true;
+    const session = await this.postSession('/auth/login', { email, password, role });
+    this.setSession(this.toUser(session));
   }
 
   async verifyEmail(token: string): Promise<{ message: string; verified: boolean }> {
