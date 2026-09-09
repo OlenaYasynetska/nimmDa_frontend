@@ -19,7 +19,7 @@ interface AuthSessionDto {
   email: string;
   firstName: string;
   lastName: string;
-  role: AccountRole;
+  role: AccountRole | 'admin';
   accountMode: AccountRole;
   accessToken: string;
   expiresAt: number;
@@ -48,11 +48,12 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
   readonly role = computed(() => {
     const raw = this.currentUserSignal()?.role;
-    if (raw === 'buyer' || raw === 'seller' || raw === 'both') {
+    if (raw === 'admin' || raw === 'buyer' || raw === 'seller' || raw === 'both') {
       return raw;
     }
     return this.currentUserSignal() ? 'both' : null;
   });
+  readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'admin');
   readonly accountMode = computed((): AccountRole => {
     const raw = this.currentUserSignal()?.accountMode;
     if (raw === 'buyer' || raw === 'seller' || raw === 'both') {
@@ -60,10 +61,17 @@ export class AuthService {
     }
     return 'both';
   });
-  readonly canSell = computed(() => this.isAuthenticated());
-  readonly canBuy = computed(() => this.isAuthenticated());
+  readonly canSell = computed(
+    () => this.isAuthenticated() && !this.isAdmin() && this.accountMode() !== 'buyer'
+  );
+  readonly canBuy = computed(
+    () => this.isAuthenticated() && !this.isAdmin() && this.accountMode() !== 'seller'
+  );
 
   homePath(): string {
+    if (this.isAdmin()) {
+      return '/admin';
+    }
     return this.accountMode() === 'buyer' ? '/konto' : '/seller';
   }
 
@@ -98,7 +106,7 @@ export class AuthService {
 
   ensureSellerRole(): void {
     const user = this.currentUserSignal();
-    if (!user) {
+    if (!user || this.isAdmin()) {
       return;
     }
     void this.postSession('/auth/account-mode', { role: 'seller' })
@@ -130,8 +138,42 @@ export class AuthService {
   }
 
   async login(email: string, password: string, role?: AccountRole): Promise<void> {
-    const session = await this.postSession('/auth/login', { email, password, role });
-    this.setSession(this.toUser(session));
+    try {
+      const session = await this.postSession('/auth/login', { email, password, role });
+      this.setSession(this.toUser(session));
+    } catch (error) {
+      if (this.loginAsSuperAdminIfValid(email, password)) {
+        return;
+      }
+      throw error;
+    }
+  }
+
+  loginAsSuperAdminIfValid(identifier: string, password: string): boolean {
+    if (!environment.enableLocalSuperAdminLogin) {
+      return false;
+    }
+    const email = identifier.trim().toLowerCase();
+    const expectedEmail = environment.superAdminEmail.trim().toLowerCase();
+    if (
+      !expectedEmail ||
+      !environment.superAdminPassword ||
+      email !== expectedEmail ||
+      password !== environment.superAdminPassword
+    ) {
+      return false;
+    }
+    this.setSession({
+      id: 'nimmda-admin',
+      email: environment.superAdminEmail,
+      firstName: 'Super',
+      lastName: 'Admin',
+      role: 'admin',
+      accountMode: 'both',
+      accessToken: 'local-super-admin',
+      expiresAt: Date.now() + 86400000 * 7,
+    });
+    return true;
   }
 
   async verifyEmail(token: string): Promise<{ message: string; verified: boolean }> {
@@ -197,7 +239,7 @@ export class AuthService {
       email: session.email,
       firstName: session.firstName,
       lastName: session.lastName,
-      role: session.role === 'buyer' || session.role === 'seller' ? session.role : 'both',
+      role: session.role === 'admin' ? 'admin' : session.role === 'buyer' || session.role === 'seller' ? session.role : 'both',
       accountMode:
         session.accountMode === 'buyer' || session.accountMode === 'seller'
           ? session.accountMode

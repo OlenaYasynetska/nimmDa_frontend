@@ -5,7 +5,7 @@ import { AuthService } from '../services/auth.service';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const token = auth.getAccessToken();
-  if (token) {
+  if (token && token !== 'local-super-admin') {
     req = req.clone({
       setHeaders: { Authorization: `Bearer ${token}` },
     });

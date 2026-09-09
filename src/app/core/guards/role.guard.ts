@@ -12,7 +12,7 @@ export function roleGuard(allowedRoles: string[]): CanActivateFn {
       return false;
     }
     if (user.role && allowedRoles.includes(user.role)) return true;
-    void router.navigate([auth.canSell() ? '/seller' : '/konto']);
+    void router.navigate([auth.isAdmin() ? '/admin' : auth.canSell() ? '/seller' : '/konto']);
     return false;
   };
 }

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { redirectAdminGuard } from './core/guards/redirect-admin.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 const loadLanding = () =>
@@ -97,7 +98,7 @@ export const routes: Routes = [
   },
   {
     path: 'konto',
-    canActivate: [authGuard],
+    canActivate: [authGuard, redirectAdminGuard],
     loadComponent: () =>
       import('./features/buyer/layout/buyer-layout.component').then((m) => m.BuyerLayoutComponent),
     children: [
@@ -119,7 +120,7 @@ export const routes: Routes = [
   },
   {
     path: 'seller',
-    canActivate: [authGuard, roleGuard(['seller', 'both'])],
+    canActivate: [authGuard, redirectAdminGuard, roleGuard(['seller', 'both'])],
     loadComponent: () =>
       import('./features/seller/layout/seller-layout.component').then(
         (m) => m.SellerLayoutComponent
@@ -144,6 +145,61 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/seller/pages/seller-messages/seller-messages.component').then(
             (m) => m.SellerMessagesComponent
+          ),
+      },
+    ],
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, roleGuard(['admin'])],
+    loadComponent: () =>
+      import('./features/admin/layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/admin/pages/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent
+          ),
+      },
+      {
+        path: 'sellers',
+        data: { kind: 'sellers' },
+        loadComponent: () =>
+          import('./features/admin/pages/admin-people/admin-people.component').then(
+            (m) => m.AdminPeopleComponent
+          ),
+      },
+      {
+        path: 'buyers',
+        data: { kind: 'buyers' },
+        loadComponent: () =>
+          import('./features/admin/pages/admin-people/admin-people.component').then(
+            (m) => m.AdminPeopleComponent
+          ),
+      },
+      {
+        path: 'payments',
+        data: { kind: 'payments' },
+        loadComponent: () =>
+          import('./features/admin/pages/admin-empty-list/admin-empty-list.component').then(
+            (m) => m.AdminEmptyListComponent
+          ),
+      },
+      {
+        path: 'ads',
+        data: { kind: 'ads' },
+        loadComponent: () =>
+          import('./features/admin/pages/admin-empty-list/admin-empty-list.component').then(
+            (m) => m.AdminEmptyListComponent
+          ),
+      },
+      {
+        path: 'subscriptions',
+        data: { kind: 'subscriptions' },
+        loadComponent: () =>
+          import('./features/admin/pages/admin-empty-list/admin-empty-list.component').then(
+            (m) => m.AdminEmptyListComponent
           ),
       },
     ],

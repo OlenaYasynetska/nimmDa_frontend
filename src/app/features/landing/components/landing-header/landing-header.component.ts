@@ -75,6 +75,10 @@ export class LandingHeaderComponent {
 
   openMerkliste(event: Event): void {
     event.preventDefault();
+    if (this.auth.isAdmin()) {
+      void this.router.navigateByUrl('/admin');
+      return;
+    }
     if (this.auth.isAuthenticated()) {
       void this.router.navigateByUrl('/konto');
       return;
@@ -85,6 +89,10 @@ export class LandingHeaderComponent {
   }
 
   postAd(): void {
+    if (this.auth.isAdmin()) {
+      void this.router.navigateByUrl('/admin');
+      return;
+    }
     if (this.auth.isAuthenticated()) {
       this.auth.ensureSellerRole();
       void this.router.navigateByUrl('/seller/listings/new');
