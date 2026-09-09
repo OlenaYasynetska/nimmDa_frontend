@@ -68,20 +68,32 @@ export class AuthService {
   }
 
   rememberReturnUrl(url?: string | null): void {
-    const value = url?.trim();
+    const value = this.safeReturnUrl(url);
     if (value) {
+      localStorage.setItem(RETURN_URL_KEY, value);
       sessionStorage.setItem(RETURN_URL_KEY, value);
     }
   }
 
   consumeReturnUrl(): string | null {
-    const value = sessionStorage.getItem(RETURN_URL_KEY);
+    const value =
+      this.safeReturnUrl(localStorage.getItem(RETURN_URL_KEY)) ??
+      this.safeReturnUrl(sessionStorage.getItem(RETURN_URL_KEY));
+    localStorage.removeItem(RETURN_URL_KEY);
     sessionStorage.removeItem(RETURN_URL_KEY);
     return value;
   }
 
   afterAuthPath(): string {
     return this.consumeReturnUrl() || this.homePath();
+  }
+
+  private safeReturnUrl(url?: string | null): string | null {
+    const value = url?.trim();
+    if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('://')) {
+      return null;
+    }
+    return value;
   }
 
   ensureSellerRole(): void {
@@ -112,6 +124,9 @@ export class AuthService {
   async register(email: string, password: string, role: AccountRole): Promise<void> {
     const result = await this.postMail('/auth/register', { email, password, role });
     this.rememberMail(email, 'verify', result);
+    if (!localStorage.getItem(RETURN_URL_KEY) && !sessionStorage.getItem(RETURN_URL_KEY)) {
+      this.rememberReturnUrl(role === 'buyer' ? '/konto' : '/seller');
+    }
   }
 
   async login(email: string, password: string, role?: AccountRole): Promise<void> {
@@ -120,16 +135,9 @@ export class AuthService {
   }
 
   async verifyEmail(token: string): Promise<{ message: string; verified: boolean }> {
-    try {
-      return await firstValueFrom(
-        this.http.get<{ message: string; verified: boolean }>(
-          `${environment.apiUrl}/auth/verify-email`,
-          { params: { token } }
-        )
-      );
-    } catch (error) {
-      return this.throwAuth(error);
-    }
+    const session = await this.postSession('/auth/verify', { token });
+    this.setSession(this.toUser(session));
+    return { message: 'E-Mail bestätigt.', verified: true };
   }
 
   async requestPasswordReset(email: string): Promise<void> {

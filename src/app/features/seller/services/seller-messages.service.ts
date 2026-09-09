@@ -13,6 +13,7 @@ interface MessageDto {
 
 interface ConversationDto {
   id: string;
+  listingId?: string;
   buyerName: string;
   listingTitle: string;
   preview: string;
@@ -73,6 +74,10 @@ export class SellerMessagesService {
     );
   }
 
+  threadForListing(listingId: string): SellerThread | undefined {
+    return this.threadsSignal().find((thread) => thread.listingId === listingId);
+  }
+
   async reply(text: string): Promise<void> {
     const trimmed = text.trim();
     const id = this.selectedIdSignal();
@@ -93,6 +98,7 @@ function toThread(row: ConversationDto): SellerThread {
   const last = row.messages?.at(-1);
   return {
     id: row.id,
+    listingId: row.listingId,
     buyerName: row.buyerName,
     initials: initials(row.buyerName),
     productTitle: row.listingTitle,

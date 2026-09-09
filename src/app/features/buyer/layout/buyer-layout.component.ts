@@ -37,6 +37,13 @@ import { LandingFooterComponent } from '../../landing/components/landing-footer/
         >
           Übersicht
         </a>
+        <a
+          routerLink="/konto/nachrichten"
+          routerLinkActive="bg-[#1b3a5f] text-white"
+          class="rounded-full bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200"
+        >
+          Nachrichten
+        </a>
       </nav>
       <router-outlet />
     </main>

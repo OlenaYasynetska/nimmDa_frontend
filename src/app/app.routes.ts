@@ -75,6 +75,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'auth/verify-email',
+        loadComponent: () =>
+          import('./features/auth/pages/verify-email/verify-email.component').then(
+            (m) => m.VerifyEmailComponent
+          ),
+      },
+      {
         path: 'auth/reset-password',
         loadComponent: () =>
           import('./features/auth/pages/reset-password/reset-password.component').then(
@@ -99,6 +106,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/buyer/pages/buyer-home/buyer-home.component').then(
             (m) => m.BuyerHomeComponent
+          ),
+      },
+      {
+        path: 'nachrichten',
+        loadComponent: () =>
+          import('./features/seller/pages/seller-messages/seller-messages.component').then(
+            (m) => m.SellerMessagesComponent
           ),
       },
     ],

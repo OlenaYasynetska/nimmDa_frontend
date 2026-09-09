@@ -115,6 +115,10 @@ export class ListingDetailComponent {
         untracked(() => this.activity.trackView(item));
       }
     });
+    const openContact = this.route.snapshot.queryParamMap.get('contact') === '1';
+    if (openContact && this.auth.isAuthenticated()) {
+      this.showMessage.set(true);
+    }
   }
 
   toggleFavorite(): void {
@@ -145,11 +149,16 @@ export class ListingDetailComponent {
     this.sending.set(true);
     this.sendError.set(null);
     try {
-      await this.marketplace.sendInquiry(item.id, this.draft);
+      const conversation = await this.marketplace.sendInquiry(item.id, this.draft);
       this.activity.addInquiry(item, this.draft);
       this.draft = '';
       this.sent.set(true);
       this.showMessage.set(false);
+      if (conversation?.id) {
+        await this.router.navigate(['/konto/nachrichten'], {
+          queryParams: { thread: conversation.id },
+        });
+      }
     } catch {
       this.sendError.set('Nachricht konnte nicht gesendet werden. Bitte erneut anmelden.');
     } finally {
@@ -158,7 +167,11 @@ export class ListingDetailComponent {
   }
 
   private goAuth(): void {
-    const returnUrl = this.router.url;
+    const listingId = this.listingId();
+    const returnUrl = listingId
+      ? `/konto/nachrichten?listing=${encodeURIComponent(listingId)}`
+      : this.router.url;
+    this.auth.rememberReturnUrl(returnUrl);
     void this.router.navigate(['/auth/login'], {
       queryParams: { intent: 'contact', role: 'buyer', returnUrl },
     });

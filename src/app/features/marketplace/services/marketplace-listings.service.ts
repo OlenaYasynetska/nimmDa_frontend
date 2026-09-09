@@ -13,6 +13,10 @@ interface ListingDto {
   imageSrc: string;
 }
 
+interface InquiryDto {
+  id: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MarketplaceListingsService {
   private readonly http = inject(HttpClient);
@@ -63,9 +67,9 @@ export class MarketplaceListingsService {
     }
   }
 
-  async sendInquiry(listingId: string, message: string): Promise<void> {
-    await firstValueFrom(
-      this.http.post(`${environment.apiUrl}/listings/${listingId}/inquiries`, { message })
+  async sendInquiry(listingId: string, message: string): Promise<InquiryDto> {
+    return firstValueFrom(
+      this.http.post<InquiryDto>(`${environment.apiUrl}/listings/${listingId}/inquiries`, { message })
     );
   }
 }

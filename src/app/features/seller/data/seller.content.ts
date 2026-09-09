@@ -20,6 +20,7 @@ export interface SellerChatLine {
 
 export interface SellerThread {
   id: string;
+  listingId?: string;
   buyerName: string;
   initials: string;
   productTitle: string;
