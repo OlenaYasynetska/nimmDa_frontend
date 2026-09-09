@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { MarketplaceListingsService } from '../../marketplace/services/marketplace-listings.service';
-import { SELLER_SALES_COUNT, type ListingStatus, type SellerListing } from '../data/seller.content';
+import { type ListingStatus, type SellerListing } from '../data/seller.content';
 
 interface ListingDto {
   id: string;
@@ -25,7 +25,7 @@ export class SellerListingsService {
   private readonly listingsSignal = signal<SellerListing[]>([]);
 
   readonly listings = this.listingsSignal.asReadonly();
-  readonly salesCount = SELLER_SALES_COUNT;
+  readonly salesCount = 0;
   readonly activeCount = computed(
     () => this.listingsSignal().filter((item) => item.status === 'aktiv').length
   );
