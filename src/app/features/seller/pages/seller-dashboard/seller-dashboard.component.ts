@@ -1,20 +1,18 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
-  SELLER_CHECKLIST,
-  SELLER_NEWS,
-  SELLER_RATING,
-  SELLER_TIPS,
-  SELLER_TREND,
-} from '../../data/seller.content';
+  SellerTrendChartComponent,
+  emptySellerTrend,
+} from '../../components/seller-trend-chart/seller-trend-chart.component';
+import { SELLER_CHECKLIST_ITEMS, SELLER_TIPS } from '../../data/seller.content';
 import { SellerListingsService } from '../../services/seller-listings.service';
 import { SellerMessagesService } from '../../services/seller-messages.service';
 
 @Component({
   selector: 'app-seller-dashboard',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, SellerTrendChartComponent],
   template: `
     <div class="mx-auto flex max-w-7xl flex-col gap-6 xl:flex-row">
       <div class="min-w-0 flex-1 space-y-6">
@@ -57,11 +55,7 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
             <h2 class="text-lg font-bold text-slate-800">Übersicht</h2>
             <span class="text-xs text-slate-400">Letzte 30 Tage</span>
           </div>
-          <svg viewBox="0 0 320 110" class="h-40 w-full text-slate-200" aria-hidden="true">
-            <polyline fill="none" stroke="#c4b5fd" stroke-width="2" [attr.points]="viewPoints" />
-            <polyline fill="none" stroke="#fb923c" stroke-width="2" [attr.points]="inquiryPoints" />
-            <polyline fill="none" stroke="#60a5fa" stroke-width="2" [attr.points]="salesPoints" />
-          </svg>
+          <app-seller-trend-chart [series]="trend" />
           <div class="mt-2 flex gap-4 text-xs text-slate-500">
             <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-violet-400"></span> Aufrufe</span>
             <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-orange-400"></span> Anfragen</span>
@@ -76,37 +70,41 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
               Neue Anzeige
             </a>
           </div>
-          <ul class="divide-y divide-slate-100">
-            @for (item of listings.listings(); track item.id) {
-              <li class="flex items-center gap-3 py-3">
-                <img [src]="item.imageSrc" [alt]="item.title" class="h-14 w-14 rounded-lg bg-slate-100 object-cover" />
-                <div class="min-w-0 flex-1">
-                  <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
-                  <p class="text-sm text-slate-500">€ {{ item.price }} · {{ item.views }} Aufrufe · {{ item.chats }} Chats</p>
-                </div>
-                <span
-                  class="rounded-full px-2.5 py-1 text-xs font-semibold"
-                  [class]="item.status === 'aktiv' ? 'bg-[#eaf8ef] text-[#2f9e57]' : 'bg-orange-100 text-orange-700'"
-                >
-                  {{ item.status === 'aktiv' ? 'Aktiv' : 'Pausiert' }}
-                </span>
-                <details class="relative">
-                  <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none text-slate-400 hover:bg-slate-50 hover:text-slate-700">
-                    ⋮
-                  </summary>
-                  <div class="absolute right-0 z-10 mt-1 w-36 rounded-lg border border-slate-100 bg-white py-1 shadow-md">
-                    <button
-                      type="button"
-                      class="block w-full px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
-                      (click)="toggleStatus(item.id, item.status)"
-                    >
-                      {{ item.status === 'aktiv' ? 'Pausieren' : 'Aktivieren' }}
-                    </button>
+          @if (listings.listings().length === 0) {
+            <p class="py-8 text-sm text-slate-400">Noch keine Anzeigen.</p>
+          } @else {
+            <ul class="divide-y divide-slate-100">
+              @for (item of listings.listings(); track item.id) {
+                <li class="flex items-center gap-3 py-3">
+                  <img [src]="item.imageSrc" [alt]="item.title" class="h-14 w-14 rounded-lg bg-slate-100 object-cover" />
+                  <div class="min-w-0 flex-1">
+                    <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
+                    <p class="text-sm text-slate-500">€ {{ item.price }} · {{ item.views }} Aufrufe · {{ item.chats }} Chats</p>
                   </div>
-                </details>
-              </li>
-            }
-          </ul>
+                  <span
+                    class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                    [class]="item.status === 'aktiv' ? 'bg-[#eaf8ef] text-[#2f9e57]' : 'bg-orange-100 text-orange-700'"
+                  >
+                    {{ item.status === 'aktiv' ? 'Aktiv' : 'Pausiert' }}
+                  </span>
+                  <details class="relative">
+                    <summary class="cursor-pointer list-none rounded-md px-2 py-1 text-lg leading-none text-slate-400 hover:bg-slate-50 hover:text-slate-700">
+                      ⋮
+                    </summary>
+                    <div class="absolute right-0 z-10 mt-1 w-36 rounded-lg border border-slate-100 bg-white py-1 shadow-md">
+                      <button
+                        type="button"
+                        class="block w-full px-3 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+                        (click)="toggleStatus(item.id, item.status)"
+                      >
+                        {{ item.status === 'aktiv' ? 'Pausieren' : 'Aktivieren' }}
+                      </button>
+                    </div>
+                  </details>
+                </li>
+              }
+            </ul>
+          }
         </section>
 
         <section class="rounded-2xl bg-white p-5 shadow-sm">
@@ -114,32 +112,36 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
             <h2 class="text-lg font-bold text-slate-800">Letzte Nachrichten</h2>
             <a routerLink="/seller/messages" class="text-sm font-medium text-[#2f6fb2] hover:underline">Alle anzeigen</a>
           </div>
-          <ul class="divide-y divide-slate-100">
-            @for (thread of messages.threads(); track thread.id) {
-              <li>
-                <a
-                  routerLink="/seller/messages"
-                  [queryParams]="{ thread: thread.id }"
-                  class="flex items-start gap-3 py-3 hover:bg-slate-50"
-                >
-                  <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700">
-                    {{ thread.initials }}
-                  </span>
-                  <div class="min-w-0 flex-1">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="font-semibold text-slate-800">{{ thread.buyerName }}</p>
-                      <span class="text-xs text-slate-400">{{ thread.time }}</span>
+          @if (messages.threads().length === 0) {
+            <p class="py-8 text-sm text-slate-400">Noch keine Nachrichten.</p>
+          } @else {
+            <ul class="divide-y divide-slate-100">
+              @for (thread of messages.threads(); track thread.id) {
+                <li>
+                  <a
+                    routerLink="/seller/messages"
+                    [queryParams]="{ thread: thread.id }"
+                    class="flex items-start gap-3 py-3 hover:bg-slate-50"
+                  >
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700">
+                      {{ thread.initials }}
+                    </span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="font-semibold text-slate-800">{{ thread.buyerName }}</p>
+                        <span class="text-xs text-slate-400">{{ thread.time }}</span>
+                      </div>
+                      <p class="truncate text-xs text-slate-500">{{ thread.productTitle }}</p>
+                      <p class="truncate text-sm text-slate-600">{{ thread.preview }}</p>
                     </div>
-                    <p class="truncate text-xs text-slate-500">{{ thread.productTitle }}</p>
-                    <p class="truncate text-sm text-slate-600">{{ thread.preview }}</p>
-                  </div>
-                  @if (thread.unread) {
-                    <span class="mt-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#2f9e57] px-1 text-[10px] font-bold text-white">1</span>
-                  }
-                </a>
-              </li>
-            }
-          </ul>
+                    @if (thread.unread) {
+                      <span class="mt-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#2f9e57] px-1 text-[10px] font-bold text-white">1</span>
+                    }
+                  </a>
+                </li>
+              }
+            </ul>
+          }
         </section>
       </div>
 
@@ -158,12 +160,12 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
 
         <section class="rounded-2xl bg-white p-4 shadow-sm">
           <h3 class="font-bold text-slate-800">Verkäufer-Checkliste</h3>
-          <p class="mt-1 text-xs text-slate-500">{{ checklistDone }} von {{ checklist.length }} erledigt</p>
+          <p class="mt-1 text-xs text-slate-500">{{ checklistDone() }} von {{ checklist().length }} erledigt</p>
           <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
-            <div class="h-full rounded-full bg-[#2f9e57]" [style.width.%]="checklistDone / checklist.length * 100"></div>
+            <div class="h-full rounded-full bg-[#2f9e57]" [style.width.%]="checklistDone() / checklist().length * 100"></div>
           </div>
           <ul class="mt-3 space-y-2 text-sm">
-            @for (item of checklist; track item.label) {
+            @for (item of checklist(); track item.id) {
               <li class="flex items-center gap-2" [class]="item.done ? 'text-slate-500' : 'text-slate-700'">
                 <span
                   class="flex h-4 w-4 items-center justify-center rounded border text-[10px]"
@@ -191,7 +193,10 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
               <li class="flex items-center gap-2 text-xs text-slate-500">
                 <span class="w-4">{{ 5 - $index }}</span>
                 <span class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100">
-                  <span class="block h-full rounded-full bg-[#f5c400]" [style.width.%]="bar / rating.count * 100"></span>
+                  <span
+                    class="block h-full rounded-full bg-[#f5c400]"
+                    [style.width.%]="rating.count ? (bar / rating.count) * 100 : 0"
+                  ></span>
                 </span>
               </li>
             }
@@ -200,14 +205,18 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
 
         <section class="rounded-2xl bg-white p-4 shadow-sm">
           <h3 class="font-bold text-slate-800">Neuigkeiten</h3>
-          <ul class="mt-3 space-y-2">
-            @for (item of news; track item.title) {
-              <li>
-                <p class="text-sm font-medium text-slate-700">{{ item.title }}</p>
-                <p class="text-xs text-slate-400">{{ item.date }}</p>
-              </li>
-            }
-          </ul>
+          @if (news.length === 0) {
+            <p class="mt-3 text-sm text-slate-400">Noch keine Neuigkeiten.</p>
+          } @else {
+            <ul class="mt-3 space-y-2">
+              @for (item of news; track item.title) {
+                <li>
+                  <p class="text-sm font-medium text-slate-700">{{ item.title }}</p>
+                  <p class="text-xs text-slate-400">{{ item.date }}</p>
+                </li>
+              }
+            </ul>
+          }
         </section>
       </aside>
     </div>
@@ -218,13 +227,25 @@ export class SellerDashboardComponent {
   readonly messages = inject(SellerMessagesService);
   private readonly auth = inject(AuthService);
   readonly tips = SELLER_TIPS;
-  readonly checklist = SELLER_CHECKLIST;
-  readonly rating = SELLER_RATING;
-  readonly news = SELLER_NEWS;
-  readonly checklistDone = SELLER_CHECKLIST.filter((item) => item.done).length;
-  readonly viewPoints = this.toPoints(SELLER_TREND.views, 100);
-  readonly inquiryPoints = this.toPoints(SELLER_TREND.inquiries, 100);
-  readonly salesPoints = this.toPoints(SELLER_TREND.sales, 12);
+  readonly trend = emptySellerTrend();
+  readonly news: { title: string; date: string }[] = [];
+  readonly rating = { score: 0, count: 0, bars: [0, 0, 0, 0, 0] };
+
+  readonly checklist = computed(() => {
+    const user = this.auth.currentUser();
+    const hasListing = this.listings.listings().length > 0;
+    const doneById = {
+      email: this.auth.isAuthenticated(),
+      photo: Boolean(user?.avatarUrl),
+      phone: false,
+      payment: false,
+      listing: hasListing,
+      pickup: false,
+    };
+    return SELLER_CHECKLIST_ITEMS.map((item) => ({ ...item, done: doneById[item.id] }));
+  });
+
+  readonly checklistDone = computed(() => this.checklist().filter((item) => item.done).length);
 
   get greetingName(): string {
     return this.auth.currentUser()?.firstName || 'Verkäufer';
@@ -232,15 +253,5 @@ export class SellerDashboardComponent {
 
   async toggleStatus(id: string, status: 'aktiv' | 'pausiert'): Promise<void> {
     await this.listings.setStatus(id, status === 'aktiv' ? 'pausiert' : 'aktiv');
-  }
-
-  private toPoints(values: number[], max: number): string {
-    return values
-      .map((value, index) => {
-        const x = (index / (values.length - 1)) * 320;
-        const y = 100 - (value / max) * 90;
-        return `${x},${y}`;
-      })
-      .join(' ');
   }
 }
