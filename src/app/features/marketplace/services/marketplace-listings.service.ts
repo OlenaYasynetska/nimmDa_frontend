@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { type MarketplaceListing } from '../data/marketplace.content';
+import { MARKETPLACE_LISTINGS, type MarketplaceListing } from '../data/marketplace.content';
 
 interface ListingDto {
   id: string;
@@ -22,8 +22,9 @@ export class MarketplaceListingsService {
   private readonly http = inject(HttpClient);
   private readonly items = signal<MarketplaceListing[]>([]);
   private readonly extras = signal<Record<string, MarketplaceListing>>({});
+  private readonly failed = signal(false);
 
-  readonly all = computed(() => this.items());
+  readonly all = computed(() => (this.failed() ? MARKETPLACE_LISTINGS : this.items()));
 
   constructor() {
     void this.refresh();
@@ -45,7 +46,9 @@ export class MarketplaceListingsService {
     try {
       const rows = await firstValueFrom(this.http.get<ListingDto[]>(`${environment.apiUrl}/listings`));
       this.items.set(rows.map(toMarketplaceListing));
+      this.failed.set(false);
     } catch {
+      this.failed.set(true);
       this.items.set([]);
     }
   }

@@ -30,7 +30,7 @@ import { SellerMessagesService } from '../services/seller-messages.service';
       <div class="ml-auto flex items-center gap-4 text-sm text-slate-600">
         <span class="hidden items-center gap-1 text-slate-500 lg:inline-flex">
           <app-landing-icon name="pin" svgClass="h-4 w-4" />
-          Oberösterreich
+          Linz, Oberösterreich
         </span>
         <a routerLink="/seller/messages" class="text-slate-600 hover:text-slate-900" aria-label="Nachrichten">
           <app-landing-icon name="chat" svgClass="h-5 w-5" />
