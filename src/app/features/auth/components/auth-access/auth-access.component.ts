@@ -1,7 +1,6 @@
 import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import type { AccountRole } from '../../../../core/models/auth-account.model';
 import { AuthFlowException, AuthService } from '../../../../core/services/auth.service';
 import { BuyerActivityService } from '../../../buyer/services/buyer-activity.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -66,26 +65,6 @@ type AccountStatus = 'new' | 'existing';
           </div>
         </fieldset>
 
-        <fieldset>
-          <legend class="mb-2 text-sm font-medium text-slate-600">Du bist …</legend>
-          <div class="grid grid-cols-3 gap-2">
-            @for (option of roles; track option.value) {
-              <button
-                type="button"
-                class="rounded-xl px-2 py-2 text-xs font-medium ring-1 sm:text-sm"
-                [class]="
-                  role() === option.value
-                    ? 'bg-[#eaf8ef] font-semibold text-[#2f9e57] ring-[#2f9e57]'
-                    : 'bg-slate-100 text-slate-700 ring-transparent'
-                "
-                (click)="role.set(option.value)"
-              >
-                {{ option.label }}
-              </button>
-            }
-          </div>
-        </fieldset>
-
         <div>
           <label for="auth-email" class="mb-1.5 block text-sm font-medium text-slate-600">E-Mail</label>
           <input
@@ -138,30 +117,18 @@ export class AuthAccessComponent implements OnInit {
   readonly password = usePasswordVisibility();
   readonly form = useAuthPlaceholderForm();
   readonly status = signal<AccountStatus>('existing');
-  readonly role = signal<AccountRole>('buyer');
   readonly error = signal<string | null>(null);
   readonly busy = signal(false);
-  readonly hint = signal('Wähle, ob du neu bist, und ob du kaufen oder verkaufen möchtest.');
+  readonly hint = signal('Melde dich an oder erstelle ein Konto, um NimmDa zu nutzen.');
   readonly verifiedNotice = signal(false);
-  readonly roles: { value: AccountRole; label: string }[] = [
-    { value: 'buyer', label: 'Käufer' },
-    { value: 'seller', label: 'Verkäufer' },
-    { value: 'both', label: 'Beides' },
-  ];
 
   ngOnInit(): void {
     this.status.set(this.initialStatus());
     const params = this.route.snapshot.queryParamMap;
     const email = params.get('email');
-    const role = params.get('role');
     const returnUrl = params.get('returnUrl');
     if (email) {
       this.form.controls.email.setValue(email);
-    }
-    if (role === 'buyer' || role === 'seller' || role === 'both') {
-      this.role.set(role);
-    } else if (this.initialStatus() === 'new') {
-      this.role.set('seller');
     }
     if (returnUrl) {
       this.auth.rememberReturnUrl(returnUrl);
@@ -176,9 +143,6 @@ export class AuthAccessComponent implements OnInit {
     }
     if (params.get('intent') === 'contact') {
       this.hint.set('Um den Verkäufer zu kontaktieren, melde dich an oder erstelle ein Konto.');
-      if (!params.get('role')) {
-        this.role.set('buyer');
-      }
     }
   }
 
@@ -191,16 +155,15 @@ export class AuthAccessComponent implements OnInit {
     this.error.set(null);
     const email = this.form.controls.email.value;
     const password = this.form.controls.password.value;
-    const role = this.role();
     try {
       if (this.status() === 'new') {
-        await this.auth.register(email, password, role);
+        await this.auth.register(email, password);
         await this.router.navigate(['/auth/check-email'], {
           queryParams: { email, type: 'verify' },
         });
         return;
       }
-      await this.auth.login(email, password, role);
+      await this.auth.login(email, password);
       this.activity.claimGuest();
       await this.router.navigateByUrl(this.auth.afterAuthPath());
     } catch (error) {

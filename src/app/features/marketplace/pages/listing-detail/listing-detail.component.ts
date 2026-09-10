@@ -173,7 +173,7 @@ export class ListingDetailComponent {
       : this.router.url;
     this.auth.rememberReturnUrl(returnUrl);
     void this.router.navigate(['/auth/login'], {
-      queryParams: { intent: 'contact', role: 'buyer', returnUrl },
+      queryParams: { intent: 'contact', returnUrl },
     });
   }
 }

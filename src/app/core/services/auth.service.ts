@@ -3,7 +3,6 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
-  AccountRole,
   AuthFlowError,
   AuthMailType,
   LastAuthMail,
@@ -19,8 +18,8 @@ interface AuthSessionDto {
   email: string;
   firstName: string;
   lastName: string;
-  role: AccountRole | 'admin';
-  accountMode: AccountRole;
+  role: 'admin' | 'user' | string;
+  accountMode?: string;
   accessToken: string;
   expiresAt: number;
 }
@@ -48,31 +47,20 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
   readonly role = computed(() => {
     const raw = this.currentUserSignal()?.role;
-    if (raw === 'admin' || raw === 'buyer' || raw === 'seller' || raw === 'both') {
-      return raw;
+    if (raw === 'admin') {
+      return 'admin';
     }
-    return this.currentUserSignal() ? 'both' : null;
+    return this.currentUserSignal() ? 'user' : null;
   });
   readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'admin');
-  readonly accountMode = computed((): AccountRole => {
-    const raw = this.currentUserSignal()?.accountMode;
-    if (raw === 'buyer' || raw === 'seller' || raw === 'both') {
-      return raw;
-    }
-    return 'both';
-  });
-  readonly canSell = computed(
-    () => this.isAuthenticated() && !this.isAdmin() && this.accountMode() !== 'buyer'
-  );
-  readonly canBuy = computed(
-    () => this.isAuthenticated() && !this.isAdmin() && this.accountMode() !== 'seller'
-  );
+  readonly canSell = computed(() => this.isAuthenticated() && !this.isAdmin());
+  readonly canBuy = computed(() => this.isAuthenticated() && !this.isAdmin());
 
   homePath(): string {
     if (this.isAdmin()) {
       return '/admin';
     }
-    return this.accountMode() === 'buyer' ? '/konto' : '/seller';
+    return '/konto';
   }
 
   rememberReturnUrl(url?: string | null): void {
@@ -104,18 +92,6 @@ export class AuthService {
     return value;
   }
 
-  ensureSellerRole(): void {
-    const user = this.currentUserSignal();
-    if (!user || this.isAdmin()) {
-      return;
-    }
-    void this.postSession('/auth/account-mode', { role: 'seller' })
-      .then((session) => this.setSession(this.toUser(session)))
-      .catch(() => {
-        this.setSession({ ...user, accountMode: 'seller', role: 'both' });
-      });
-  }
-
   getAccessToken(): string | null {
     return this.currentUserSignal()?.accessToken ?? null;
   }
@@ -125,20 +101,16 @@ export class AuthService {
     sessionStorage.removeItem(USER_KEY);
   }
 
-  async registerSeller(email: string, password: string): Promise<void> {
-    await this.register(email, password, 'seller');
-  }
-
-  async register(email: string, password: string, role: AccountRole): Promise<void> {
-    const result = await this.postMail('/auth/register', { email, password, role });
+  async register(email: string, password: string): Promise<void> {
+    const result = await this.postMail('/auth/register', { email, password });
     this.rememberMail(email, 'verify', result);
     if (!localStorage.getItem(RETURN_URL_KEY) && !sessionStorage.getItem(RETURN_URL_KEY)) {
-      this.rememberReturnUrl(role === 'buyer' ? '/konto' : '/seller');
+      this.rememberReturnUrl('/konto');
     }
   }
 
-  async login(email: string, password: string, role?: AccountRole): Promise<void> {
-    const session = await this.postSession('/auth/login', { email, password, role });
+  async login(email: string, password: string): Promise<void> {
+    const session = await this.postSession('/auth/login', { email, password });
     this.setSession(this.toUser(session));
   }
 
@@ -205,11 +177,7 @@ export class AuthService {
       email: session.email,
       firstName: session.firstName,
       lastName: session.lastName,
-      role: session.role === 'admin' ? 'admin' : session.role === 'buyer' || session.role === 'seller' ? session.role : 'both',
-      accountMode:
-        session.accountMode === 'buyer' || session.accountMode === 'seller'
-          ? session.accountMode
-          : 'both',
+      role: session.role === 'admin' ? 'admin' : 'user',
       accessToken: session.accessToken,
       expiresAt: session.expiresAt,
     };

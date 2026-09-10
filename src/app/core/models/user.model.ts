@@ -13,5 +13,4 @@ export interface AuthUser extends User {
   accessToken: string;
   refreshToken?: string;
   expiresAt: number;
-  accountMode?: 'buyer' | 'seller' | 'both';
 }

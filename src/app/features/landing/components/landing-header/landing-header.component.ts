@@ -84,7 +84,7 @@ export class LandingHeaderComponent {
       return;
     }
     void this.router.navigate(['/auth/login'], {
-      queryParams: { role: 'buyer', returnUrl: '/konto' },
+      queryParams: { returnUrl: '/konto' },
     });
   }
 
@@ -94,12 +94,11 @@ export class LandingHeaderComponent {
       return;
     }
     if (this.auth.isAuthenticated()) {
-      this.auth.ensureSellerRole();
       void this.router.navigateByUrl('/seller/listings/new');
       return;
     }
     void this.router.navigate(['/auth/register'], {
-      queryParams: { role: 'seller' },
+      queryParams: { returnUrl: '/seller/listings/new' },
     });
   }
 }

@@ -120,7 +120,7 @@ export const routes: Routes = [
   },
   {
     path: 'seller',
-    canActivate: [authGuard, redirectAdminGuard, roleGuard(['seller', 'both'])],
+    canActivate: [authGuard, redirectAdminGuard],
     loadComponent: () =>
       import('./features/seller/layout/seller-layout.component').then(
         (m) => m.SellerLayoutComponent

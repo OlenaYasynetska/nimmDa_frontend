@@ -1,12 +1,9 @@
-export type AccountRole = 'buyer' | 'seller' | 'both';
-
 export interface StoredAuthAccount {
   id: string;
   email: string;
   passwordHash: string;
   firstName: string;
   lastName: string;
-  role: AccountRole;
   emailVerified: boolean;
 }
 
