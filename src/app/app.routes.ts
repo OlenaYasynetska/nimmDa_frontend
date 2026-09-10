@@ -25,6 +25,16 @@ export const routes: Routes = [
     loadComponent: loadListingDetail,
   },
   {
+    path: 'services',
+    loadComponent: loadCategoryListings,
+    data: { listingFilter: 'services' },
+  },
+  {
+    path: 'kostenlos',
+    loadComponent: loadCategoryListings,
+    data: { listingFilter: 'kostenlos' },
+  },
+  {
     path: 'anzeigen',
     pathMatch: 'full',
     loadComponent: loadCategoryListings,

@@ -14,7 +14,7 @@ interface MessageDto {
 interface ConversationDto {
   id: string;
   listingId?: string;
-  buyerName: string;
+  participant: string;
   listingTitle: string;
   preview: string;
   updatedAt: string;
@@ -96,19 +96,20 @@ export class SellerMessagesService {
 
 function toThread(row: ConversationDto): SellerThread {
   const last = row.messages?.at(-1);
+  const participant = row.participant || 'Mitglied';
   return {
     id: row.id,
     listingId: row.listingId,
-    buyerName: row.buyerName,
-    initials: initials(row.buyerName),
+    participant,
+    initials: initials(participant),
     productTitle: row.listingTitle,
     preview: row.preview,
     time: formatTime(row.updatedAt),
-    unread: last?.author === 'buyer',
+    unread: last?.author === 'other',
     messages: (row.messages ?? []).map(
       (line, index): SellerChatLine => ({
         id: `${row.id}-${index}`,
-        from: line.author === 'seller' ? 'seller' : 'buyer',
+        from: line.author === 'self' ? 'self' : 'other',
         text: line.text,
         time: formatTime(line.createdAt),
       })

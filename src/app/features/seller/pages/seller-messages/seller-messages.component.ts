@@ -12,7 +12,7 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
     <div class="mx-auto max-w-5xl">
       <a [routerLink]="backLink" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Zurück zur Übersicht</a>
       <h1 class="mt-3 text-2xl font-extrabold text-[#1b3a5f]">Nachrichten</h1>
-      <p class="mt-1 text-sm text-slate-500">Dein Chat mit Käuferinnen, Käufern und Verkäuferinnen.</p>
+      <p class="mt-1 text-sm text-slate-500">Alle Unterhaltungen an einem Ort.</p>
 
       <div class="mt-6 grid overflow-hidden rounded-2xl bg-white shadow-sm md:grid-cols-[16rem_1fr]">
         <ul class="divide-y divide-slate-100 border-b border-slate-100 md:border-b-0 md:border-r">
@@ -32,7 +32,7 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
                 </span>
                 <span class="min-w-0 flex-1">
                   <span class="flex items-center justify-between gap-2">
-                    <span class="truncate font-semibold text-slate-800">{{ thread.buyerName }}</span>
+                    <span class="truncate font-semibold text-slate-800">{{ thread.participant }}</span>
                     <span class="text-[11px] text-slate-400">{{ thread.time }}</span>
                   </span>
                   <span class="block truncate text-xs text-slate-500">{{ thread.productTitle }}</span>
@@ -49,15 +49,15 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
         @if (messages.selectedThread(); as thread) {
           <div class="flex min-h-[28rem] flex-col">
             <div class="border-b border-slate-100 px-4 py-3">
-              <p class="font-semibold text-slate-800">{{ thread.buyerName }}</p>
+              <p class="font-semibold text-slate-800">{{ thread.participant }}</p>
               <p class="text-xs text-slate-500">{{ thread.productTitle }}</p>
             </div>
             <div class="flex-1 space-y-3 overflow-y-auto px-4 py-4">
               @for (line of thread.messages; track line.id) {
-                <div [class]="line.from === 'seller' ? 'ml-8 text-right' : 'mr-8'">
+                <div [class]="line.from === 'self' ? 'ml-8 text-right' : 'mr-8'">
                   <p
                     class="inline-block rounded-2xl px-3 py-2 text-sm"
-                    [class]="line.from === 'seller' ? 'bg-[#2f9e57] text-white' : 'bg-slate-100 text-slate-800'"
+                    [class]="line.from === 'self' ? 'bg-[#2f9e57] text-white' : 'bg-slate-100 text-slate-800'"
                   >
                     {{ line.text }}
                   </p>
@@ -83,7 +83,7 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
           </div>
         } @else if (pendingListingId()) {
           <div class="flex min-h-[28rem] flex-col p-4">
-            <p class="font-semibold text-slate-800">Nachricht an den Verkäufer</p>
+            <p class="font-semibold text-slate-800">Nachricht zur Anzeige</p>
             <p class="mt-1 text-sm text-slate-500">Schreibe die erste Nachricht, um den Chat zu starten.</p>
             <form class="mt-4 flex gap-2" (ngSubmit)="startFromListing()">
               <input

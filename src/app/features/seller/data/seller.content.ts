@@ -13,7 +13,7 @@ export interface SellerListing {
 
 export interface SellerChatLine {
   id: string;
-  from: 'buyer' | 'seller';
+  from: 'self' | 'other';
   text: string;
   time: string;
 }
@@ -21,7 +21,7 @@ export interface SellerChatLine {
 export interface SellerThread {
   id: string;
   listingId?: string;
-  buyerName: string;
+  participant: string;
   initials: string;
   productTitle: string;
   preview: string;

@@ -67,7 +67,8 @@ import { SellerMessagesService } from '../../../seller/services/seller-messages.
                     {{ thread.initials }}
                   </span>
                   <div class="min-w-0 flex-1">
-                    <p class="font-semibold text-slate-800">{{ thread.buyerName }}</p>
+                    <p class="font-semibold text-slate-800">{{ thread.participant }}</p>
+                    <p class="truncate text-xs text-slate-500">{{ thread.productTitle }}</p>
                     <p class="truncate text-sm text-slate-600">{{ thread.preview }}</p>
                   </div>
                 </a>

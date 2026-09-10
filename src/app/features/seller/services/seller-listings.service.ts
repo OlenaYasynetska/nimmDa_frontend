@@ -63,13 +63,19 @@ export class SellerListingsService {
     }
   }
 
-  async add(input: { title: string; price: number; imageSrc?: string; category?: string }): Promise<void> {
+  async add(input: {
+    title: string;
+    price: number;
+    imageSrc?: string;
+    category?: string;
+    location?: string;
+  }): Promise<void> {
     await firstValueFrom(
       this.http.post(`${environment.apiUrl}/listings`, {
         title: input.title,
         price: input.price,
         category: input.category || 'Möbel & Haushalt',
-        location: 'Linz',
+        location: input.location,
         imageSrc: input.imageSrc,
       })
     );

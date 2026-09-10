@@ -1,7 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { POPULAR_CATEGORIES } from '../../../landing/data/landing.content';
+import { CREATE_LISTING_LOCATIONS } from '../../../marketplace/data/standort';
 import { SellerListingsService } from '../../services/seller-listings.service';
 
 @Component({
@@ -32,6 +34,7 @@ import { SellerListingsService } from '../../services/seller-listings.service';
             formControlName="price"
             class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
           />
+          <p class="mt-1 text-xs text-slate-400">0 = kostenlos</p>
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-category">Kategorie</label>
@@ -45,6 +48,30 @@ import { SellerListingsService } from '../../services/seller-listings.service';
             }
           </select>
         </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-location">Standort</label>
+          <select
+            id="listing-location"
+            formControlName="locationChoice"
+            class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
+          >
+            <option value="">Stadt wählen</option>
+            @for (place of locations; track place.value) {
+              <option [value]="place.value">{{ place.label }}</option>
+            }
+          </select>
+        </div>
+        @if (locationChoice() === 'andere') {
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-other-city">Stadt</label>
+            <input
+              id="listing-other-city"
+              formControlName="otherCity"
+              placeholder="z. B. Traun"
+              class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            />
+          </div>
+        }
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-description">Beschreibung</label>
           <textarea
@@ -121,6 +148,7 @@ export class CreateListingComponent {
   private readonly router = inject(Router);
 
   readonly categories = POPULAR_CATEGORIES.filter((item) => item.name !== 'Weitere Kategorien');
+  readonly locations = CREATE_LISTING_LOCATIONS;
   readonly photoPreview = signal<string | null>(null);
   readonly photoName = signal<string | null>(null);
   readonly photoError = signal<string | null>(null);
@@ -130,9 +158,14 @@ export class CreateListingComponent {
 
   readonly form = this.fb.nonNullable.group({
     title: ['', Validators.required],
-    price: [0, [Validators.required, Validators.min(1)]],
+    price: [0, [Validators.required, Validators.min(0)]],
     category: [this.categories[0]?.name ?? '', Validators.required],
+    locationChoice: ['', Validators.required],
+    otherCity: [''],
     description: [''],
+  });
+  readonly locationChoice = toSignal(this.form.controls.locationChoice.valueChanges, {
+    initialValue: this.form.controls.locationChoice.value,
   });
 
   async onPhotoSelected(event: Event): Promise<void> {
@@ -178,6 +211,13 @@ export class CreateListingComponent {
       return;
     }
     const value = this.form.getRawValue();
+    const location =
+      value.locationChoice === 'andere' ? value.otherCity.trim() : value.locationChoice;
+    if (!location) {
+      this.form.controls.otherCity.markAsTouched();
+      this.saveError.set('Bitte gib eine Stadt ein.');
+      return;
+    }
     this.saving.set(true);
     this.saveError.set(null);
     try {
@@ -186,6 +226,7 @@ export class CreateListingComponent {
         price: value.price,
         imageSrc: this.photoPreview() ?? undefined,
         category: value.category,
+        location,
       });
       void this.router.navigateByUrl('/konto/meine-anzeigen');
     } catch {

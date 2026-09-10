@@ -46,7 +46,7 @@ export const ACTION_CARDS: ActionCard[] = [
     iconClass: 'text-[#6f4ea1]',
     buttonClass: 'bg-[#6f4ea1] hover:bg-[#5d4188] text-white',
     cardClass: 'bg-[#f3eef8]',
-    link: '/anzeigen',
+    link: '/services',
   },
   {
     title: 'Kostenlos',
@@ -60,8 +60,7 @@ export const ACTION_CARDS: ActionCard[] = [
     iconClass: 'text-[#d4a017]',
     buttonClass: 'bg-[#f5c400] hover:bg-[#e0b400] text-white',
     cardClass: 'bg-[#fff8dc]',
-    link: '/anzeigen',
-    queryParams: { kostenlos: '1' },
+    link: '/kostenlos',
   },
 ];
 
@@ -158,6 +157,12 @@ export const POPULAR_CATEGORIES: PopularCategory[] = [
     iconClass: 'text-[#e05a6c]',
   },
   {
+    name: 'Dienstleistungen',
+    slug: 'dienstleistungen',
+    icon: 'wrench',
+    iconClass: 'text-[#6f4ea1]',
+  },
+  {
     name: 'Weitere Kategorien',
     slug: 'weitere',
     icon: 'grid',
@@ -175,7 +180,13 @@ export function categoryByName(name: string): PopularCategory | undefined {
 }
 
 export function categoryListingsPath(category: PopularCategory): string {
-  return category.slug === 'weitere' ? '/anzeigen' : `/anzeigen/${category.slug}`;
+  if (category.slug === 'weitere') {
+    return '/anzeigen';
+  }
+  if (category.slug === 'dienstleistungen') {
+    return '/services';
+  }
+  return `/anzeigen/${category.slug}`;
 }
 
 export interface HowStep {

@@ -128,7 +128,7 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
                     </span>
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center justify-between gap-2">
-                        <p class="font-semibold text-slate-800">{{ thread.buyerName }}</p>
+                        <p class="font-semibold text-slate-800">{{ thread.participant }}</p>
                         <span class="text-xs text-slate-400">{{ thread.time }}</span>
                       </div>
                       <p class="truncate text-xs text-slate-500">{{ thread.productTitle }}</p>

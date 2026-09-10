@@ -69,7 +69,7 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
               </form>
             }
             @if (sent()) {
-              <p class="mt-3 text-sm font-medium text-[#2f9e57]">Nachricht gesendet. Der Verkäufer sieht sie in den Anfragen.</p>
+              <p class="mt-3 text-sm font-medium text-[#2f9e57]">Nachricht gesendet. Du findest sie unter Nachrichten.</p>
             }
             @if (sendError()) {
               <p class="mt-3 text-sm text-red-600">{{ sendError() }}</p>

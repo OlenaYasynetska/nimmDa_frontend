@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ACTION_CARDS } from '../../data/landing.content';
 import { useActionCardImageSize } from '../../hooks/use-action-card-image.hook';
+import { StandortService } from '../../../marketplace/services/standort.service';
 import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 
 @Component({
@@ -14,7 +15,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         @for (card of cards; track card.title) {
           <a
             [routerLink]="card.link"
-            [queryParams]="card.queryParams"
+            [queryParams]="standort.queryParams()"
             class="flex min-h-[16.5rem] cursor-pointer overflow-hidden rounded-3xl p-6 shadow-[0_18px_44px_rgba(15,23,42,0.12)] {{ card.cardClass }}"
             [attr.id]="
               card.illustration === 'toolbox'
@@ -89,4 +90,5 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 export class ActionCardsComponent {
   readonly cards = ACTION_CARDS;
   readonly imageSize = useActionCardImageSize();
+  readonly standort = inject(StandortService);
 }

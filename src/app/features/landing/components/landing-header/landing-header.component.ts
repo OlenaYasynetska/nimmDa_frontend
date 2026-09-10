@@ -1,9 +1,12 @@
 import { Component, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
+import { listingFilterQuery } from '../../../marketplace/data/listing-query';
+import { STANDORT_OPTIONS, hasCoordinates, parseStandort, type StandortValue } from '../../../marketplace/data/standort';
+import { StandortService } from '../../../marketplace/services/standort.service';
 import { SellerMessagesService } from '../../../seller/services/seller-messages.service';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
 import { LandingIconComponent } from '../landing-icon/landing-icon.component';
@@ -21,13 +24,25 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         <app-brand-mark [compact]="true" />
 
         <nav class="flex items-center gap-4 text-sm font-medium text-slate-700 md:gap-6">
-          <a routerLink="/anzeigen" class="hover:text-[#1b3a5f]" [class.text-[#1b3a5f]]="anzeigenActive()">
-            Anzeigen
-          </a>
-          <a routerLink="/anzeigen" class="hover:text-[#1b3a5f]">Services</a>
           <a
             routerLink="/anzeigen"
-            [queryParams]="{ kostenlos: '1' }"
+            [queryParams]="standort.queryParams()"
+            class="hover:text-[#1b3a5f]"
+            [class.text-[#1b3a5f]]="anzeigenActive()"
+          >
+            Anzeigen
+          </a>
+          <a
+            routerLink="/services"
+            [queryParams]="standort.queryParams()"
+            class="hover:text-[#1b3a5f]"
+            [class.text-[#1b3a5f]]="servicesActive()"
+          >
+            Services
+          </a>
+          <a
+            routerLink="/kostenlos"
+            [queryParams]="standort.queryParams()"
             class="hover:text-[#1b3a5f]"
             [class.text-[#1b3a5f]]="kostenlosActive()"
           >
@@ -35,19 +50,55 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           </a>
         </nav>
 
-        <form class="relative min-w-0 flex-1" (ngSubmit)="search()">
+        <form class="relative min-w-[12rem] flex-1" (ngSubmit)="search()">
+          <label class="sr-only" for="header-search">Was suchst du?</label>
           <input
+            id="header-search"
             type="search"
             name="q"
             [(ngModel)]="query"
-            placeholder="Suche auf NimmDa..."
-            class="w-full rounded-xl border-0 bg-slate-100 py-2.5 pl-10 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            placeholder="Was suchst du?"
+            class="w-full rounded-xl border-0 bg-slate-100 py-2.5 pl-3 pr-11 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
           />
-          <app-landing-icon
-            name="search"
-            svgClass="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
-          />
+          <button
+            type="submit"
+            class="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-[#1b3a5f]"
+            aria-label="Suchen"
+          >
+            <app-landing-icon name="search" svgClass="h-4 w-4" />
+          </button>
         </form>
+
+        <div class="relative">
+          <button
+            type="button"
+            class="inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1b3a5f]"
+            (click)="toggleStandort($event)"
+            [attr.aria-expanded]="standortOpen()"
+          >
+            <app-landing-icon name="pin" svgClass="h-4 w-4" />
+            <span>{{ standort.label() }}</span>
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          @if (standortOpen()) {
+            <div class="absolute right-0 z-40 mt-1 w-48 rounded-xl border border-slate-100 bg-white py-1 shadow-lg">
+              @for (option of standortOptions; track option.label) {
+                <button
+                  type="button"
+                  class="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
+                  [class.font-semibold]="standort.selected() === option.value"
+                  [class.text-[#1b3a5f]]="standort.selected() === option.value"
+                  [class.text-slate-700]="standort.selected() !== option.value"
+                  (click)="chooseStandort(option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
 
         <div class="ml-auto flex items-center gap-1 sm:gap-2">
           <button
@@ -168,10 +219,13 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 export class LandingHeaderComponent {
   readonly auth = inject(AuthService);
   readonly messages = inject(SellerMessagesService);
+  readonly standort = inject(StandortService);
+  readonly standortOptions = STANDORT_OPTIONS;
   private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
 
   readonly menuOpen = signal(false);
+  readonly standortOpen = signal(false);
   query = '';
 
   private readonly url = toSignal(
@@ -183,16 +237,28 @@ export class LandingHeaderComponent {
   );
 
   constructor() {
-    this.query = this.router.parseUrl(this.router.url).queryParams['q'] ?? '';
+    this.syncFromUrl(this.router.url);
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe((event) => this.syncFromUrl(event.urlAfterRedirects));
   }
 
   anzeigenActive(): boolean {
     const url = this.url();
-    return url.startsWith('/anzeigen') && !url.includes('kostenlos=1');
+    return url.startsWith('/anzeigen') && !this.kostenlosActive() && !this.servicesActive();
+  }
+
+  servicesActive(): boolean {
+    const url = this.url();
+    return url.startsWith('/services') || url.startsWith('/anzeigen/dienstleistungen');
   }
 
   kostenlosActive(): boolean {
-    return this.url().includes('kostenlos=1');
+    const url = this.url();
+    return url.startsWith('/kostenlos') || url.includes('kostenlos=1') || url.includes('price=0');
   }
 
   get displayName(): string {
@@ -200,11 +266,39 @@ export class LandingHeaderComponent {
   }
 
   search(): void {
+    this.standortOpen.set(false);
     const q = this.query.trim();
-    void this.router.navigate(['/anzeigen'], { queryParams: q ? { q } : {} });
+    const current = this.router.parseUrl(this.router.url).queryParams;
+    void this.router.navigate(['/anzeigen'], {
+      queryParams: {
+        ...listingFilterQuery(current),
+        q: q || null,
+        ...this.standort.queryParams(),
+      },
+    });
+  }
+
+  chooseStandort(value: StandortValue): void {
+    this.standort.set(value);
+    this.standortOpen.set(false);
+    const path = this.listingsPath();
+    if (path.length === 0) {
+      return;
+    }
+    const current = this.router.parseUrl(this.router.url).queryParams;
+    const keepSearch = this.isListingsView();
+    void this.router.navigate(path, {
+      queryParams: {
+        ...listingFilterQuery(current),
+        q: keepSearch ? current['q'] || null : null,
+        ort: value || null,
+        km: keepSearch && value && hasCoordinates(value) ? current['km'] || null : null,
+      },
+    });
   }
 
   goKonto(path: string): void {
+    this.standortOpen.set(false);
     if (this.auth.isAdmin()) {
       void this.router.navigateByUrl('/admin');
       return;
@@ -218,7 +312,14 @@ export class LandingHeaderComponent {
 
   toggleMenu(event: Event): void {
     event.stopPropagation();
+    this.standortOpen.set(false);
     this.menuOpen.update((open) => !open);
+  }
+
+  toggleStandort(event: Event): void {
+    event.stopPropagation();
+    this.menuOpen.set(false);
+    this.standortOpen.update((open) => !open);
   }
 
   closeMenu(): void {
@@ -228,6 +329,7 @@ export class LandingHeaderComponent {
   onDocumentClick(event: Event): void {
     if (!this.host.nativeElement.contains(event.target as Node)) {
       this.closeMenu();
+      this.standortOpen.set(false);
     }
   }
 
@@ -235,5 +337,44 @@ export class LandingHeaderComponent {
     this.closeMenu();
     this.auth.logout();
     void this.router.navigateByUrl('/');
+  }
+
+  private isListingsView(): boolean {
+    const path = this.router.url.split('?')[0];
+    return (
+      path.startsWith('/anzeigen') || path.startsWith('/services') || path.startsWith('/kostenlos')
+    );
+  }
+
+  private listingsPath(): string[] {
+    const path = this.router.url.split('?')[0];
+    if (path.startsWith('/services')) {
+      return ['/services'];
+    }
+    if (path.startsWith('/kostenlos')) {
+      return ['/kostenlos'];
+    }
+    if (path.startsWith('/anzeigen/artikel')) {
+      return ['/anzeigen'];
+    }
+    if (path.startsWith('/anzeigen')) {
+      return path
+        .split('/')
+        .filter(Boolean)
+        .map((segment, index) => (index === 0 ? `/${segment}` : segment));
+    }
+    if (path === '/' || path === '') {
+      return ['/anzeigen'];
+    }
+    return [];
+  }
+
+  private syncFromUrl(url: string): void {
+    const params = this.router.parseUrl(url).queryParams;
+    this.query = params['q'] ?? '';
+    const ort = parseStandort(params['ort']);
+    if (params['ort']) {
+      this.standort.set(ort);
+    }
   }
 }

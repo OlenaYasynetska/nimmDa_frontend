@@ -11,6 +11,7 @@ interface ListingDto {
   category: string;
   location: string;
   imageSrc: string;
+  createdAt?: string;
 }
 
 interface InquiryDto {
@@ -24,7 +25,17 @@ export class MarketplaceListingsService {
   private readonly extras = signal<Record<string, MarketplaceListing>>({});
   private readonly failed = signal(false);
 
-  readonly all = computed(() => (this.failed() ? MARKETPLACE_LISTINGS : this.items()));
+  readonly all = computed(() => {
+    if (this.failed()) {
+      return MARKETPLACE_LISTINGS;
+    }
+    const rows = this.items();
+    if (environment.production) {
+      return rows;
+    }
+    const seen = new Set(rows.map((item) => item.id));
+    return [...rows, ...MARKETPLACE_LISTINGS.filter((item) => !seen.has(item.id))];
+  });
 
   constructor() {
     void this.refresh();
@@ -82,5 +93,6 @@ function toMarketplaceListing(row: ListingDto): MarketplaceListing {
     imageSrc: row.imageSrc,
     category: row.category,
     location: row.location,
+    createdAt: row.createdAt,
   };
 }
