@@ -10,7 +10,7 @@ import { SellerListingsService } from '../../services/seller-listings.service';
   imports: [ReactiveFormsModule, RouterLink],
   template: `
     <div class="mx-auto max-w-xl rounded-2xl bg-white p-6 shadow-sm">
-      <a routerLink="/seller" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Zurück zur Übersicht</a>
+      <a routerLink="/konto/meine-anzeigen" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Meine Anzeigen</a>
       <h1 class="mt-3 text-2xl font-extrabold text-[#1b3a5f]">Anzeige erstellen</h1>
       <p class="mt-1 text-sm text-slate-500">Erstelle eine Produktkarte für den Marktplatz.</p>
 
@@ -187,7 +187,7 @@ export class CreateListingComponent {
         imageSrc: this.photoPreview() ?? undefined,
         category: value.category,
       });
-      void this.router.navigateByUrl('/seller');
+      void this.router.navigateByUrl('/konto/meine-anzeigen');
     } catch {
       this.saveError.set('Die Anzeige konnte nicht gespeichert werden. Bitte erneut anmelden und nochmal versuchen.');
     } finally {

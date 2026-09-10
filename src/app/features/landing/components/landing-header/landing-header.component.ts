@@ -80,11 +80,11 @@ export class LandingHeaderComponent {
       return;
     }
     if (this.auth.isAuthenticated()) {
-      void this.router.navigateByUrl('/konto');
+      void this.router.navigateByUrl('/konto/favoriten');
       return;
     }
     void this.router.navigate(['/auth/login'], {
-      queryParams: { returnUrl: '/konto' },
+      queryParams: { returnUrl: '/konto/favoriten' },
     });
   }
 
@@ -94,11 +94,11 @@ export class LandingHeaderComponent {
       return;
     }
     if (this.auth.isAuthenticated()) {
-      void this.router.navigateByUrl('/seller/listings/new');
+      void this.router.navigateByUrl('/konto/anzeige-neu');
       return;
     }
     void this.router.navigate(['/auth/register'], {
-      queryParams: { returnUrl: '/seller/listings/new' },
+      queryParams: { returnUrl: '/konto/anzeige-neu' },
     });
   }
 }

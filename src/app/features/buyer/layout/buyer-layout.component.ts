@@ -19,14 +19,22 @@ import { LandingFooterComponent } from '../../landing/components/landing-footer/
           <h1 class="text-2xl font-extrabold text-[#1b3a5f]">Hallo, {{ greeting }}!</h1>
           <p class="mt-1 text-sm text-slate-500">Dein Käuferbereich: Merkliste, Verlauf und Anfragen.</p>
         </div>
-        @if (auth.canSell()) {
+        <div class="flex flex-wrap gap-2">
           <a
-            routerLink="/seller"
-            class="rounded-lg bg-[#2f9e57] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#278a4b]"
+            routerLink="/"
+            class="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-[#2f6fb2] ring-1 ring-slate-200 hover:bg-slate-50"
           >
-            Zum Verkäufer-Dashboard
+            Zum Marktplatz
           </a>
-        }
+          @if (auth.canSell()) {
+            <a
+              routerLink="/seller"
+              class="rounded-lg bg-[#2f9e57] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#278a4b]"
+            >
+              Zum Verkäufer-Dashboard
+            </a>
+          }
+        </div>
       </div>
       <nav class="mb-6 flex gap-2 text-sm">
         <a

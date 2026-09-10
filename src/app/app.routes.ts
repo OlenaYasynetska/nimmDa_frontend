@@ -100,13 +100,13 @@ export const routes: Routes = [
     path: 'konto',
     canActivate: [authGuard, redirectAdminGuard],
     loadComponent: () =>
-      import('./features/buyer/layout/buyer-layout.component').then((m) => m.BuyerLayoutComponent),
+      import('./features/konto/layout/konto-layout.component').then((m) => m.KontoLayoutComponent),
     children: [
       {
         path: '',
         loadComponent: () =>
-          import('./features/buyer/pages/buyer-home/buyer-home.component').then(
-            (m) => m.BuyerHomeComponent
+          import('./features/konto/pages/konto-overview/konto-overview.component').then(
+            (m) => m.KontoOverviewComponent
           ),
       },
       {
@@ -116,38 +116,59 @@ export const routes: Routes = [
             (m) => m.SellerMessagesComponent
           ),
       },
-    ],
-  },
-  {
-    path: 'seller',
-    canActivate: [authGuard, redirectAdminGuard],
-    loadComponent: () =>
-      import('./features/seller/layout/seller-layout.component').then(
-        (m) => m.SellerLayoutComponent
-      ),
-    children: [
       {
-        path: '',
+        path: 'meine-anzeigen',
+        pathMatch: 'full',
+        redirectTo: 'meine-anzeigen/aktiv',
+      },
+      {
+        path: 'meine-anzeigen/:filter',
         loadComponent: () =>
-          import('./features/seller/pages/seller-dashboard/seller-dashboard.component').then(
-            (m) => m.SellerDashboardComponent
+          import('./features/konto/pages/konto-listings/konto-listings.component').then(
+            (m) => m.KontoListingsComponent
           ),
       },
       {
-        path: 'listings/new',
+        path: 'anzeige-neu',
         loadComponent: () =>
           import('./features/seller/pages/create-listing/create-listing.component').then(
             (m) => m.CreateListingComponent
           ),
       },
       {
-        path: 'messages',
+        path: 'favoriten',
         loadComponent: () =>
-          import('./features/seller/pages/seller-messages/seller-messages.component').then(
-            (m) => m.SellerMessagesComponent
+          import('./features/konto/pages/konto-favorites/konto-favorites.component').then(
+            (m) => m.KontoFavoritesComponent
+          ),
+      },
+      {
+        path: 'profil',
+        loadComponent: () =>
+          import('./features/konto/pages/konto-profile/konto-profile.component').then(
+            (m) => m.KontoProfileComponent
+          ),
+      },
+      {
+        path: 'einstellungen',
+        loadComponent: () =>
+          import('./features/konto/pages/konto-settings/konto-settings.component').then(
+            (m) => m.KontoSettingsComponent
           ),
       },
     ],
+  },
+  {
+    path: 'seller/listings/new',
+    redirectTo: 'konto/anzeige-neu',
+  },
+  {
+    path: 'seller/messages',
+    redirectTo: 'konto/nachrichten',
+  },
+  {
+    path: 'seller',
+    redirectTo: 'konto',
   },
   {
     path: 'admin',

@@ -120,7 +120,7 @@ export class SellerMessagesComponent implements OnInit {
   readonly startError = signal<string | null>(null);
 
   get backLink(): string {
-    return this.router.url.startsWith('/konto') ? '/konto' : '/seller';
+    return '/konto';
   }
 
   async ngOnInit(): Promise<void> {
