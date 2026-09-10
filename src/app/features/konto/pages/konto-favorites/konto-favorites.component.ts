@@ -12,7 +12,7 @@ import type { MarketplaceListing } from '../../../marketplace/data/marketplace.c
       <h2 class="text-lg font-bold text-slate-800">Favoriten</h2>
       <p class="mt-1 text-sm text-slate-500">Anzeigen, die du dir merken möchtest.</p>
       @if (activity.favorites().length === 0) {
-        <p class="mt-4 text-sm text-slate-400">Noch keine Favoriten. Tippe aufs Herz bei einer Anzeige.</p>
+        <p class="mt-4 text-sm text-slate-400">Noch keine Favoriten. Tippe aufs Herz bei einer Anzeige — sie werden in deinem Konto gespeichert.</p>
       } @else {
         <ul class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           @for (item of activity.favorites(); track item.id) {

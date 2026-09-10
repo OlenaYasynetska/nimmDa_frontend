@@ -14,9 +14,12 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
       <h1 class="mt-3 text-2xl font-extrabold text-[#1b3a5f]">Nachrichten</h1>
       <p class="mt-1 text-sm text-slate-500">Alle Unterhaltungen an einem Ort.</p>
 
+      @if (startError()) {
+        <p class="mt-3 text-sm text-red-600">{{ startError() }}</p>
+      }
       <div class="mt-6 grid overflow-hidden rounded-2xl bg-white shadow-sm md:grid-cols-[16rem_1fr]">
         <ul class="divide-y divide-slate-100 border-b border-slate-100 md:border-b-0 md:border-r">
-          @if (messages.threads().length === 0 && !pendingListingId()) {
+          @if (messages.threads().length === 0 && !starting()) {
             <li class="px-4 py-6 text-sm text-slate-400">Noch keine Nachrichten.</li>
           }
           @for (thread of messages.threads(); track thread.id) {
@@ -75,34 +78,15 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
               <button
                 type="submit"
                 class="rounded-lg bg-[#2f9e57] px-4 py-2 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
-                [disabled]="!draft.trim() || starting()"
+                [disabled]="!draft.trim()"
               >
                 Senden
               </button>
             </form>
           </div>
-        } @else if (pendingListingId()) {
-          <div class="flex min-h-[28rem] flex-col p-4">
-            <p class="font-semibold text-slate-800">Nachricht zur Anzeige</p>
-            <p class="mt-1 text-sm text-slate-500">Schreibe die erste Nachricht, um den Chat zu starten.</p>
-            <form class="mt-4 flex gap-2" (ngSubmit)="startFromListing()">
-              <input
-                [(ngModel)]="draft"
-                name="first"
-                placeholder="Nachricht schreiben..."
-                class="min-w-0 flex-1 rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
-              />
-              <button
-                type="submit"
-                class="rounded-lg bg-[#2f9e57] px-4 py-2 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
-                [disabled]="!draft.trim() || starting()"
-              >
-                Senden
-              </button>
-            </form>
-            @if (startError()) {
-              <p class="mt-3 text-sm text-red-600">{{ startError() }}</p>
-            }
+        } @else if (starting()) {
+          <div class="flex min-h-[28rem] items-center p-4 text-sm text-slate-500">
+            Chat wird geöffnet…
           </div>
         }
       </div>
@@ -115,7 +99,6 @@ export class SellerMessagesComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly marketplace = inject(MarketplaceListingsService);
   draft = '';
-  readonly pendingListingId = signal<string | null>(null);
   readonly starting = signal(false);
   readonly startError = signal<string | null>(null);
 
@@ -135,8 +118,25 @@ export class SellerMessagesComponent implements OnInit {
       const existing = this.messages.threadForListing(listingId);
       if (existing) {
         this.messages.select(existing.id);
-      } else {
-        this.pendingListingId.set(listingId);
+        return;
+      }
+      this.starting.set(true);
+      this.startError.set(null);
+      try {
+        const conversation = await this.marketplace.sendInquiry(listingId);
+        await this.messages.refresh();
+        if (conversation.id) {
+          this.messages.select(conversation.id);
+          await this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { thread: conversation.id },
+            replaceUrl: true,
+          });
+        }
+      } catch {
+        this.startError.set('Nachricht konnte nicht geöffnet werden.');
+      } finally {
+        this.starting.set(false);
       }
     }
   }
@@ -144,33 +144,5 @@ export class SellerMessagesComponent implements OnInit {
   async send(): Promise<void> {
     await this.messages.reply(this.draft);
     this.draft = '';
-  }
-
-  async startFromListing(): Promise<void> {
-    const listingId = this.pendingListingId();
-    const text = this.draft.trim();
-    if (!listingId || !text || this.starting()) {
-      return;
-    }
-    this.starting.set(true);
-    this.startError.set(null);
-    try {
-      const conversation = await this.marketplace.sendInquiry(listingId, text);
-      this.draft = '';
-      this.pendingListingId.set(null);
-      await this.messages.refresh();
-      if (conversation.id) {
-        this.messages.select(conversation.id);
-        await this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams: { thread: conversation.id },
-          replaceUrl: true,
-        });
-      }
-    } catch {
-      this.startError.set('Nachricht konnte nicht gesendet werden.');
-    } finally {
-      this.starting.set(false);
-    }
   }
 }

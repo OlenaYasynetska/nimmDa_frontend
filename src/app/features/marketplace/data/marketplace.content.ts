@@ -6,6 +6,7 @@ export interface MarketplaceListing {
   category: string;
   location: string;
   createdAt?: string;
+  sellerId?: string;
 }
 
 export const MARKETPLACE_LISTINGS: MarketplaceListing[] = [

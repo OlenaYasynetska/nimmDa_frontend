@@ -12,6 +12,7 @@ interface ListingDto {
   location: string;
   imageSrc: string;
   createdAt?: string;
+  sellerId?: string;
 }
 
 interface InquiryDto {
@@ -78,9 +79,12 @@ export class MarketplaceListingsService {
     }
   }
 
-  async sendInquiry(listingId: string, message: string): Promise<InquiryDto> {
+  async sendInquiry(listingId: string, message?: string): Promise<InquiryDto> {
     return firstValueFrom(
-      this.http.post<InquiryDto>(`${environment.apiUrl}/listings/${listingId}/inquiries`, { message })
+      this.http.post<InquiryDto>(
+        `${environment.apiUrl}/listings/${listingId}/inquiries`,
+        message ? { message } : {}
+      )
     );
   }
 }
@@ -94,5 +98,6 @@ function toMarketplaceListing(row: ListingDto): MarketplaceListing {
     category: row.category,
     location: row.location,
     createdAt: row.createdAt,
+    sellerId: row.sellerId,
   };
 }

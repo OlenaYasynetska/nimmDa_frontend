@@ -144,6 +144,9 @@ export class AuthAccessComponent implements OnInit {
     if (params.get('intent') === 'contact') {
       this.hint.set('Um den Verkäufer zu kontaktieren, melde dich an oder erstelle ein Konto.');
     }
+    if (params.get('intent') === 'favorite') {
+      this.hint.set('Um Favoriten zu speichern, melde dich an oder erstelle ein Konto.');
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -164,7 +167,7 @@ export class AuthAccessComponent implements OnInit {
         return;
       }
       await this.auth.login(email, password);
-      this.activity.claimGuest();
+      await this.activity.claimGuest();
       await this.router.navigateByUrl(this.auth.afterAuthPath());
     } catch (error) {
       if (error instanceof AuthFlowException && error.code === 'notFound') {

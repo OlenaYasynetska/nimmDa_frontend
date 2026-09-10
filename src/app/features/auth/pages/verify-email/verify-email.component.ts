@@ -47,7 +47,7 @@ export class VerifyEmailComponent implements OnInit {
     }
     try {
       await this.auth.verifyEmail(token);
-      this.activity.claimGuest();
+      await this.activity.claimGuest();
       await this.router.navigateByUrl(this.auth.afterAuthPath());
     } catch (error) {
       const code = error instanceof AuthFlowException ? error.code : 'expired';
