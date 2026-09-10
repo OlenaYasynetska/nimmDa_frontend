@@ -14,6 +14,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         @for (card of cards; track card.title) {
           <a
             [routerLink]="card.link"
+            [queryParams]="card.queryParams"
             class="flex min-h-[16.5rem] cursor-pointer overflow-hidden rounded-3xl p-6 shadow-[0_18px_44px_rgba(15,23,42,0.12)] {{ card.cardClass }}"
             [attr.id]="
               card.illustration === 'toolbox'

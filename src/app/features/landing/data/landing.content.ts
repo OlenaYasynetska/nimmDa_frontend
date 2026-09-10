@@ -15,6 +15,7 @@ export interface ActionCard {
   buttonClass: string;
   cardClass: string;
   link: string;
+  queryParams?: Record<string, string>;
 }
 
 export const ACTION_CARDS: ActionCard[] = [
@@ -60,6 +61,7 @@ export const ACTION_CARDS: ActionCard[] = [
     buttonClass: 'bg-[#f5c400] hover:bg-[#e0b400] text-white',
     cardClass: 'bg-[#fff8dc]',
     link: '/anzeigen',
+    queryParams: { kostenlos: '1' },
   },
 ];
 

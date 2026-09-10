@@ -30,7 +30,7 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
 
       @if (listings().length === 0) {
         <p class="mt-10 rounded-2xl bg-white p-8 text-center text-slate-500 shadow-sm">
-          In dieser Kategorie gibt es gerade keine Anzeigen.
+          {{ search() || kostenlos() ? 'Keine Anzeigen gefunden.' : 'In dieser Kategorie gibt es gerade keine Anzeigen.' }}
         </p>
       } @else {
         <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -105,8 +105,22 @@ export class CategoryListingsComponent {
     initialValue: this.route.snapshot.paramMap.get('slug'),
   });
 
+  readonly search = toSignal(
+    this.route.queryParamMap.pipe(map((params) => (params.get('q') ?? '').trim().toLowerCase())),
+    { initialValue: (this.route.snapshot.queryParamMap.get('q') ?? '').trim().toLowerCase() }
+  );
+
+  readonly kostenlos = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('kostenlos') === '1')),
+    { initialValue: this.route.snapshot.queryParamMap.get('kostenlos') === '1' }
+  );
+
+  readonly pageKey = computed(
+    () => `${this.slug() ?? ''}|${this.search()}|${this.kostenlos()}`
+  );
+
   readonly page = linkedSignal({
-    source: this.slug,
+    source: this.pageKey,
     computation: () => 1,
   });
 
@@ -116,6 +130,13 @@ export class CategoryListingsComponent {
   });
 
   readonly title = computed(() => {
+    if (this.kostenlos()) {
+      return 'Kostenlos';
+    }
+    const q = this.search();
+    if (q) {
+      return `Suche: ${q}`;
+    }
     const slug = this.slug();
     if (!slug || slug === 'weitere') {
       return 'Alle Anzeigen';
@@ -125,14 +146,23 @@ export class CategoryListingsComponent {
 
   readonly listings = computed(() => {
     const slug = this.slug();
-    if (!slug || slug === 'weitere') {
-      return this.marketplace.all();
+    let items =
+      !slug || slug === 'weitere'
+        ? this.marketplace.all()
+        : (() => {
+            const category = categoryBySlug(slug);
+            return category ? this.marketplace.forCategory(category.name) : [];
+          })();
+    if (this.kostenlos()) {
+      items = items.filter((item) => item.price === 0);
     }
-    const category = categoryBySlug(slug);
-    if (!category) {
-      return [];
+    const q = this.search();
+    if (q) {
+      items = items.filter((item) =>
+        `${item.title} ${item.category} ${item.location}`.toLowerCase().includes(q)
+      );
     }
-    return this.marketplace.forCategory(category.name);
+    return items;
   });
 
   readonly totalPages = computed(() =>
