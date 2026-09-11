@@ -1,20 +1,22 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { POPULAR_CATEGORIES } from '../../../landing/data/landing.content';
-import { CREATE_LISTING_LOCATIONS } from '../../../marketplace/data/standort';
+import { StandortPickerComponent } from '../../../marketplace/components/standort-picker/standort-picker.component';
+import { MarketplaceListingsService } from '../../../marketplace/services/marketplace-listings.service';
 import { SellerListingsService } from '../../services/seller-listings.service';
 
 @Component({
   selector: 'app-create-listing',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, StandortPickerComponent],
   template: `
     <div class="mx-auto max-w-xl rounded-2xl bg-white p-6 shadow-sm">
       <a routerLink="/konto/meine-anzeigen" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Meine Anzeigen</a>
-      <h1 class="mt-3 text-2xl font-extrabold text-[#1b3a5f]">Anzeige erstellen</h1>
-      <p class="mt-1 text-sm text-slate-500">Erstelle eine Produktkarte für den Marktplatz.</p>
+      <h1 class="mt-3 text-2xl font-extrabold text-[#1b3a5f]">{{ listingId() ? 'Anzeige bearbeiten' : 'Anzeige erstellen' }}</h1>
+      <p class="mt-1 text-sm text-slate-500">{{ listingId() ? 'Aktualisiere deine Produktkarte.' : 'Erstelle eine Produktkarte für den Marktplatz.' }}</p>
 
       <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div>
@@ -50,28 +52,13 @@ import { SellerListingsService } from '../../services/seller-listings.service';
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-location">Standort</label>
-          <select
-            id="listing-location"
-            formControlName="locationChoice"
-            class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
-          >
-            <option value="">Stadt wählen</option>
-            @for (place of locations; track place.value) {
-              <option [value]="place.value">{{ place.label }}</option>
-            }
-          </select>
+          <app-standort-picker
+            inputId="listing-location"
+            placeholder="Stadt wählen"
+            [value]="form.controls.location.value"
+            (valueChange)="form.controls.location.setValue($event)"
+          />
         </div>
-        @if (locationChoice() === 'andere') {
-          <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-other-city">Stadt</label>
-            <input
-              id="listing-other-city"
-              formControlName="otherCity"
-              placeholder="z. B. Traun"
-              class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
-            />
-          </div>
-        }
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-description">Beschreibung</label>
           <textarea
@@ -133,7 +120,7 @@ import { SellerListingsService } from '../../services/seller-listings.service';
           class="rounded-lg bg-[#2f9e57] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
           [disabled]="form.invalid || photoBusy() || saving()"
         >
-          {{ saving() ? 'Wird gespeichert…' : 'Anzeige speichern' }}
+          {{ saving() ? 'Wird gespeichert…' : listingId() ? 'Speichern' : 'Anzeige speichern' }}
         </button>
         @if (saveError()) {
           <p class="text-xs text-red-600">{{ saveError() }}</p>
@@ -145,10 +132,16 @@ import { SellerListingsService } from '../../services/seller-listings.service';
 export class CreateListingComponent {
   private readonly fb = inject(FormBuilder);
   private readonly listings = inject(SellerListingsService);
+  private readonly marketplace = inject(MarketplaceListingsService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  readonly listingId = toSignal(
+    this.route.paramMap.pipe(map((params) => params.get('id'))),
+    { initialValue: this.route.snapshot.paramMap.get('id') }
+  );
 
   readonly categories = POPULAR_CATEGORIES.filter((item) => item.name !== 'Weitere Kategorien');
-  readonly locations = CREATE_LISTING_LOCATIONS;
   readonly photoPreview = signal<string | null>(null);
   readonly photoName = signal<string | null>(null);
   readonly photoError = signal<string | null>(null);
@@ -160,13 +153,19 @@ export class CreateListingComponent {
     title: ['', Validators.required],
     price: [0, [Validators.required, Validators.min(0)]],
     category: [this.categories[0]?.name ?? '', Validators.required],
-    locationChoice: ['', Validators.required],
-    otherCity: [''],
+    location: ['', Validators.required],
     description: [''],
   });
-  readonly locationChoice = toSignal(this.form.controls.locationChoice.valueChanges, {
-    initialValue: this.form.controls.locationChoice.value,
-  });
+
+  constructor() {
+    effect(() => {
+      const id = this.listingId();
+      if (!id) {
+        return;
+      }
+      untracked(() => void this.prefill(id));
+    });
+  }
 
   async onPhotoSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
@@ -211,23 +210,32 @@ export class CreateListingComponent {
       return;
     }
     const value = this.form.getRawValue();
-    const location =
-      value.locationChoice === 'andere' ? value.otherCity.trim() : value.locationChoice;
+    const location = value.location.trim();
     if (!location) {
-      this.form.controls.otherCity.markAsTouched();
+      this.form.controls.location.markAsTouched();
       this.saveError.set('Bitte gib eine Stadt ein.');
       return;
     }
     this.saving.set(true);
     this.saveError.set(null);
     try {
-      await this.listings.add({
-        title: value.title,
-        price: value.price,
-        imageSrc: this.photoPreview() ?? undefined,
-        category: value.category,
-        location,
-      });
+      if (this.listingId()) {
+        await this.listings.update(this.listingId() as string, {
+          title: value.title,
+          price: value.price,
+          imageSrc: this.photoPreview() ?? undefined,
+          category: value.category,
+          location,
+        });
+      } else {
+        await this.listings.add({
+          title: value.title,
+          price: value.price,
+          imageSrc: this.photoPreview() ?? undefined,
+          category: value.category,
+          location,
+        });
+      }
       void this.router.navigateByUrl('/konto/meine-anzeigen');
     } catch {
       this.saveError.set('Die Anzeige konnte nicht gespeichert werden. Bitte erneut anmelden und nochmal versuchen.');
@@ -268,5 +276,24 @@ export class CreateListingComponent {
     }
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/jpeg', 0.82);
+  }
+
+  private async prefill(id: string): Promise<void> {
+    await this.marketplace.ensure(id);
+    const item = this.marketplace.byId(id);
+    const own = this.listings.listings().find((row) => row.id === id);
+    if (!item && !own) {
+      return;
+    }
+    this.form.patchValue({
+      title: item?.title || own?.title || '',
+      price: item?.price ?? own?.price ?? 0,
+      category: item?.category || own?.category || this.form.controls.category.value,
+                    location: item?.location || own?.location || '',
+    });
+    const image = item?.imageSrc || own?.imageSrc;
+    if (image) {
+      this.photoPreview.set(image);
+    }
   }
 }

@@ -26,7 +26,12 @@ interface AuthSessionDto {
 
 interface MailResultDto {
   mailSent: boolean;
-  verifyUrl?: string | null;
+}
+
+interface VerifyEmailDto {
+  message: string;
+  verified: boolean;
+  email?: string | null;
 }
 
 export class AuthFlowException extends Error {
@@ -104,9 +109,6 @@ export class AuthService {
   async register(email: string, password: string): Promise<void> {
     const result = await this.postMail('/auth/register', { email, password });
     this.rememberMail(email, 'verify', result);
-    if (!localStorage.getItem(RETURN_URL_KEY) && !sessionStorage.getItem(RETURN_URL_KEY)) {
-      this.rememberReturnUrl('/konto');
-    }
   }
 
   async login(email: string, password: string): Promise<void> {
@@ -114,10 +116,20 @@ export class AuthService {
     this.setSession(this.toUser(session));
   }
 
-  async verifyEmail(token: string): Promise<{ message: string; verified: boolean }> {
-    const session = await this.postSession('/auth/verify', { token });
-    this.setSession(this.toUser(session));
-    return { message: 'E-Mail bestätigt.', verified: true };
+  async verifyEmail(token: string): Promise<{ message: string; verified: boolean; email: string | null }> {
+    this.logout();
+    try {
+      const result = await firstValueFrom(
+        this.http.post<VerifyEmailDto>(`${environment.apiUrl}/auth/verify`, { token })
+      );
+      return {
+        message: result.message,
+        verified: result.verified === true,
+        email: result.email?.trim() ? result.email.trim() : null,
+      };
+    } catch (error) {
+      return this.throwAuth(error);
+    }
   }
 
   async requestPasswordReset(email: string): Promise<void> {
@@ -147,24 +159,10 @@ export class AuthService {
     await this.resendVerification(last.email);
   }
 
-  mailLinkFor(email: string, type: AuthMailType): string | null {
-    const last = this.lastMailSignal();
-    if (
-      last &&
-      last.email === this.normalizeEmail(email) &&
-      last.type === type &&
-      last.url
-    ) {
-      return last.url;
-    }
-    return null;
-  }
-
   private rememberMail(email: string, type: AuthMailType, result: MailResultDto): void {
     const mail: LastAuthMail = {
       email: this.normalizeEmail(email),
       type,
-      url: result.verifyUrl ?? '',
       mailSent: result.mailSent === true,
     };
     this.lastMailSignal.set(mail);

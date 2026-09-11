@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { redirectAdminGuard } from './core/guards/redirect-admin.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { AUTH_ROUTES } from './features/auth/auth.routes';
+import { categoryListingsMatch } from './features/marketplace/data/listing-route';
 
 const loadLanding = () =>
   import('./features/landing/pages/landing/landing.component').then((m) => m.LandingComponent);
@@ -19,10 +21,15 @@ const loadListingDetail = () =>
     (m) => m.ListingDetailComponent
   );
 
+const loadCreateListing = () =>
+  import('./features/seller/pages/create-listing/create-listing.component').then(
+    (m) => m.CreateListingComponent
+  );
+
 export const routes: Routes = [
   {
     path: 'anzeigen/artikel/:id',
-    loadComponent: loadListingDetail,
+    redirectTo: '/anzeigen/:id',
   },
   {
     path: 'services',
@@ -41,7 +48,12 @@ export const routes: Routes = [
   },
   {
     path: 'anzeigen/:slug',
+    canMatch: [categoryListingsMatch],
     loadComponent: loadCategoryListings,
+  },
+  {
+    path: 'anzeigen/:id',
+    loadComponent: loadListingDetail,
   },
   {
     path: '',
@@ -52,59 +64,20 @@ export const routes: Routes = [
         pathMatch: 'full',
         loadComponent: loadEmptyOutlet,
       },
-      {
-        path: 'auth/login',
-        loadComponent: () =>
-          import('./features/auth/pages/login/login.component').then((m) => m.LoginComponent),
-      },
-      {
-        path: 'auth/register',
-        loadComponent: () =>
-          import('./features/auth/pages/register/register.component').then(
-            (m) => m.RegisterComponent
-          ),
-      },
-      {
-        path: 'auth/forgot-password',
-        loadComponent: () =>
-          import('./features/auth/pages/forgot-password/forgot-password.component').then(
-            (m) => m.ForgotPasswordComponent
-          ),
-      },
-      {
-        path: 'auth/check-email',
-        loadComponent: () =>
-          import('./features/auth/pages/check-email/check-email.component').then(
-            (m) => m.CheckEmailComponent
-          ),
-      },
-      {
-        path: 'auth/verify',
-        loadComponent: () =>
-          import('./features/auth/pages/verify-email/verify-email.component').then(
-            (m) => m.VerifyEmailComponent
-          ),
-      },
-      {
-        path: 'auth/verify-email',
-        loadComponent: () =>
-          import('./features/auth/pages/verify-email/verify-email.component').then(
-            (m) => m.VerifyEmailComponent
-          ),
-      },
-      {
-        path: 'auth/reset-password',
-        loadComponent: () =>
-          import('./features/auth/pages/reset-password/reset-password.component').then(
-            (m) => m.ResetPasswordComponent
-          ),
-      },
+      ...AUTH_ROUTES,
     ],
   },
+  { path: 'auth/login', redirectTo: '/login' },
+  { path: 'auth/register', redirectTo: '/register' },
+  { path: 'auth/forgot-password', redirectTo: '/forgot-password' },
+  { path: 'auth/check-email', redirectTo: '/check-email' },
+  { path: 'auth/verify', redirectTo: '/verify' },
+  { path: 'auth/verify-email', redirectTo: '/verify-email' },
+  { path: 'auth/reset-password', redirectTo: '/reset-password' },
   {
     path: 'auth',
     pathMatch: 'full',
-    redirectTo: 'auth/login',
+    redirectTo: '/login',
   },
   {
     path: 'konto',
@@ -127,9 +100,31 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'favoriten',
+        loadComponent: () =>
+          import('./features/konto/pages/konto-favorites/konto-favorites.component').then(
+            (m) => m.KontoFavoritesComponent
+          ),
+      },
+      {
+        path: 'meine-anzeigen/neu',
+        loadComponent: loadCreateListing,
+      },
+      {
+        path: 'meine-anzeigen/:id/bearbeiten',
+        loadComponent: loadCreateListing,
+      },
+      {
+        path: 'meine-anzeigen/aktiv',
+        redirectTo: 'meine-anzeigen',
+      },
+      {
         path: 'meine-anzeigen',
         pathMatch: 'full',
-        redirectTo: 'meine-anzeigen/aktiv',
+        loadComponent: () =>
+          import('./features/konto/pages/konto-listings/konto-listings.component').then(
+            (m) => m.KontoListingsComponent
+          ),
       },
       {
         path: 'meine-anzeigen/:filter',
@@ -140,17 +135,7 @@ export const routes: Routes = [
       },
       {
         path: 'anzeige-neu',
-        loadComponent: () =>
-          import('./features/seller/pages/create-listing/create-listing.component').then(
-            (m) => m.CreateListingComponent
-          ),
-      },
-      {
-        path: 'favoriten',
-        loadComponent: () =>
-          import('./features/konto/pages/konto-favorites/konto-favorites.component').then(
-            (m) => m.KontoFavoritesComponent
-          ),
+        redirectTo: 'meine-anzeigen/neu',
       },
       {
         path: 'profil',
@@ -170,7 +155,7 @@ export const routes: Routes = [
   },
   {
     path: 'seller/listings/new',
-    redirectTo: 'konto/anzeige-neu',
+    redirectTo: 'konto/meine-anzeigen/neu',
   },
   {
     path: 'seller/messages',
@@ -178,7 +163,17 @@ export const routes: Routes = [
   },
   {
     path: 'seller',
-    redirectTo: 'konto',
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: '/konto',
+      },
+      {
+        path: '**',
+        redirectTo: '/konto',
+      },
+    ],
   },
   {
     path: 'admin',

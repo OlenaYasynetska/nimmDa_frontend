@@ -17,7 +17,7 @@ import type { MarketplaceListing } from '../../../marketplace/data/marketplace.c
         <ul class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           @for (item of activity.favorites(); track item.id) {
             <li>
-              <a [routerLink]="['/anzeigen/artikel', item.id]" class="flex gap-3 rounded-xl bg-slate-50 p-3 hover:bg-slate-100">
+              <a [routerLink]="['/anzeigen', item.id]" class="flex gap-3 rounded-xl bg-slate-50 p-3 hover:bg-slate-100">
                 <img [src]="item.imageSrc" [alt]="item.title" class="h-16 w-16 rounded-lg object-cover" />
                 <span class="min-w-0">
                   <span class="block truncate font-semibold text-slate-800">{{ item.title }}</span>

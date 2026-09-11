@@ -1,20 +1,22 @@
 export const STANDORT_CITIES = ['Steyr', 'Linz', 'Wels', 'Amstetten'] as const;
 
-export const STANDORT_ANDERE = 'andere' as const;
+export const OBEROESTERREICH_CITIES = [
+  ...STANDORT_CITIES,
+  'Leonding',
+  'Traun',
+  'Enns',
+  'Ansfelden',
+  'Marchtrenk',
+  'Gmunden',
+  'Vöcklabruck',
+  'Perg',
+  'Freistadt',
+  'Ried im Innkreis',
+  'Schärding',
+  'Braunau am Inn',
+] as const;
 
-export type NamedStandort = (typeof STANDORT_CITIES)[number];
 export type StandortValue = string;
-
-export const STANDORT_OPTIONS: { value: StandortValue; label: string }[] = [
-  { value: '', label: 'Standort' },
-  ...STANDORT_CITIES.map((city) => ({ value: city, label: city })),
-  { value: STANDORT_ANDERE, label: 'Andere Stadt' },
-];
-
-export const CREATE_LISTING_LOCATIONS: { value: NamedStandort | typeof STANDORT_ANDERE; label: string }[] = [
-  ...STANDORT_CITIES.map((city) => ({ value: city, label: city })),
-  { value: STANDORT_ANDERE, label: 'Andere Stadt' },
-];
 
 export const UMKREIS_OPTIONS = [5, 10, 25, 50] as const;
 
@@ -44,9 +46,11 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   perg: { lat: 48.2503, lng: 14.6339 },
   freistadt: { lat: 48.5117, lng: 14.5036 },
   ried: { lat: 48.2107, lng: 13.4884 },
+  'ried im innkreis': { lat: 48.2107, lng: 13.4884 },
   'schärding': { lat: 48.4569, lng: 13.4317 },
   schaerding: { lat: 48.4569, lng: 13.4317 },
   braunau: { lat: 48.2563, lng: 13.0434 },
+  'braunau am inn': { lat: 48.2563, lng: 13.0434 },
 };
 
 export function parseStandort(value: string | null | undefined): StandortValue {
@@ -54,35 +58,39 @@ export function parseStandort(value: string | null | undefined): StandortValue {
     return '';
   }
   const trimmed = value.trim();
-  if (!trimmed) {
+  if (!trimmed || trimmed.toLowerCase() === 'andere') {
     return '';
   }
-  if (trimmed.toLowerCase() === STANDORT_ANDERE) {
-    return STANDORT_ANDERE;
-  }
-  const named = STANDORT_CITIES.find((city) => city.toLowerCase() === trimmed.toLowerCase());
-  return named ?? trimmed;
+  const known = knownCities().find((city) => city.toLowerCase() === trimmed.toLowerCase());
+  return known ?? trimmed;
 }
 
 export function standortLabel(value: StandortValue): string {
-  if (!value) {
-    return 'Standort';
-  }
-  if (value === STANDORT_ANDERE) {
-    return 'Andere Stadt';
-  }
-  return value;
+  return value || 'Standort';
 }
 
 export function listingMatchesStandort(location: string, standort: StandortValue): boolean {
   if (!standort) {
     return true;
   }
-  const city = location.trim().toLowerCase();
-  if (standort === STANDORT_ANDERE) {
-    return !STANDORT_CITIES.some((item) => item.toLowerCase() === city);
+  return location.trim().toLowerCase() === standort.trim().toLowerCase();
+}
+
+export function suggestCities(query: string, extra: string[] = []): string[] {
+  const popular = [...STANDORT_CITIES];
+  const rest = uniqueListingLocations([...OBEROESTERREICH_CITIES, ...extra]).filter(
+    (city) => !popular.some((item) => item.toLowerCase() === city.toLowerCase())
+  );
+  const all = [...popular, ...rest];
+  const q = query.trim().toLowerCase();
+  if (!q) {
+    return all;
   }
-  return city === standort.toLowerCase();
+  return all.filter((city) => city.toLowerCase().includes(q));
+}
+
+function knownCities(): string[] {
+  return uniqueListingLocations([...OBEROESTERREICH_CITIES]);
 }
 
 export function hasCoordinates(city: string): boolean {
@@ -94,7 +102,7 @@ export function listingMatchesUmkreis(
   center: StandortValue,
   km: number
 ): boolean {
-  if (!center || center === STANDORT_ANDERE || !km) {
+  if (!center || !km) {
     return true;
   }
   if (location.trim().toLowerCase() === center.trim().toLowerCase()) {
@@ -105,7 +113,7 @@ export function listingMatchesUmkreis(
 }
 
 export function listingDistanceKm(location: string, center: StandortValue): number | null {
-  if (!center || center === STANDORT_ANDERE) {
+  if (!center) {
     return null;
   }
   if (location.trim().toLowerCase() === center.trim().toLowerCase()) {

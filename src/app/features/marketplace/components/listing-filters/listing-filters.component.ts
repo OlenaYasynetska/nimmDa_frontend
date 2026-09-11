@@ -16,13 +16,14 @@ import {
   parseStandort,
   uniqueListingLocations,
 } from '../../data/standort';
+import { StandortPickerComponent } from '../standort-picker/standort-picker.component';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 import { StandortService } from '../../services/standort.service';
 
 @Component({
   selector: 'app-listing-filters',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, StandortPickerComponent],
   template: `
     <section class="mt-6 rounded-2xl bg-white p-4 shadow-sm md:p-5">
       <form class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" (ngSubmit)="applySearch()">
@@ -40,20 +41,14 @@ import { StandortService } from '../../services/standort.service';
 
         <label class="block">
           <span class="mb-1.5 block text-sm font-medium text-slate-600">Standort</span>
-          <select
-            name="ort"
-            class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
-            [ngModel]="ort()"
-            (ngModelChange)="setOrt($event)"
-          >
-            <option value="">Alle Orte</option>
-            @for (city of cities(); track city) {
-              <option [value]="city">{{ city }}</option>
-            }
-            @if (ort() === 'andere') {
-              <option value="andere">Andere Stadt</option>
-            }
-          </select>
+          <app-standort-picker
+            [value]="ort()"
+            [allowEmpty]="true"
+            emptyLabel="Alle Orte"
+            placeholder="Stadt wählen"
+            [extraCities]="cities()"
+            (valueChange)="setOrt($event)"
+          />
         </label>
 
         <fieldset class="block">
@@ -114,6 +109,7 @@ import { StandortService } from '../../services/standort.service';
               placeholder="bis"
               class="min-w-0 flex-1 rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
               (change)="applyPrice()"
+            />
           </div>
         </div>
 
@@ -163,9 +159,7 @@ export class ListingFiltersComponent {
     uniqueListingLocations(this.marketplace.all().map((item) => item.location))
   );
 
-  readonly ort = computed(
-    () => parseStandort(this.query()?.get('ort')) || this.standortService.selected()
-  );
+  readonly ort = computed(() => parseStandort(this.query()?.get('ort')));
 
   readonly umkreis = computed(() => {
     const km = Number(this.query()?.get('km'));
@@ -187,7 +181,7 @@ export class ListingFiltersComponent {
 
   readonly canUseUmkreis = computed(() => {
     const city = this.ort();
-    return !!city && city !== 'andere' && hasCoordinates(city);
+    return !!city && hasCoordinates(city);
   });
 
   constructor() {

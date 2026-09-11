@@ -67,7 +67,7 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
         </app-button>
       </form>
       <p class="mt-4 text-center text-sm">
-        <a routerLink="/auth/login" class="text-primary hover:underline">Zur Anmeldung</a>
+        <a routerLink="/login" class="text-primary hover:underline">Zur Anmeldung</a>
       </p>
     </app-auth-modal>
   `,
@@ -109,7 +109,7 @@ export class ResetPasswordComponent implements OnInit {
     this.error.set(null);
     try {
       await this.auth.resetPassword(this.token, this.form.controls.password.value);
-      await this.router.navigateByUrl('/auth/login');
+      await this.router.navigateByUrl('/login');
     } catch (error) {
       const code = error instanceof AuthFlowException ? error.code : 'expired';
       this.error.set(AUTH_ERRORS[code]);

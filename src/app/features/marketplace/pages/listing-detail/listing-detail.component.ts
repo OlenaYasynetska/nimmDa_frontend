@@ -7,6 +7,7 @@ import { BuyerActivityService } from '../../../buyer/services/buyer-activity.ser
 import { LandingFooterComponent } from '../../../landing/components/landing-footer/landing-footer.component';
 import { LandingHeaderComponent } from '../../../landing/components/landing-header/landing-header.component';
 import { LandingIconComponent } from '../../../landing/components/landing-icon/landing-icon.component';
+import { listingDetailUrl } from '../../data/listing-route';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 
 @Component({
@@ -37,6 +38,12 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
             <div class="mt-6 flex flex-wrap items-center gap-3">
               @if (ownListing()) {
                 <p class="text-sm font-medium text-slate-500">Das ist deine Anzeige.</p>
+                <a
+                  [routerLink]="['/konto/meine-anzeigen', item.id, 'bearbeiten']"
+                  class="inline-flex items-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
+                >
+                  Bearbeiten
+                </a>
               } @else {
                 <button
                   type="button"
@@ -195,10 +202,10 @@ export class ListingDetailComponent {
     const listingId = this.listingId();
     const extra = intent === 'favorite' ? 'favorite=1' : 'contact=1';
     const returnUrl = listingId
-      ? `/anzeigen/artikel/${encodeURIComponent(listingId)}?${extra}`
+      ? listingDetailUrl(listingId, extra)
       : this.router.url;
     this.auth.rememberReturnUrl(returnUrl);
-    void this.router.navigate(['/auth/login'], {
+    void this.router.navigate(['/login'], {
       queryParams: { intent, returnUrl },
     });
   }

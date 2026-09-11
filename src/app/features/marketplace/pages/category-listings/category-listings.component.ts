@@ -18,7 +18,6 @@ import {
 } from '../../data/standort';
 import { useListingPageSize } from '../../hooks/use-listing-page-size.hook';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
-import { StandortService } from '../../services/standort.service';
 import type { MarketplaceListing } from '../../data/marketplace.content';
 
 const SERVICES_CATEGORY = 'Dienstleistungen';
@@ -52,7 +51,7 @@ const SERVICES_CATEGORY = 'Dienstleistungen';
         <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             @for (item of pagedListings(); track item.id) {
               <li class="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                <a [routerLink]="['/anzeigen/artikel', item.id]" class="block cursor-pointer text-left">
+                <a [routerLink]="['/anzeigen', item.id]" class="block cursor-pointer text-left">
                   <img [src]="item.imageSrc" [alt]="item.title" class="h-44 w-full bg-slate-100 object-cover" />
                   <div class="p-4">
                     <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
@@ -113,7 +112,6 @@ const SERVICES_CATEGORY = 'Dienstleistungen';
 export class CategoryListingsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly marketplace = inject(MarketplaceListingsService);
-  private readonly standortService = inject(StandortService);
   private readonly viewport = inject(ViewportScroller);
 
   readonly pageSize = useListingPageSize();
@@ -148,7 +146,7 @@ export class CategoryListingsComponent {
     { initialValue: parseStandort(this.route.snapshot.queryParamMap.get('ort')) }
   );
 
-  readonly standort = computed(() => this.ortParam() || this.standortService.selected());
+  readonly standort = computed(() => this.ortParam());
 
   readonly umkreis = toSignal(
     this.route.queryParamMap.pipe(map((params) => parseUmkreis(params.get('km')))),
@@ -227,9 +225,6 @@ export class CategoryListingsComponent {
     }
     if (!place) {
       return count;
-    }
-    if (place === 'andere') {
-      return `${count} in anderen Städten`;
     }
     return `${count} in ${standortLabel(place)}`;
   });

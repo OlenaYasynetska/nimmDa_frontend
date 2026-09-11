@@ -5,7 +5,9 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { listingFilterQuery } from '../../../marketplace/data/listing-query';
-import { STANDORT_OPTIONS, hasCoordinates, parseStandort, type StandortValue } from '../../../marketplace/data/standort';
+import { categoryBySlug } from '../../../landing/data/landing.content';
+import { StandortPickerComponent } from '../../../marketplace/components/standort-picker/standort-picker.component';
+import { hasCoordinates, parseStandort, type StandortValue } from '../../../marketplace/data/standort';
 import { StandortService } from '../../../marketplace/services/standort.service';
 import { SellerMessagesService } from '../../../seller/services/seller-messages.service';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
@@ -14,7 +16,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 @Component({
   selector: 'app-landing-header',
   standalone: true,
-  imports: [RouterLink, FormsModule, BrandMarkComponent, LandingIconComponent],
+  imports: [RouterLink, FormsModule, BrandMarkComponent, LandingIconComponent, StandortPickerComponent],
   host: {
     '(document:click)': 'onDocumentClick($event)',
   },
@@ -69,36 +71,13 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           </button>
         </form>
 
-        <div class="relative">
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1b3a5f]"
-            (click)="toggleStandort($event)"
-            [attr.aria-expanded]="standortOpen()"
-          >
-            <app-landing-icon name="pin" svgClass="h-4 w-4" />
-            <span>{{ standort.label() }}</span>
-            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-          @if (standortOpen()) {
-            <div class="absolute right-0 z-40 mt-1 w-48 rounded-xl border border-slate-100 bg-white py-1 shadow-lg">
-              @for (option of standortOptions; track option.label) {
-                <button
-                  type="button"
-                  class="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50"
-                  [class.font-semibold]="standort.selected() === option.value"
-                  [class.text-[#1b3a5f]]="standort.selected() === option.value"
-                  [class.text-slate-700]="standort.selected() !== option.value"
-                  (click)="chooseStandort(option.value)"
-                >
-                  {{ option.label }}
-                </button>
-              }
-            </div>
-          }
-        </div>
+        <app-standort-picker
+          variant="header"
+          [value]="standort.selected()"
+          [allowEmpty]="true"
+          emptyLabel="Alle Orte"
+          (valueChange)="chooseStandort($event)"
+        />
 
         <div class="ml-auto flex items-center gap-1 sm:gap-2">
           <button
@@ -205,7 +184,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
             </div>
           } @else {
             <a
-              routerLink="/auth/login"
+              routerLink="/login"
               class="inline-flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-slate-700 hover:text-[#1b3a5f]"
             >
               Anmelden
@@ -220,12 +199,10 @@ export class LandingHeaderComponent {
   readonly auth = inject(AuthService);
   readonly messages = inject(SellerMessagesService);
   readonly standort = inject(StandortService);
-  readonly standortOptions = STANDORT_OPTIONS;
   private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
 
   readonly menuOpen = signal(false);
-  readonly standortOpen = signal(false);
   query = '';
 
   private readonly url = toSignal(
@@ -266,7 +243,6 @@ export class LandingHeaderComponent {
   }
 
   search(): void {
-    this.standortOpen.set(false);
     const q = this.query.trim();
     const current = this.router.parseUrl(this.router.url).queryParams;
     void this.router.navigate(['/anzeigen'], {
@@ -280,7 +256,6 @@ export class LandingHeaderComponent {
 
   chooseStandort(value: StandortValue): void {
     this.standort.set(value);
-    this.standortOpen.set(false);
     const path = this.listingsPath();
     if (path.length === 0) {
       return;
@@ -298,7 +273,6 @@ export class LandingHeaderComponent {
   }
 
   goKonto(path: string): void {
-    this.standortOpen.set(false);
     if (this.auth.isAdmin()) {
       void this.router.navigateByUrl('/admin');
       return;
@@ -307,19 +281,12 @@ export class LandingHeaderComponent {
       void this.router.navigateByUrl(path);
       return;
     }
-    void this.router.navigate(['/auth/login'], { queryParams: { returnUrl: path } });
+    void this.router.navigate(['/login'], { queryParams: { returnUrl: path } });
   }
 
   toggleMenu(event: Event): void {
     event.stopPropagation();
-    this.standortOpen.set(false);
     this.menuOpen.update((open) => !open);
-  }
-
-  toggleStandort(event: Event): void {
-    event.stopPropagation();
-    this.menuOpen.set(false);
-    this.standortOpen.update((open) => !open);
   }
 
   closeMenu(): void {
@@ -329,7 +296,6 @@ export class LandingHeaderComponent {
   onDocumentClick(event: Event): void {
     if (!this.host.nativeElement.contains(event.target as Node)) {
       this.closeMenu();
-      this.standortOpen.set(false);
     }
   }
 
@@ -341,9 +307,13 @@ export class LandingHeaderComponent {
 
   private isListingsView(): boolean {
     const path = this.router.url.split('?')[0];
-    return (
-      path.startsWith('/anzeigen') || path.startsWith('/services') || path.startsWith('/kostenlos')
-    );
+    if (path.startsWith('/services') || path.startsWith('/kostenlos') || path === '/anzeigen') {
+      return true;
+    }
+    if (path.startsWith('/anzeigen/')) {
+      return !!categoryBySlug(path.split('/')[2] ?? '');
+    }
+    return false;
   }
 
   private listingsPath(): string[] {
@@ -354,14 +324,12 @@ export class LandingHeaderComponent {
     if (path.startsWith('/kostenlos')) {
       return ['/kostenlos'];
     }
-    if (path.startsWith('/anzeigen/artikel')) {
-      return ['/anzeigen'];
+    if (path.startsWith('/anzeigen/')) {
+      const slug = path.split('/')[2] ?? '';
+      return categoryBySlug(slug) ? ['/anzeigen', slug] : ['/anzeigen'];
     }
     if (path.startsWith('/anzeigen')) {
-      return path
-        .split('/')
-        .filter(Boolean)
-        .map((segment, index) => (index === 0 ? `/${segment}` : segment));
+      return ['/anzeigen'];
     }
     if (path === '/' || path === '') {
       return ['/anzeigen'];
@@ -372,9 +340,8 @@ export class LandingHeaderComponent {
   private syncFromUrl(url: string): void {
     const params = this.router.parseUrl(url).queryParams;
     this.query = params['q'] ?? '';
-    const ort = parseStandort(params['ort']);
-    if (params['ort']) {
-      this.standort.set(ort);
+    if (this.isListingsView()) {
+      this.standort.set(parseStandort(params['ort']));
     }
   }
 }

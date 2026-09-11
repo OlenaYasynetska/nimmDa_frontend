@@ -69,6 +69,6 @@ export class AdminLayoutComponent {
 
   logout(): void {
     this.auth.logout();
-    void this.router.navigateByUrl('/auth/login');
+    void this.router.navigateByUrl('/login');
   }
 }

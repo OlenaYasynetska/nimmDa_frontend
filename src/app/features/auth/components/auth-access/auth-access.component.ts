@@ -102,7 +102,7 @@ type AccountStatus = 'new' | 'existing';
         </app-button>
       </form>
       <p class="mt-4 text-center text-sm">
-        <a routerLink="/auth/forgot-password" class="text-primary hover:underline">Passwort vergessen?</a>
+        <a routerLink="/forgot-password" class="text-primary hover:underline">Passwort vergessen?</a>
       </p>
     </app-auth-modal>
   `,
@@ -161,7 +161,7 @@ export class AuthAccessComponent implements OnInit {
     try {
       if (this.status() === 'new') {
         await this.auth.register(email, password);
-        await this.router.navigate(['/auth/check-email'], {
+        await this.router.navigate(['/check-email'], {
           queryParams: { email, type: 'verify' },
         });
         return;
@@ -181,7 +181,7 @@ export class AuthAccessComponent implements OnInit {
         return;
       }
       if (error instanceof AuthFlowException && error.code === 'unverified') {
-        await this.router.navigate(['/auth/check-email'], {
+        await this.router.navigate(['/check-email'], {
           queryParams: { email, type: 'verify' },
         });
         return;

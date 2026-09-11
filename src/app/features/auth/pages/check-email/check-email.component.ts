@@ -22,14 +22,6 @@ import { AUTH_ERRORS, checkEmailCopy } from '../../data/auth.content';
       @if (email()) {
         <p class="mb-6 text-center text-sm font-medium text-slate-700">{{ email() }}</p>
       }
-      @if (mailUrl()) {
-        <a
-          [href]="mailUrl()"
-          class="mb-3 inline-flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2 font-medium text-white hover:opacity-90"
-        >
-          {{ copy().action }}
-        </a>
-      }
       <button
         type="button"
         class="w-full text-center text-sm text-primary hover:underline disabled:opacity-50"
@@ -45,7 +37,7 @@ import { AUTH_ERRORS, checkEmailCopy } from '../../data/auth.content';
         <p class="mt-2 text-center text-sm text-red-600">{{ error() }}</p>
       }
       <p class="mt-4 text-center text-sm">
-        <a routerLink="/auth/login" class="text-primary hover:underline">Zur Anmeldung</a>
+        <a routerLink="/login" class="text-primary hover:underline">Zur Anmeldung</a>
       </p>
     </app-auth-modal>
   `,
@@ -74,7 +66,6 @@ export class CheckEmailComponent {
   readonly email = computed(() => this.params().email);
   readonly type = computed(() => this.params().type);
   readonly copy = computed(() => checkEmailCopy(this.type()));
-  readonly mailUrl = computed(() => this.auth.mailLinkFor(this.email(), this.type()));
   readonly busy = signal(false);
   readonly resent = signal(false);
   readonly error = signal<string | null>(null);

@@ -8,7 +8,7 @@ export function roleGuard(allowedRoles: string[]): CanActivateFn {
     const router = inject(Router);
     const user = auth.currentUser();
     if (!user) {
-      void router.navigate(['/auth/login']);
+      void router.navigate(['/login']);
       return false;
     }
     if (user.role && allowedRoles.includes(user.role)) return true;

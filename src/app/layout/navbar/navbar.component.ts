@@ -17,7 +17,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
           <span class="text-sm text-gray-600">{{ user.firstName }} {{ user.lastName }}</span>
           <app-button (click)="auth.logout()">Logout</app-button>
         } @else {
-          <a routerLink="/auth/login" class="text-sm font-medium text-primary">Login</a>
+          <a routerLink="/login" class="text-sm font-medium text-primary">Login</a>
         }
       </div>
     </header>

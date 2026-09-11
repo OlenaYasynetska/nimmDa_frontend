@@ -33,7 +33,7 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
         <app-button type="submit" [disabled]="form.invalid || busy()">Link senden</app-button>
       </form>
       <p class="mt-4 text-center text-sm">
-        <a routerLink="/auth/login" class="text-primary hover:underline">Zurück zur Anmeldung</a>
+        <a routerLink="/login" class="text-primary hover:underline">Zurück zur Anmeldung</a>
       </p>
     </app-auth-modal>
   `,
@@ -57,7 +57,7 @@ export class ForgotPasswordComponent {
     try {
       const email = this.form.controls.email.value;
       await this.auth.requestPasswordReset(email);
-      await this.router.navigate(['/auth/check-email'], {
+        await this.router.navigate(['/check-email'], {
         queryParams: { email, type: 'reset' },
       });
     } finally {

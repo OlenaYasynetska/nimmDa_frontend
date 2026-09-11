@@ -15,6 +15,7 @@ interface ListingDto {
   status: string;
   imageSrc: string;
   category: string;
+  location?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -55,7 +56,7 @@ export class SellerListingsService {
   async refresh(): Promise<void> {
     try {
       const rows = await firstValueFrom(
-        this.http.get<ListingDto[]>(`${environment.apiUrl}/listings/mine`)
+        this.http.get<ListingDto[]>(`${environment.apiUrl}/my/listings`)
       );
       this.listingsSignal.set(rows.map(toSellerListing));
     } catch {
@@ -83,6 +84,35 @@ export class SellerListingsService {
     await this.marketplace.refresh();
   }
 
+  async update(
+    id: string,
+    input: {
+      title: string;
+      price: number;
+      imageSrc?: string;
+      category?: string;
+      location?: string;
+    }
+  ): Promise<void> {
+    await firstValueFrom(
+      this.http.put(`${environment.apiUrl}/listings/${id}`, {
+        title: input.title,
+        price: input.price,
+        category: input.category || 'Möbel & Haushalt',
+        location: input.location,
+        imageSrc: input.imageSrc,
+      })
+    );
+    await this.refresh();
+    await this.marketplace.refresh();
+  }
+
+  async remove(id: string): Promise<void> {
+    await firstValueFrom(this.http.delete(`${environment.apiUrl}/listings/${id}`));
+    this.listingsSignal.update((items) => items.filter((item) => item.id !== id));
+    await this.marketplace.refresh();
+  }
+
   async setStatus(id: string, status: ListingStatus): Promise<void> {
     const row = await firstValueFrom(
       this.http.patch<ListingDto>(`${environment.apiUrl}/listings/${id}`, { status })
@@ -103,5 +133,6 @@ function toSellerListing(row: ListingDto): SellerListing {
     status: row.status === 'PAUSED' ? 'pausiert' : 'aktiv',
     imageSrc: row.imageSrc,
     category: row.category,
+    location: row.location,
   };
 }

@@ -11,17 +11,15 @@ export const AUTH_ERRORS: Record<AuthFlowError, string> = {
   network: 'Keine Verbindung zum Server. Seite neu laden und nochmal versuchen.',
 };
 
-export function checkEmailCopy(type: AuthMailType): { title: string; body: string; action: string } {
+export function checkEmailCopy(type: AuthMailType): { title: string; body: string } {
   if (type === 'reset') {
     return {
       title: 'E-Mail prüfen',
-      body: 'Wenn ein Konto existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet.',
-      action: 'Link aus der E-Mail öffnen',
+      body: 'Wenn ein Konto existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet. Bitte prüfe Posteingang und Spam.',
     };
   }
   return {
     title: 'E-Mail bestätigen',
-      body: 'Wir haben dir einen Bestätigungslink an deine E-Mail gesendet. Bitte prüfe Posteingang und Spam. Nach dem Klick auf den Link kannst du dich anmelden.',
-    action: 'Bestätigungslink öffnen',
+    body: 'Wir haben dir einen Bestätigungslink an deine E-Mail gesendet. Bitte prüfe Posteingang und Spam. Nach dem Klick auf den Link kannst du dich anmelden.',
   };
 }
