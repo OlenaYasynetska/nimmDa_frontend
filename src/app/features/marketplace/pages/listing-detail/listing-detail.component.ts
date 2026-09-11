@@ -19,7 +19,7 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
   },
   template: `
     <app-landing-header />
-    <main class="container px-4 py-8 md:px-8">
+    <main class="container px-4 py-5 md:px-8 md:py-8">
       <a routerLink="/anzeigen" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Alle Anzeigen</a>
       @if (listing(); as item) {
         <article class="mt-5 overflow-hidden rounded-2xl bg-white shadow-sm md:grid md:grid-cols-2">
@@ -35,19 +35,19 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
               }
             </p>
             <p class="mt-2 text-sm text-slate-500">{{ item.location }} · Oberösterreich</p>
-            <div class="mt-6 flex flex-wrap items-center gap-3">
+            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               @if (ownListing()) {
                 <p class="text-sm font-medium text-slate-500">Das ist deine Anzeige.</p>
                 <a
                   [routerLink]="['/konto/meine-anzeigen', item.id, 'bearbeiten']"
-                  class="inline-flex items-center rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
+                  class="inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 sm:w-auto"
                 >
                   Bearbeiten
                 </a>
               } @else {
                 <button
                   type="button"
-                  class="inline-flex items-center gap-2 rounded-lg bg-[#2f9e57] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
+                  class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#2f9e57] px-4 py-3 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50 sm:w-auto"
                   (click)="contact()"
                   [disabled]="contacting()"
                 >
@@ -57,7 +57,7 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
               }
               <button
                 type="button"
-                class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold ring-1 hover:bg-slate-50 disabled:opacity-50"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold ring-1 hover:bg-slate-50 disabled:opacity-50 sm:w-auto"
                 [class]="favorited() ? 'text-[#e07a9a] ring-[#e07a9a]/40' : 'text-slate-700 ring-slate-200'"
                 (click)="toggleFavorite()"
                 [disabled]="favoriting()"

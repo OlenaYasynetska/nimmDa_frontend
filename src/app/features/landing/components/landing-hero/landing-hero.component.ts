@@ -8,7 +8,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
   imports: [LandingIconComponent],
   template: `
     <section id="standort" class="relative overflow-hidden bg-white">
-      <div class="relative h-[28.8rem] sm:h-[34.2rem] lg:h-[39.6rem]">
+      <div class="relative h-[22rem] sm:h-[34.2rem] lg:h-[39.6rem]">
         <img
           src="/assets/images/Hero.png"
           alt="Linz und die Donau – Blick über Oberösterreich"
@@ -25,7 +25,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <div class="container px-4 pt-8 md:px-8 md:pt-10">
             <div class="max-w-xl">
               <h1
-                class="text-4xl font-extrabold leading-[1.12] tracking-tight text-[#1b3a5f] md:text-5xl lg:text-[3.35rem]"
+                class="text-[1.85rem] font-extrabold leading-[1.12] tracking-tight text-[#1b3a5f] sm:text-4xl md:text-5xl lg:text-[3.35rem]"
               >
                 Was du brauchst.<br />Gleich nebenan.
               </h1>

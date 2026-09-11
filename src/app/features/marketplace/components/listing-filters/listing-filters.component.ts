@@ -27,7 +27,7 @@ import { StandortService } from '../../services/standort.service';
   template: `
     <section class="mt-6 rounded-2xl bg-white p-4 shadow-sm md:p-5">
       <form class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" (ngSubmit)="applySearch()">
-        <label class="block">
+        <label class="hidden md:block">
           <span class="mb-1.5 block text-sm font-medium text-slate-600">Suche</span>
           <input
             type="search"

@@ -35,7 +35,10 @@ export class SellerMessagesService {
   );
   readonly selectedThread = computed(() => {
     const id = this.selectedIdSignal();
-    return this.threadsSignal().find((thread) => thread.id === id) ?? this.threadsSignal()[0] ?? null;
+    if (!id) {
+      return null;
+    }
+    return this.threadsSignal().find((thread) => thread.id === id) ?? null;
   });
 
   constructor() {
@@ -59,16 +62,19 @@ export class SellerMessagesService {
       );
       const threads = rows.map(toThread);
       this.threadsSignal.set(threads);
-      if (!this.selectedIdSignal() && threads[0]) {
-        this.selectedIdSignal.set(threads[0].id);
+      if (this.selectedIdSignal() && !threads.some((thread) => thread.id === this.selectedIdSignal())) {
+        this.selectedIdSignal.set(null);
       }
     } catch {
       this.threadsSignal.set([]);
     }
   }
 
-  select(id: string): void {
+  select(id: string | null): void {
     this.selectedIdSignal.set(id);
+    if (!id) {
+      return;
+    }
     this.threadsSignal.update((threads) =>
       threads.map((thread) => (thread.id === id ? { ...thread, unread: false } : thread))
     );

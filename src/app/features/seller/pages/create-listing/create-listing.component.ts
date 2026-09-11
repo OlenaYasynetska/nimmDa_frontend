@@ -13,7 +13,7 @@ import { SellerListingsService } from '../../services/seller-listings.service';
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, StandortPickerComponent],
   template: `
-    <div class="mx-auto max-w-xl rounded-2xl bg-white p-6 shadow-sm">
+    <div class="mx-auto max-w-xl rounded-2xl bg-white p-4 shadow-sm sm:p-6">
       <a routerLink="/konto/meine-anzeigen" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Meine Anzeigen</a>
       <h1 class="mt-3 text-2xl font-extrabold text-[#1b3a5f]">{{ listingId() ? 'Anzeige bearbeiten' : 'Anzeige erstellen' }}</h1>
       <p class="mt-1 text-sm text-slate-500">{{ listingId() ? 'Aktualisiere deine Produktkarte.' : 'Erstelle eine Produktkarte für den Marktplatz.' }}</p>
@@ -117,7 +117,7 @@ import { SellerListingsService } from '../../services/seller-listings.service';
         </div>
         <button
           type="submit"
-          class="rounded-lg bg-[#2f9e57] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
+          class="w-full rounded-lg bg-[#2f9e57] px-4 py-3 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50 sm:w-auto"
           [disabled]="form.invalid || photoBusy() || saving()"
         >
           {{ saving() ? 'Wird gespeichert…' : listingId() ? 'Speichern' : 'Anzeige speichern' }}

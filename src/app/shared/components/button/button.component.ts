@@ -28,7 +28,7 @@ export class ButtonComponent {
   loading = input(false);
 
   private base =
-    'inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 font-medium text-white transition hover:opacity-90 disabled:opacity-50';
+    'inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-50';
   buttonClass = input(this.base);
 
   click = output<MouseEvent>();

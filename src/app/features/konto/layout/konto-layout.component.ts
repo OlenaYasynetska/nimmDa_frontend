@@ -13,14 +13,14 @@ import { KONTO_NAV } from '../data/konto.nav';
   },
   template: `
     <app-landing-header />
-    <main class="container px-4 py-8 md:px-8">
-      <nav class="mb-8 flex flex-wrap gap-2 text-sm">
+    <main class="container px-4 py-6 md:px-8 md:py-8">
+      <nav class="-mx-1 mb-6 flex gap-2 overflow-x-auto px-1 pb-1 text-sm md:mb-8 md:flex-wrap">
         @for (item of nav; track item.path) {
           <a
             [routerLink]="item.path"
             routerLinkActive="bg-[#1b3a5f] text-white"
             [routerLinkActiveOptions]="{ exact: !!item.exact }"
-            class="rounded-full bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200"
+            class="shrink-0 rounded-full bg-white px-3 py-1.5 font-medium text-slate-700 ring-1 ring-slate-200"
           >
             {{ item.label }}
           </a>

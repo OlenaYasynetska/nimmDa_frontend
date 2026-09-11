@@ -31,7 +31,7 @@ const SERVICES_CATEGORY = 'Dienstleistungen';
   },
   template: `
     <app-landing-header />
-    <main class="container px-4 py-8 md:px-8">
+    <main class="container px-4 py-5 md:px-8 md:py-8">
       <a routerLink="/" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Zur Startseite</a>
 
       <div class="mt-4 flex flex-wrap items-end justify-between gap-3">

@@ -35,6 +35,11 @@ import { Component, input } from '@angular/core';
           <path stroke-linecap="round" d="M12 10c-2-3-5-3-5-1.5S9 10 12 10c2-3 5-3 5-1.5S15 10 12 10z" />
         </svg>
       }
+      @case ('plus') {
+        <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" d="M12 5v14M5 12h14" />
+        </svg>
+      }
       @case ('search') {
         <svg [attr.class]="svgClass()" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
           <circle cx="11" cy="11" r="6" />

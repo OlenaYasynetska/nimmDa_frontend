@@ -14,13 +14,14 @@ import { LandingIconComponent } from '../../../landing/components/landing-icon/l
     @if (variant() === 'header') {
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1b3a5f]"
+        class="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1b3a5f]"
         (click)="toggle($event)"
         [attr.aria-expanded]="open()"
+        [attr.aria-label]="'Standort: ' + displayLabel()"
       >
-        <app-landing-icon name="pin" svgClass="h-4 w-4" />
-        <span>{{ displayLabel() }}</span>
-        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <app-landing-icon name="pin" svgClass="h-5 w-5 md:h-4 md:w-4" />
+        <span class="hidden max-w-[8rem] truncate md:inline">{{ displayLabel() }}</span>
+        <svg class="hidden h-3.5 w-3.5 md:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
         </svg>
       </button>
@@ -40,7 +41,7 @@ import { LandingIconComponent } from '../../../landing/components/landing-icon/l
 
     @if (open()) {
       <div
-        class="absolute z-40 mt-1 max-h-72 w-full min-w-[14rem] overflow-auto rounded-xl border border-slate-100 bg-white py-1 shadow-lg"
+        class="absolute z-40 mt-1 max-h-72 w-[min(18rem,calc(100vw-1.5rem))] overflow-auto rounded-xl border border-slate-100 bg-white py-1 shadow-lg"
         [class.right-0]="variant() === 'header'"
         [class.left-0]="variant() !== 'header'"
       >

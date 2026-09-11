@@ -18,7 +18,10 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
         <p class="mt-3 text-sm text-red-600">{{ startError() }}</p>
       }
       <div class="mt-6 grid overflow-hidden rounded-2xl bg-white shadow-sm md:grid-cols-[16rem_1fr]">
-        <ul class="divide-y divide-slate-100 border-b border-slate-100 md:border-b-0 md:border-r">
+        <ul
+          class="divide-y divide-slate-100 border-b border-slate-100 md:border-b-0 md:border-r"
+          [class.max-md:hidden]="!!messages.selectedId()"
+        >
           @if (messages.threads().length === 0 && !starting()) {
             <li class="px-4 py-6 text-sm text-slate-400">Noch keine Nachrichten.</li>
           }
@@ -50,8 +53,15 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
         </ul>
 
         @if (messages.selectedThread(); as thread) {
-          <div class="flex min-h-[28rem] flex-col">
+          <div class="flex min-h-[24rem] flex-col md:min-h-[28rem]">
             <div class="border-b border-slate-100 px-4 py-3">
+              <button
+                type="button"
+                class="mb-2 text-sm font-medium text-[#2f6fb2] md:hidden"
+                (click)="messages.select(null)"
+              >
+                ← Unterhaltungen
+              </button>
               <p class="font-semibold text-slate-800">{{ thread.participant }}</p>
               <p class="text-xs text-slate-500">{{ thread.productTitle }}</p>
             </div>
@@ -77,7 +87,7 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
               />
               <button
                 type="submit"
-                class="rounded-lg bg-[#2f9e57] px-4 py-2 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
+                class="rounded-lg bg-[#2f9e57] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#278a4b] disabled:opacity-50"
                 [disabled]="!draft.trim()"
               >
                 Senden
@@ -85,8 +95,12 @@ import { SellerMessagesService } from '../../services/seller-messages.service';
             </form>
           </div>
         } @else if (starting()) {
-          <div class="flex min-h-[28rem] items-center p-4 text-sm text-slate-500">
+          <div class="flex min-h-[16rem] items-center p-4 text-sm text-slate-500 md:min-h-[28rem]">
             Chat wird geöffnet…
+          </div>
+        } @else {
+          <div class="hidden items-center p-6 text-sm text-slate-400 md:flex md:min-h-[28rem]">
+            Wähle eine Unterhaltung.
           </div>
         }
       </div>

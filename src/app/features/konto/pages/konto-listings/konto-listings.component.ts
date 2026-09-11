@@ -10,7 +10,7 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   template: `
-    <div class="rounded-2xl bg-white p-5 shadow-sm">
+    <div class="rounded-2xl bg-white p-4 shadow-sm sm:p-5">
       <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 class="text-lg font-bold text-slate-800">Meine Anzeigen</h2>
@@ -18,9 +18,9 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
         </div>
         <a
           routerLink="/konto/meine-anzeigen/neu"
-          class="text-sm font-medium text-[#2f6fb2] hover:underline"
+          class="inline-flex w-full items-center justify-center rounded-lg bg-[#f5c400] px-4 py-2.5 text-sm font-bold text-[#1b3a5f] hover:bg-[#e6b700] sm:w-auto"
         >
-          Neue Anzeige
+          Anzeige aufgeben
         </a>
       </div>
 
@@ -46,7 +46,7 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
       } @else {
         <ul class="divide-y divide-slate-100">
           @for (item of visible(); track item.id) {
-            <li class="flex items-center gap-3 py-3">
+            <li class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center">
               <a [routerLink]="['/anzeigen', item.id]" class="flex min-w-0 flex-1 items-center gap-3">
                 <img [src]="item.imageSrc" [alt]="item.title" class="h-14 w-14 rounded-lg bg-slate-100 object-cover" />
                 <div class="min-w-0 flex-1">
@@ -54,6 +54,7 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
                   <p class="text-sm text-slate-500">€ {{ item.price }} · {{ item.views }} Aufrufe</p>
                 </div>
               </a>
+              <div class="flex flex-wrap gap-2">
               <a
                 [routerLink]="['/konto/meine-anzeigen', item.id, 'bearbeiten']"
                 class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -74,6 +75,7 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
               >
                 Löschen
               </button>
+              </div>
             </li>
           }
         </ul>

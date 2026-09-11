@@ -16,3 +16,9 @@ body {
   color: #0f172a;
   overflow-x: hidden;
 }
+
+@media (max-width: 767px) {
+  body.has-mobile-tabbar {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+  }
+}

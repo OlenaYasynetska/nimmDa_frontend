@@ -19,7 +19,7 @@ type AccountStatus = 'new' | 'existing';
     <app-auth-modal
       [titleId]="status() === 'new' ? 'register-title' : 'login-title'"
       [closeLabel]="status() === 'new' ? 'Registrierung schließen' : 'Anmeldung schließen'"
-      panelClass="relative z-10 my-8 w-full max-w-md"
+      panelClass="relative z-10 max-h-[92dvh] w-full max-w-md overflow-y-auto sm:my-8"
     >
       <h1
         [id]="status() === 'new' ? 'register-title' : 'login-title'"

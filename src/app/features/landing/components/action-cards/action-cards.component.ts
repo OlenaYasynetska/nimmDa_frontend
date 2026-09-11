@@ -16,7 +16,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <a
             [routerLink]="card.link"
             [queryParams]="standort.queryParams()"
-            class="flex min-h-[16.5rem] cursor-pointer overflow-hidden rounded-3xl p-6 shadow-[0_18px_44px_rgba(15,23,42,0.12)] {{ card.cardClass }}"
+            class="flex min-h-[13.5rem] cursor-pointer overflow-hidden rounded-3xl p-5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] sm:min-h-[16.5rem] sm:p-6 {{ card.cardClass }}"
             [attr.id]="
               card.illustration === 'toolbox'
                 ? 'services'

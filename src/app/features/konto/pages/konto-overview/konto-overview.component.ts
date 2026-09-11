@@ -13,11 +13,11 @@ import { SellerMessagesService } from '../../../seller/services/seller-messages.
     <div class="mx-auto max-w-2xl space-y-8">
       <div>
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Mein Konto</p>
-        <h1 class="mt-1 text-3xl font-extrabold text-[#1b3a5f]">Hallo {{ greeting }} 👋</h1>
+        <h1 class="mt-1 text-2xl font-extrabold text-[#1b3a5f] sm:text-3xl">Hallo {{ greeting }} 👋</h1>
         <p class="mt-2 text-base text-slate-600">Was möchtest du tun?</p>
         <a
           routerLink="/konto/meine-anzeigen/neu"
-          class="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#2f9e57] px-5 py-3 text-sm font-semibold text-white hover:bg-[#278a4b]"
+          class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f5c400] px-5 py-3.5 text-base font-bold text-[#1b3a5f] hover:bg-[#e6b700] sm:w-auto sm:text-sm"
         >
           <span aria-hidden="true">+</span>
           Anzeige aufgeben

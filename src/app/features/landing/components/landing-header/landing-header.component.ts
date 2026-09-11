@@ -1,4 +1,5 @@
-import { Component, ElementRef, inject, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, DestroyRef, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -22,10 +23,10 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
   },
   template: `
     <header class="sticky top-0 z-30 border-b border-slate-100 bg-white">
-      <div class="container flex flex-wrap items-center gap-3 px-4 py-3 md:px-8">
+      <div class="container flex items-center gap-2 px-3 py-2 md:gap-3 md:px-8 md:py-3">
         <app-brand-mark [compact]="true" />
 
-        <nav class="flex items-center gap-4 text-sm font-medium text-slate-700 md:gap-6">
+        <nav class="hidden items-center gap-5 text-sm font-medium text-slate-700 lg:flex">
           <a
             routerLink="/anzeigen"
             [queryParams]="standort.queryParams()"
@@ -52,7 +53,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           </a>
         </nav>
 
-        <form class="relative min-w-[12rem] flex-1" (ngSubmit)="search()">
+        <form class="relative min-w-0 flex-1" (ngSubmit)="search()">
           <label class="sr-only" for="header-search">Was suchst du?</label>
           <input
             id="header-search"
@@ -64,7 +65,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           />
           <button
             type="submit"
-            class="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-[#1b3a5f]"
+            class="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-white hover:text-[#1b3a5f]"
             aria-label="Suchen"
           >
             <app-landing-icon name="search" svgClass="h-4 w-4" />
@@ -73,20 +74,32 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 
         <app-standort-picker
           variant="header"
+          class="shrink-0"
           [value]="standort.selected()"
           [allowEmpty]="true"
           emptyLabel="Alle Orte"
           (valueChange)="chooseStandort($event)"
         />
 
-        <div class="ml-auto flex items-center gap-1 sm:gap-2">
+        @if (!auth.isAdmin()) {
+          <button
+            type="button"
+            class="hidden shrink-0 items-center rounded-lg bg-[#f5c400] px-3 py-2 text-sm font-bold text-[#1b3a5f] hover:bg-[#e6b700] md:inline-flex"
+            (click)="goAufgeben()"
+          >
+            <span class="xl:hidden">Aufgeben</span>
+            <span class="hidden xl:inline">Anzeige aufgeben</span>
+          </button>
+        }
+
+        <div class="ml-0 hidden items-center gap-1 md:flex">
           <button
             type="button"
             class="inline-flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-[#1b3a5f]"
             (click)="goKonto('/konto/favoriten')"
           >
             <app-landing-icon name="heart" svgClass="h-4 w-4" />
-            <span class="hidden sm:inline">Favoriten</span>
+            <span class="hidden lg:inline">Favoriten</span>
           </button>
           <button
             type="button"
@@ -94,7 +107,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
             (click)="goKonto('/konto/nachrichten')"
           >
             <app-landing-icon name="chat" svgClass="h-4 w-4" />
-            <span class="hidden sm:inline">Nachrichten</span>
+            <span class="hidden lg:inline">Nachrichten</span>
             @if (auth.isAuthenticated() && messages.unreadCount() > 0) {
               <span class="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#2f9e57]"></span>
             }
@@ -193,6 +206,68 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         </div>
       </div>
     </header>
+
+    @if (!auth.isAdmin() && !authScreen()) {
+      <nav
+        class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white md:hidden"
+        style="padding-bottom: env(safe-area-inset-bottom, 0px)"
+        aria-label="Mobile Navigation"
+      >
+        <div class="grid grid-cols-5 items-end px-1 pt-1 pb-1">
+          <a
+            routerLink="/"
+            class="flex min-h-12 flex-col items-center justify-center gap-0.5 text-[11px] font-medium"
+            [class]="startActive() ? 'text-[#1b3a5f]' : 'text-slate-500'"
+          >
+            <app-landing-icon name="home" svgClass="h-5 w-5" />
+            Start
+          </a>
+          <a
+            routerLink="/anzeigen"
+            [queryParams]="standort.queryParams()"
+            class="flex min-h-12 flex-col items-center justify-center gap-0.5 text-[11px] font-medium"
+            [class]="searchActive() ? 'text-[#1b3a5f]' : 'text-slate-500'"
+          >
+            <app-landing-icon name="search" svgClass="h-5 w-5" />
+            Suche
+          </a>
+          <button
+            type="button"
+            class="flex min-h-12 flex-col items-center justify-center text-[11px] font-bold text-[#1b3a5f]"
+            (click)="goAufgeben()"
+          >
+            <span
+              class="-mt-5 mb-0.5 flex h-14 w-14 items-center justify-center rounded-full bg-[#f5c400] shadow-[0_8px_20px_rgba(245,196,0,0.45)] ring-4 ring-white"
+              [class.ring-[#1b3a5f]]="aufgebenActive()"
+            >
+              <app-landing-icon name="plus" svgClass="h-7 w-7" />
+            </span>
+            Aufgeben
+          </button>
+          <button
+            type="button"
+            class="relative flex min-h-12 flex-col items-center justify-center gap-0.5 text-[11px] font-medium"
+            [class]="nachrichtenActive() ? 'text-[#1b3a5f]' : 'text-slate-500'"
+            (click)="goKonto('/konto/nachrichten')"
+          >
+            <app-landing-icon name="chat" svgClass="h-5 w-5" />
+            Nachrichten
+            @if (auth.isAuthenticated() && messages.unreadCount() > 0) {
+              <span class="absolute right-[28%] top-1 h-2 w-2 rounded-full bg-[#2f9e57]"></span>
+            }
+          </button>
+          <button
+            type="button"
+            class="flex min-h-12 flex-col items-center justify-center gap-0.5 text-[11px] font-medium"
+            [class]="kontoActive() ? 'text-[#1b3a5f]' : 'text-slate-500'"
+            (click)="goKonto('/konto')"
+          >
+            <app-landing-icon name="user" svgClass="h-5 w-5" />
+            {{ auth.isAuthenticated() ? 'Konto' : 'Anmelden' }}
+          </button>
+        </div>
+      </nav>
+    }
   `,
 })
 export class LandingHeaderComponent {
@@ -201,6 +276,7 @@ export class LandingHeaderComponent {
   readonly standort = inject(StandortService);
   private readonly router = inject(Router);
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly document = inject(DOCUMENT);
 
   readonly menuOpen = signal(false);
   query = '';
@@ -214,6 +290,8 @@ export class LandingHeaderComponent {
   );
 
   constructor() {
+    this.document.body.classList.add('has-mobile-tabbar');
+    inject(DestroyRef).onDestroy(() => this.document.body.classList.remove('has-mobile-tabbar'));
     this.syncFromUrl(this.router.url);
     this.router.events
       .pipe(
@@ -236,6 +314,46 @@ export class LandingHeaderComponent {
   kostenlosActive(): boolean {
     const url = this.url();
     return url.startsWith('/kostenlos') || url.includes('kostenlos=1') || url.includes('price=0');
+  }
+
+  startActive(): boolean {
+    const path = this.url().split('?')[0];
+    return path === '/' || path === '';
+  }
+
+  searchActive(): boolean {
+    const path = this.url().split('?')[0];
+    return (
+      path.startsWith('/anzeigen') ||
+      path.startsWith('/services') ||
+      path.startsWith('/kostenlos')
+    );
+  }
+
+  aufgebenActive(): boolean {
+    return this.url().includes('/meine-anzeigen/neu') || this.url().includes('/bearbeiten');
+  }
+
+  nachrichtenActive(): boolean {
+    return this.url().startsWith('/konto/nachrichten');
+  }
+
+  kontoActive(): boolean {
+    const url = this.url();
+    return url.startsWith('/konto') && !this.nachrichtenActive() && !this.aufgebenActive();
+  }
+
+  authScreen(): boolean {
+    const path = this.url().split('?')[0];
+    return (
+      path === '/login' ||
+      path === '/register' ||
+      path === '/forgot-password' ||
+      path === '/check-email' ||
+      path === '/verify' ||
+      path === '/verify-email' ||
+      path === '/reset-password'
+    );
   }
 
   get displayName(): string {
@@ -270,6 +388,10 @@ export class LandingHeaderComponent {
         km: keepSearch && value && hasCoordinates(value) ? current['km'] || null : null,
       },
     });
+  }
+
+  goAufgeben(): void {
+    this.goKonto('/konto/meine-anzeigen/neu');
   }
 
   goKonto(path: string): void {
