@@ -3,6 +3,8 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { MARKETPLACE_LISTINGS, type MarketplaceListing } from '../data/marketplace.content';
+import { listingSearchHttpParams, type ListingSearchParams } from '../data/listing-query';
+import { categoryBySlug } from '../../landing/data/landing.content';
 
 interface ListingDto {
   id: string;
@@ -25,6 +27,9 @@ export class MarketplaceListingsService {
   private readonly items = signal<MarketplaceListing[]>([]);
   private readonly extras = signal<Record<string, MarketplaceListing>>({});
   private readonly failed = signal(false);
+  private readonly revision = signal(0);
+
+  readonly catalogRevision = this.revision.asReadonly();
 
   readonly all = computed(() => {
     if (this.failed()) {
@@ -59,9 +64,24 @@ export class MarketplaceListingsService {
       const rows = await firstValueFrom(this.http.get<ListingDto[]>(`${environment.apiUrl}/listings`));
       this.items.set(rows.map(toMarketplaceListing));
       this.failed.set(false);
+      this.revision.update((value) => value + 1);
     } catch {
       this.failed.set(true);
       this.items.set([]);
+    }
+  }
+
+  async search(filters: ListingSearchParams): Promise<MarketplaceListing[]> {
+    try {
+      const rows = await firstValueFrom(
+        this.http.get<ListingDto[]>(`${environment.apiUrl}/listings`, {
+          params: listingSearchHttpParams(filters),
+        })
+      );
+      this.failed.set(false);
+      return rows.map(toMarketplaceListing);
+    } catch {
+      return filterLocal(this.all(), filters);
     }
   }
 
@@ -100,4 +120,44 @@ function toMarketplaceListing(row: ListingDto): MarketplaceListing {
     createdAt: row.createdAt,
     sellerId: row.sellerId,
   };
+}
+
+function filterLocal(items: MarketplaceListing[], filters: ListingSearchParams): MarketplaceListing[] {
+  let rows = items;
+  const categoryName = resolveCategoryName(filters.kat) || filters.category?.trim();
+  if (categoryName) {
+    rows = rows.filter((item) => item.category === categoryName);
+  }
+  if (filters.kostenlos) {
+    rows = rows.filter((item) => item.price === 0);
+  }
+  const q = filters.q?.trim().toLowerCase();
+  if (q) {
+    rows = rows.filter((item) => item.title.toLowerCase().includes(q));
+  }
+  const ort = filters.ort?.trim().toLowerCase();
+  if (ort) {
+    rows = rows.filter((item) => item.location.trim().toLowerCase() === ort);
+  }
+  if (!filters.kostenlos && filters.von !== null && filters.von !== undefined) {
+    rows = rows.filter((item) => item.price >= filters.von!);
+  }
+  if (!filters.kostenlos && filters.bis !== null && filters.bis !== undefined) {
+    rows = rows.filter((item) => item.price <= filters.bis!);
+  }
+  const sort = filters.sort;
+  if (sort === 'preis-asc') {
+    return [...rows].sort((a, b) => a.price - b.price);
+  }
+  if (sort === 'preis-desc') {
+    return [...rows].sort((a, b) => b.price - a.price);
+  }
+  return rows;
+}
+
+function resolveCategoryName(slug?: string | null): string {
+  if (!slug || slug === 'weitere') {
+    return '';
+  }
+  return categoryBySlug(slug)?.name ?? '';
 }

@@ -1,4 +1,4 @@
-import { Component, computed, inject, linkedSignal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -9,7 +9,6 @@ import { LandingHeaderComponent } from '../../../landing/components/landing-head
 import { ListingFiltersComponent } from '../../components/listing-filters/listing-filters.component';
 import {
   listingDistanceKm,
-  listingMatchesStandort,
   listingMatchesUmkreis,
   parseSort,
   parseStandort,
@@ -19,8 +18,6 @@ import {
 import { useListingPageSize } from '../../hooks/use-listing-page-size.hook';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 import type { MarketplaceListing } from '../../data/marketplace.content';
-
-const SERVICES_CATEGORY = 'Dienstleistungen';
 
 @Component({
   selector: 'app-category-listings',
@@ -189,6 +186,17 @@ export class CategoryListingsComponent {
     computation: () => 1,
   });
 
+  private readonly results = signal<MarketplaceListing[]>([]);
+  private searchSeq = 0;
+
+  constructor() {
+    effect(() => {
+      this.pageKey();
+      this.marketplace.catalogRevision();
+      untracked(() => void this.reload());
+    });
+  }
+
   readonly category = computed(() => {
     const slug = this.slug();
     if (slug) {
@@ -230,40 +238,13 @@ export class CategoryListingsComponent {
   });
 
   readonly listings = computed(() => {
-    let items = this.marketplace.all();
-    if (this.services()) {
-      items = items.filter((item) => item.category === SERVICES_CATEGORY);
-    } else if (this.slug() && this.slug() !== 'weitere') {
-      const category = categoryBySlug(this.slug() ?? '');
-      items = category ? items.filter((item) => item.category === category.name) : [];
-    } else if (this.category()) {
-      items = items.filter((item) => item.category === this.category()?.name);
-    }
-    if (this.freeOnly()) {
-      items = items.filter((item) => item.price === 0);
-    }
-    const q = this.search().toLowerCase();
-    if (q) {
-      items = items.filter((item) =>
-        `${item.title} ${item.category} ${item.location}`.toLowerCase().includes(q)
-      );
-    }
     const place = this.standort();
     const km = this.umkreis();
-    if (place) {
-      items = km
-        ? items.filter((item) => listingMatchesUmkreis(item.location, place, km))
-        : items.filter((item) => listingMatchesStandort(item.location, place));
+    let items = this.results();
+    if (place && km) {
+      items = items.filter((item) => listingMatchesUmkreis(item.location, place, km));
     }
-    const from = this.priceFrom();
-    if (from !== null) {
-      items = items.filter((item) => item.price >= from);
-    }
-    const to = this.priceTo();
-    if (to !== null) {
-      items = items.filter((item) => item.price <= to);
-    }
-    return sortListings(items, this.sort(), place);
+    return sortByDistance(items, this.sort(), place);
   });
 
   readonly emptyMessage = computed(() => {
@@ -291,6 +272,31 @@ export class CategoryListingsComponent {
     this.page.set(next);
     this.viewport.scrollToPosition([0, 0]);
   }
+
+  private async reload(): Promise<void> {
+    const seq = ++this.searchSeq;
+    const slug = this.slug();
+    const kat =
+      this.services()
+        ? 'dienstleistungen'
+        : slug && slug !== 'weitere'
+          ? slug
+          : this.categoryQuery() || null;
+    const km = this.umkreis();
+    const rows = await this.marketplace.search({
+      q: this.search() || null,
+      kat,
+      ort: km ? null : this.standort() || null,
+      von: this.freeOnly() ? null : this.priceFrom(),
+      bis: this.freeOnly() ? null : this.priceTo(),
+      sort: this.sort(),
+      kostenlos: this.freeOnly(),
+    });
+    if (seq !== this.searchSeq) {
+      return;
+    }
+    this.results.set(rows);
+  }
 }
 
 function parseBound(value: string | null): number | null {
@@ -301,35 +307,17 @@ function parseBound(value: string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function sortListings(
+function sortByDistance(
   items: MarketplaceListing[],
   sort: ReturnType<typeof parseSort>,
   place: string
 ): MarketplaceListing[] {
-  const copy = [...items];
-  if (sort === 'preis-asc') {
-    return copy.sort((a, b) => a.price - b.price);
+  if (sort !== 'naehe' || !place) {
+    return items;
   }
-  if (sort === 'preis-desc') {
-    return copy.sort((a, b) => b.price - a.price);
-  }
-  if (sort === 'naehe' && place) {
-    return copy.sort((a, b) => {
-      const da = listingDistanceKm(a.location, place);
-      const db = listingDistanceKm(b.location, place);
-      return (da ?? Number.POSITIVE_INFINITY) - (db ?? Number.POSITIVE_INFINITY);
-    });
-  }
-  return copy.sort((a, b) => listingTime(b) - listingTime(a));
-}
-
-function listingTime(item: MarketplaceListing): number {
-  if (item.createdAt) {
-    const parsed = Date.parse(item.createdAt);
-    if (!Number.isNaN(parsed)) {
-      return parsed;
-    }
-  }
-  const match = item.id.match(/(\d+)$/);
-  return match ? Number(match[1]) : 0;
+  return [...items].sort((a, b) => {
+    const da = listingDistanceKm(a.location, place);
+    const db = listingDistanceKm(b.location, place);
+    return (da ?? Number.POSITIVE_INFINITY) - (db ?? Number.POSITIVE_INFINITY);
+  });
 }
