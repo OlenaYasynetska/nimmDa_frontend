@@ -189,7 +189,6 @@ export class CategoryListingsComponent {
       this.pageKey();
       this.page();
       this.pageSize();
-      this.marketplace.catalogRevision();
       untracked(() => void this.reload());
     });
   }

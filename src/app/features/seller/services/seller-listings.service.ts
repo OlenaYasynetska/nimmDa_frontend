@@ -3,7 +3,6 @@ import { Injectable, computed, effect, inject, signal, untracked } from '@angula
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
-import { MarketplaceListingsService } from '../../marketplace/services/marketplace-listings.service';
 import { type ListingStatus, type SellerListing } from '../data/seller.content';
 
 interface ListingDto {
@@ -22,7 +21,6 @@ interface ListingDto {
 export class SellerListingsService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly marketplace = inject(MarketplaceListingsService);
   private readonly listingsSignal = signal<SellerListing[]>([]);
 
   readonly listings = this.listingsSignal.asReadonly();
@@ -81,7 +79,6 @@ export class SellerListingsService {
       })
     );
     await this.refresh();
-    await this.marketplace.refresh();
   }
 
   async update(
@@ -104,13 +101,11 @@ export class SellerListingsService {
       })
     );
     await this.refresh();
-    await this.marketplace.refresh();
   }
 
   async remove(id: string): Promise<void> {
     await firstValueFrom(this.http.delete(`${environment.apiUrl}/listings/${id}`));
     this.listingsSignal.update((items) => items.filter((item) => item.id !== id));
-    await this.marketplace.refresh();
   }
 
   async setStatus(id: string, status: ListingStatus): Promise<void> {
@@ -119,7 +114,6 @@ export class SellerListingsService {
     );
     const mapped = toSellerListing(row);
     this.listingsSignal.update((items) => items.map((item) => (item.id === id ? mapped : item)));
-    await this.marketplace.refresh();
   }
 }
 

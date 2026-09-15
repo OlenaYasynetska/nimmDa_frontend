@@ -14,10 +14,8 @@ import {
   UMKREIS_OPTIONS,
   hasCoordinates,
   parseStandort,
-  uniqueListingLocations,
 } from '../../data/standort';
 import { StandortPickerComponent } from '../standort-picker/standort-picker.component';
-import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 import { StandortService } from '../../services/standort.service';
 
 @Component({
@@ -46,7 +44,6 @@ import { StandortService } from '../../services/standort.service';
             [allowEmpty]="true"
             emptyLabel="Alle Orte"
             placeholder="Stadt wählen"
-            [extraCities]="cities()"
             (valueChange)="setOrt($event)"
           />
         </label>
@@ -133,7 +130,6 @@ import { StandortService } from '../../services/standort.service';
 export class ListingFiltersComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly marketplace = inject(MarketplaceListingsService);
   private readonly standortService = inject(StandortService);
 
   readonly umkreisOptions = UMKREIS_OPTIONS;
@@ -154,10 +150,6 @@ export class ListingFiltersComponent {
   searchDraft = this.route.snapshot.queryParamMap.get('q') ?? '';
   vonDraft: number | null = parsePrice(this.route.snapshot.queryParamMap.get('von'));
   bisDraft: number | null = parsePrice(this.route.snapshot.queryParamMap.get('bis'));
-
-  readonly cities = computed(() =>
-    uniqueListingLocations(this.marketplace.all().map((item) => item.location))
-  );
 
   readonly ort = computed(() => parseStandort(this.query()?.get('ort')));
 
