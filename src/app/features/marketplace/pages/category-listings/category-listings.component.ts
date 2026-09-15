@@ -9,10 +9,8 @@ import { LandingHeaderComponent } from '../../../landing/components/landing-head
 import { ListingFiltersComponent } from '../../components/listing-filters/listing-filters.component';
 import {
   listingDistanceKm,
-  listingMatchesUmkreis,
   parseSort,
   parseStandort,
-  parseUmkreis,
   standortLabel,
 } from '../../data/standort';
 import { useListingPageSize } from '../../hooks/use-listing-page-size.hook';
@@ -40,13 +38,13 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
 
       <app-listing-filters />
 
-      @if (listings().length === 0) {
+      @if (totalElements() === 0) {
         <p class="mt-10 rounded-2xl bg-white p-8 text-center text-slate-500 shadow-sm">
           {{ emptyMessage() }}
         </p>
       } @else {
         <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            @for (item of pagedListings(); track item.id) {
+            @for (item of listings(); track item.id) {
               <li class="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 <a [routerLink]="['/anzeigen', item.id]" class="block cursor-pointer text-left">
                   <img [src]="item.imageSrc" [alt]="item.title" class="h-44 w-full bg-slate-100 object-cover" />
@@ -145,11 +143,6 @@ export class CategoryListingsComponent {
 
   readonly standort = computed(() => this.ortParam());
 
-  readonly umkreis = toSignal(
-    this.route.queryParamMap.pipe(map((params) => parseUmkreis(params.get('km')))),
-    { initialValue: parseUmkreis(this.route.snapshot.queryParamMap.get('km')) }
-  );
-
   readonly priceFrom = toSignal(
     this.route.queryParamMap.pipe(map((params) => parseBound(params.get('von')))),
     { initialValue: parseBound(this.route.snapshot.queryParamMap.get('von')) }
@@ -178,7 +171,7 @@ export class CategoryListingsComponent {
 
   readonly pageKey = computed(
     () =>
-      `${this.slug() ?? ''}|${this.listingFilter()}|${this.search()}|${this.freeOnly()}|${this.standort()}|${this.umkreis()}|${this.priceFrom()}|${this.priceTo()}|${this.sort()}|${this.categoryQuery()}`
+      `${this.slug() ?? ''}|${this.listingFilter()}|${this.search()}|${this.freeOnly()}|${this.standort()}|${this.priceFrom()}|${this.priceTo()}|${this.sort()}|${this.categoryQuery()}`
   );
 
   readonly page = linkedSignal({
@@ -187,11 +180,15 @@ export class CategoryListingsComponent {
   });
 
   private readonly results = signal<MarketplaceListing[]>([]);
+  private readonly totalCount = signal(0);
+  private readonly pageCount = signal(0);
   private searchSeq = 0;
 
   constructor() {
     effect(() => {
       this.pageKey();
+      this.page();
+      this.pageSize();
       this.marketplace.catalogRevision();
       untracked(() => void this.reload());
     });
@@ -225,27 +222,17 @@ export class CategoryListingsComponent {
   });
 
   readonly countLabel = computed(() => {
-    const count = `${this.listings().length} Anzeigen`;
+    const count = `${this.totalElements()} Anzeigen`;
     const place = this.standort();
-    const km = this.umkreis();
-    if (place && km) {
-      return `${count} in ${km} km um ${standortLabel(place)}`;
-    }
     if (!place) {
       return count;
     }
     return `${count} in ${standortLabel(place)}`;
   });
 
-  readonly listings = computed(() => {
-    const place = this.standort();
-    const km = this.umkreis();
-    let items = this.results();
-    if (place && km) {
-      items = items.filter((item) => listingMatchesUmkreis(item.location, place, km));
-    }
-    return sortByDistance(items, this.sort(), place);
-  });
+  readonly listings = computed(() => sortByDistance(this.results(), this.sort(), this.standort()));
+
+  readonly totalElements = this.totalCount.asReadonly();
 
   readonly emptyMessage = computed(() => {
     if (this.search() || this.freeOnly() || this.standort() || this.services() || this.priceFrom() !== null || this.priceTo() !== null) {
@@ -254,18 +241,12 @@ export class CategoryListingsComponent {
     return 'In dieser Kategorie gibt es gerade keine Anzeigen.';
   });
 
-  readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.listings().length / this.pageSize()))
-  );
+  readonly totalPages = computed(() => Math.max(1, this.pageCount()));
   readonly currentPage = computed(() => Math.min(this.page(), this.totalPages()));
-  readonly showPagination = computed(() => this.listings().length > this.pageSize());
+  readonly showPagination = computed(() => this.totalElements() > this.pageSize());
   readonly pageNumbers = computed(() =>
     Array.from({ length: this.totalPages() }, (_, index) => index + 1)
   );
-  readonly pagedListings = computed(() => {
-    const start = (this.currentPage() - 1) * this.pageSize();
-    return this.listings().slice(start, start + this.pageSize());
-  });
 
   goTo(page: number): void {
     const next = Math.min(Math.max(1, page), this.totalPages());
@@ -282,20 +263,23 @@ export class CategoryListingsComponent {
         : slug && slug !== 'weitere'
           ? slug
           : this.categoryQuery() || null;
-    const km = this.umkreis();
     const rows = await this.marketplace.search({
       q: this.search() || null,
       kat,
-      ort: km ? null : this.standort() || null,
+      ort: this.standort() || null,
       von: this.freeOnly() ? null : this.priceFrom(),
       bis: this.freeOnly() ? null : this.priceTo(),
       sort: this.sort(),
       kostenlos: this.freeOnly(),
+      page: Math.max(0, this.page() - 1),
+      size: this.pageSize(),
     });
     if (seq !== this.searchSeq) {
       return;
     }
-    this.results.set(rows);
+    this.results.set(rows.content);
+    this.totalCount.set(rows.totalElements);
+    this.pageCount.set(rows.totalPages);
   }
 }
 

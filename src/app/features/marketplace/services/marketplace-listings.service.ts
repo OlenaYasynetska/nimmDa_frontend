@@ -17,6 +17,22 @@ interface ListingDto {
   sellerId?: string;
 }
 
+interface ListingsPageDto {
+  content: ListingDto[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface ListingSearchPage {
+  content: MarketplaceListing[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 interface InquiryDto {
   id: string;
 }
@@ -61,8 +77,12 @@ export class MarketplaceListingsService {
 
   async refresh(): Promise<void> {
     try {
-      const rows = await firstValueFrom(this.http.get<ListingDto[]>(`${environment.apiUrl}/listings`));
-      this.items.set(rows.map(toMarketplaceListing));
+      const body = await firstValueFrom(
+        this.http.get<ListingsPageDto>(`${environment.apiUrl}/listings`, {
+          params: listingSearchHttpParams({ page: 0, size: 100 }),
+        })
+      );
+      this.items.set((body.content ?? []).map(toMarketplaceListing));
       this.failed.set(false);
       this.revision.update((value) => value + 1);
     } catch {
@@ -71,17 +91,17 @@ export class MarketplaceListingsService {
     }
   }
 
-  async search(filters: ListingSearchParams): Promise<MarketplaceListing[]> {
+  async search(filters: ListingSearchParams): Promise<ListingSearchPage> {
     try {
-      const rows = await firstValueFrom(
-        this.http.get<ListingDto[]>(`${environment.apiUrl}/listings`, {
+      const body = await firstValueFrom(
+        this.http.get<ListingsPageDto>(`${environment.apiUrl}/listings`, {
           params: listingSearchHttpParams(filters),
         })
       );
       this.failed.set(false);
-      return rows.map(toMarketplaceListing);
+      return toSearchPage(body);
     } catch {
-      return filterLocal(this.all(), filters);
+      return paginateLocal(filterLocal(this.all(), filters), filters.page, filters.size);
     }
   }
 
@@ -107,6 +127,35 @@ export class MarketplaceListingsService {
       )
     );
   }
+}
+
+function toSearchPage(body: ListingsPageDto): ListingSearchPage {
+  const content = (body.content ?? []).map(toMarketplaceListing);
+  return {
+    content,
+    page: body.page ?? 0,
+    size: body.size ?? content.length,
+    totalElements: body.totalElements ?? content.length,
+    totalPages: body.totalPages ?? (content.length ? 1 : 0),
+  };
+}
+
+function paginateLocal(
+  rows: MarketplaceListing[],
+  page?: number | null,
+  size?: number | null
+): ListingSearchPage {
+  const totalElements = rows.length;
+  const safeSize = size !== null && size !== undefined && size > 0 ? Math.floor(size) : Math.max(totalElements, 1);
+  const safePage = page !== null && page !== undefined && page >= 0 ? Math.floor(page) : 0;
+  const start = safePage * safeSize;
+  return {
+    content: rows.slice(start, start + safeSize),
+    page: safePage,
+    size: safeSize,
+    totalElements,
+    totalPages: totalElements === 0 ? 0 : Math.ceil(totalElements / safeSize),
+  };
 }
 
 function toMarketplaceListing(row: ListingDto): MarketplaceListing {

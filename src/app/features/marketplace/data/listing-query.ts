@@ -13,6 +13,8 @@ export interface ListingSearchParams {
   bis?: number | null;
   sort?: string | null;
   kostenlos?: boolean;
+  page?: number | null;
+  size?: number | null;
 }
 
 export function listingFilterQuery(params: Params): Record<string, string | null> {
@@ -42,6 +44,12 @@ export function listingSearchHttpParams(search: ListingSearchParams): HttpParams
   }
   if (search.kostenlos) {
     params = params.set('free', 'true');
+  }
+  if (search.page !== null && search.page !== undefined && Number.isFinite(search.page) && search.page >= 0) {
+    params = params.set('page', String(Math.floor(search.page)));
+  }
+  if (search.size !== null && search.size !== undefined && Number.isFinite(search.size) && search.size > 0) {
+    params = params.set('size', String(Math.floor(search.size)));
   }
   return params;
 }
