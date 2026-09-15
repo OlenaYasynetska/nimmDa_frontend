@@ -12,6 +12,7 @@ export interface ListingSearchParams {
   von?: number | null;
   bis?: number | null;
   sort?: string | null;
+  km?: number | null;
   kostenlos?: boolean;
   page?: number | null;
   size?: number | null;
@@ -37,6 +38,9 @@ export function listingSearchHttpParams(search: ListingSearchParams): HttpParams
   }
   if (!search.kostenlos && search.bis !== null && search.bis !== undefined && Number.isFinite(search.bis)) {
     params = params.set('maxPrice', String(search.bis));
+  }
+  if (search.km !== null && search.km !== undefined && Number.isFinite(search.km) && search.km > 0) {
+    params = params.set('km', String(Math.floor(search.km)));
   }
   const sort = toApiSort(search.sort);
   if (sort) {
@@ -77,6 +81,9 @@ function toApiSort(sort?: string | null): string | null {
   }
   if (sort === 'newest' || sort === 'neueste') {
     return 'newest';
+  }
+  if (sort === 'naehe' || sort === 'distance') {
+    return 'distance';
   }
   return null;
 }

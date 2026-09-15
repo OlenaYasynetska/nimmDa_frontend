@@ -237,8 +237,8 @@ export class CreateListingComponent {
         });
       }
       void this.router.navigateByUrl('/konto/meine-anzeigen');
-    } catch {
-      this.saveError.set('Die Anzeige konnte nicht gespeichert werden. Bitte erneut anmelden und nochmal versuchen.');
+    } catch (error) {
+      this.saveError.set(saveErrorMessage(error));
     } finally {
       this.saving.set(false);
     }
@@ -296,4 +296,17 @@ export class CreateListingComponent {
       this.photoPreview.set(image);
     }
   }
+}
+
+function saveErrorMessage(error: unknown): string {
+  const body = (error as { error?: { message?: string; suggestions?: string[] } } | null)?.error;
+  const message = body?.message?.trim();
+  if (!message) {
+    return 'Die Anzeige konnte nicht gespeichert werden. Bitte erneut anmelden und nochmal versuchen.';
+  }
+  const suggestions = (body?.suggestions ?? []).filter(Boolean);
+  if (suggestions.length === 0) {
+    return message;
+  }
+  return `${message} ${suggestions.join(' · ')}`;
 }

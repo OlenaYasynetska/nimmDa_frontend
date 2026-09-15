@@ -8,7 +8,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { listingFilterQuery } from '../../../marketplace/data/listing-query';
 import { categoryBySlug } from '../../../landing/data/landing.content';
 import { StandortPickerComponent } from '../../../marketplace/components/standort-picker/standort-picker.component';
-import { hasCoordinates, parseStandort, type StandortValue } from '../../../marketplace/data/standort';
+import { parseStandort, type StandortValue } from '../../../marketplace/data/standort';
 import { StandortService } from '../../../marketplace/services/standort.service';
 import { SellerMessagesService } from '../../../seller/services/seller-messages.service';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
@@ -385,7 +385,7 @@ export class LandingHeaderComponent {
         ...listingFilterQuery(current),
         q: keepSearch ? current['q'] || null : null,
         ort: value || null,
-        km: keepSearch && value && hasCoordinates(value) ? current['km'] || null : null,
+        km: keepSearch && value ? current['km'] || null : null,
       },
     });
   }

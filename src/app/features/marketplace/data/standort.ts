@@ -1,6 +1,6 @@
-export const STANDORT_CITIES = ['Steyr', 'Linz', 'Wels', 'Amstetten'] as const;
+export const STANDORT_CITIES = ['Linz', 'Wels', 'Steyr', 'Amstetten'] as const;
 
-export const OBEROESTERREICH_CITIES = [
+export const SUGGESTED_CITIES = [
   ...STANDORT_CITIES,
   'Leonding',
   'Traun',
@@ -14,6 +14,10 @@ export const OBEROESTERREICH_CITIES = [
   'Ried im Innkreis',
   'Schärding',
   'Braunau am Inn',
+  'Wien',
+  'Graz',
+  'Salzburg',
+  'Innsbruck',
 ] as const;
 
 export type StandortValue = string;
@@ -28,30 +32,6 @@ export const SORT_OPTIONS = [
 ] as const;
 
 export type SortValue = (typeof SORT_OPTIONS)[number]['value'];
-
-/** City centers in Oberösterreich — used only for Umkreis, never as a default Standort. */
-const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
-  linz: { lat: 48.3069, lng: 14.2858 },
-  wels: { lat: 48.1575, lng: 14.0289 },
-  steyr: { lat: 48.0428, lng: 14.4213 },
-  amstetten: { lat: 48.1229, lng: 14.872 },
-  leonding: { lat: 48.2792, lng: 14.2531 },
-  traun: { lat: 48.2265, lng: 14.2396 },
-  enns: { lat: 48.2135, lng: 14.4789 },
-  ansfelden: { lat: 48.2097, lng: 14.2903 },
-  marchtrenk: { lat: 48.1917, lng: 14.1106 },
-  gmunden: { lat: 47.9185, lng: 13.7994 },
-  'vöcklabruck': { lat: 48.0087, lng: 13.6556 },
-  voecklabruck: { lat: 48.0087, lng: 13.6556 },
-  perg: { lat: 48.2503, lng: 14.6339 },
-  freistadt: { lat: 48.5117, lng: 14.5036 },
-  ried: { lat: 48.2107, lng: 13.4884 },
-  'ried im innkreis': { lat: 48.2107, lng: 13.4884 },
-  'schärding': { lat: 48.4569, lng: 13.4317 },
-  schaerding: { lat: 48.4569, lng: 13.4317 },
-  braunau: { lat: 48.2563, lng: 13.0434 },
-  'braunau am inn': { lat: 48.2563, lng: 13.0434 },
-};
 
 export function parseStandort(value: string | null | undefined): StandortValue {
   if (!value) {
@@ -69,16 +49,9 @@ export function standortLabel(value: StandortValue): string {
   return value || 'Standort';
 }
 
-export function listingMatchesStandort(location: string, standort: StandortValue): boolean {
-  if (!standort) {
-    return true;
-  }
-  return location.trim().toLowerCase() === standort.trim().toLowerCase();
-}
-
 export function suggestCities(query: string, extra: string[] = []): string[] {
   const popular = [...STANDORT_CITIES];
-  const rest = uniqueListingLocations([...OBEROESTERREICH_CITIES, ...extra]).filter(
+  const rest = uniqueListingLocations([...SUGGESTED_CITIES, ...extra]).filter(
     (city) => !popular.some((item) => item.toLowerCase() === city.toLowerCase())
   );
   const all = [...popular, ...rest];
@@ -90,36 +63,7 @@ export function suggestCities(query: string, extra: string[] = []): string[] {
 }
 
 function knownCities(): string[] {
-  return uniqueListingLocations([...OBEROESTERREICH_CITIES]);
-}
-
-export function hasCoordinates(city: string): boolean {
-  return coordinatesFor(city) !== null;
-}
-
-export function listingMatchesUmkreis(
-  location: string,
-  center: StandortValue,
-  km: number
-): boolean {
-  if (!center || !km) {
-    return true;
-  }
-  if (location.trim().toLowerCase() === center.trim().toLowerCase()) {
-    return true;
-  }
-  const distance = distanceKm(location, center);
-  return distance !== null && distance <= km;
-}
-
-export function listingDistanceKm(location: string, center: StandortValue): number | null {
-  if (!center) {
-    return null;
-  }
-  if (location.trim().toLowerCase() === center.trim().toLowerCase()) {
-    return 0;
-  }
-  return distanceKm(location, center);
+  return uniqueListingLocations([...SUGGESTED_CITIES]);
 }
 
 export function uniqueListingLocations(locations: string[]): string[] {
@@ -146,28 +90,4 @@ export function parseSort(value: string | null | undefined): SortValue {
   return SORT_OPTIONS.some((option) => option.value === value)
     ? (value as SortValue)
     : 'neueste';
-}
-
-function coordinatesFor(city: string): { lat: number; lng: number } | null {
-  const key = city.trim().toLowerCase();
-  return CITY_COORDINATES[key] ?? null;
-}
-
-function distanceKm(fromCity: string, toCity: string): number | null {
-  const from = coordinatesFor(fromCity);
-  const to = coordinatesFor(toCity);
-  if (!from || !to) {
-    return null;
-  }
-  const earthKm = 6371;
-  const dLat = toRad(to.lat - from.lat);
-  const dLng = toRad(to.lng - from.lng);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(from.lat)) * Math.cos(toRad(to.lat)) * Math.sin(dLng / 2) ** 2;
-  return earthKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function toRad(value: number): number {
-  return (value * Math.PI) / 180;
 }

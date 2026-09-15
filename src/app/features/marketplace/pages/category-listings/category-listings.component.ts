@@ -8,7 +8,6 @@ import { LandingFooterComponent } from '../../../landing/components/landing-foot
 import { LandingHeaderComponent } from '../../../landing/components/landing-header/landing-header.component';
 import { ListingFiltersComponent } from '../../components/listing-filters/listing-filters.component';
 import {
-  listingDistanceKm,
   parseSort,
   parseStandort,
   standortLabel,
@@ -141,6 +140,11 @@ export class CategoryListingsComponent {
     { initialValue: parseStandort(this.route.snapshot.queryParamMap.get('ort')) }
   );
 
+  private readonly kmParam = toSignal(
+    this.route.queryParamMap.pipe(map((params) => parseBound(params.get('km')))),
+    { initialValue: parseBound(this.route.snapshot.queryParamMap.get('km')) }
+  );
+
   readonly standort = computed(() => this.ortParam());
 
   readonly priceFrom = toSignal(
@@ -171,7 +175,7 @@ export class CategoryListingsComponent {
 
   readonly pageKey = computed(
     () =>
-      `${this.slug() ?? ''}|${this.listingFilter()}|${this.search()}|${this.freeOnly()}|${this.standort()}|${this.priceFrom()}|${this.priceTo()}|${this.sort()}|${this.categoryQuery()}`
+      `${this.slug() ?? ''}|${this.listingFilter()}|${this.search()}|${this.freeOnly()}|${this.standort()}|${this.kmParam()}|${this.priceFrom()}|${this.priceTo()}|${this.sort()}|${this.categoryQuery()}`
   );
 
   readonly page = linkedSignal({
@@ -229,7 +233,7 @@ export class CategoryListingsComponent {
     return `${count} in ${standortLabel(place)}`;
   });
 
-  readonly listings = computed(() => sortByDistance(this.results(), this.sort(), this.standort()));
+  readonly listings = computed(() => this.results());
 
   readonly totalElements = this.totalCount.asReadonly();
 
@@ -269,6 +273,7 @@ export class CategoryListingsComponent {
       von: this.freeOnly() ? null : this.priceFrom(),
       bis: this.freeOnly() ? null : this.priceTo(),
       sort: this.sort(),
+      km: this.standort() ? this.kmParam() : null,
       kostenlos: this.freeOnly(),
       page: Math.max(0, this.page() - 1),
       size: this.pageSize(),
@@ -288,19 +293,4 @@ function parseBound(value: string | null): number | null {
   }
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function sortByDistance(
-  items: MarketplaceListing[],
-  sort: ReturnType<typeof parseSort>,
-  place: string
-): MarketplaceListing[] {
-  if (sort !== 'naehe' || !place) {
-    return items;
-  }
-  return [...items].sort((a, b) => {
-    const da = listingDistanceKm(a.location, place);
-    const db = listingDistanceKm(b.location, place);
-    return (da ?? Number.POSITIVE_INFINITY) - (db ?? Number.POSITIVE_INFINITY);
-  });
 }

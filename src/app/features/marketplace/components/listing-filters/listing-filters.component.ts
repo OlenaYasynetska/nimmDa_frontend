@@ -12,7 +12,6 @@ import { listingFilterQuery } from '../../data/listing-query';
 import {
   SORT_OPTIONS,
   UMKREIS_OPTIONS,
-  hasCoordinates,
   parseStandort,
 } from '../../data/standort';
 import { StandortPickerComponent } from '../standort-picker/standort-picker.component';
@@ -171,10 +170,7 @@ export class ListingFiltersComponent {
     return this.query()?.get('kat') ?? '';
   });
 
-  readonly canUseUmkreis = computed(() => {
-    const city = this.ort();
-    return !!city && hasCoordinates(city);
-  });
+  readonly canUseUmkreis = computed(() => !!this.ort());
 
   constructor() {
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
@@ -193,7 +189,7 @@ export class ListingFiltersComponent {
     this.standortService.set(ort);
     this.patch({
       ort: ort || null,
-      km: ort && hasCoordinates(ort) ? this.query()?.get('km') || null : null,
+      km: ort ? this.query()?.get('km') || null : null,
     });
   }
 

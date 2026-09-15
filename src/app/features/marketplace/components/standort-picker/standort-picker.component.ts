@@ -1,5 +1,6 @@
 import { Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
 import { parseStandort, suggestCities } from '../../data/standort';
+import { LocationsApiService } from '../../services/locations-api.service';
 import { LandingIconComponent } from '../../../landing/components/landing-icon/landing-icon.component';
 
 @Component({
@@ -101,6 +102,7 @@ import { LandingIconComponent } from '../../../landing/components/landing-icon/l
 })
 export class StandortPickerComponent {
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly locations = inject(LocationsApiService);
 
   readonly variant = input<'header' | 'field'>('field');
   readonly value = input('');
@@ -113,8 +115,12 @@ export class StandortPickerComponent {
 
   readonly open = signal(false);
   readonly draft = signal('');
+  readonly remote = signal<string[]>([]);
+  private suggestTimer: ReturnType<typeof setTimeout> | null = null;
 
-  readonly filtered = computed(() => suggestCities(this.draft(), this.extraCities()));
+  readonly filtered = computed(() =>
+    suggestCities(this.draft(), [...this.extraCities(), ...this.remote()])
+  );
   readonly customCity = computed(() => {
     const typed = this.draft().trim();
     if (typed.length < 2) {
@@ -151,6 +157,7 @@ export class StandortPickerComponent {
   onInput(event: Event): void {
     this.draft.set((event.target as HTMLInputElement).value);
     this.open.set(true);
+    this.queueSuggest();
   }
 
   onKeydown(event: KeyboardEvent): void {
@@ -169,6 +176,7 @@ export class StandortPickerComponent {
     const next = parseStandort(city);
     this.draft.set(next);
     this.open.set(false);
+    this.remote.set([]);
     this.valueChange.emit(next);
   }
 
@@ -176,5 +184,27 @@ export class StandortPickerComponent {
     if (!this.host.nativeElement.contains(event.target as Node)) {
       this.open.set(false);
     }
+  }
+
+  private queueSuggest(): void {
+    if (this.suggestTimer) {
+      clearTimeout(this.suggestTimer);
+    }
+    const query = this.draft().trim();
+    if (query.length < 2) {
+      this.remote.set([]);
+      return;
+    }
+    this.suggestTimer = setTimeout(() => {
+      void this.loadRemote(query);
+    }, 250);
+  }
+
+  private async loadRemote(query: string): Promise<void> {
+    const names = await this.locations.suggest(query);
+    if (this.draft().trim() !== query) {
+      return;
+    }
+    this.remote.set(names);
   }
 }
