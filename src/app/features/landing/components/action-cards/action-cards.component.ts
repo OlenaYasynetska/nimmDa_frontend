@@ -25,7 +25,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
                   : null
             "
           >
-            <div class="flex min-w-0 flex-1 flex-col gap-3 min-[1025px]:gap-0">
+            <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center min-[1025px]:flex min-[1025px]:flex-col min-[1025px]:items-stretch">
               <div class="flex items-center gap-3 min-[1025px]:flex-col min-[1025px]:items-start min-[1025px]:gap-0">
                 @if (card.iconSrc) {
                   <img
@@ -42,7 +42,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
                 {{ card.description }}
               </p>
               <span
-                class="inline-flex w-fit items-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold sm:px-4 sm:py-2.5 sm:text-sm min-[1025px]:mt-5 {{ card.buttonClass }}"
+                class="inline-flex w-fit justify-self-center items-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold sm:px-4 sm:py-2.5 sm:text-sm min-[1025px]:mt-5 min-[1025px]:justify-self-start {{ card.buttonClass }}"
               >
                 {{ card.cta }}
                 <span aria-hidden="true">→</span>
