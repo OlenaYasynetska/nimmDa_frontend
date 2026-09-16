@@ -39,7 +39,7 @@ export class EmptyOutletComponent {}
         </div>
       </div>
     </div>
-    <div class="pt-48 sm:pt-64 md:pt-72">
+    <div class="pt-80 sm:pt-72 md:pt-72">
       <app-popular-categories />
     </div>
     <app-how-it-works />
