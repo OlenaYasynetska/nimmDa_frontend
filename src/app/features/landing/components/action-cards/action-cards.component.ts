@@ -16,7 +16,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <a
             [routerLink]="card.link"
             [queryParams]="standort.queryParams()"
-            class="flex cursor-pointer overflow-hidden rounded-3xl p-5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] sm:p-6 min-[1025px]:min-h-[16.5rem] {{ card.cardClass }}"
+            class="flex items-center cursor-pointer overflow-hidden rounded-3xl px-4 py-3.5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] sm:px-5 sm:py-4 min-[1025px]:min-h-[16.5rem] min-[1025px]:items-stretch min-[1025px]:p-6 {{ card.cardClass }}"
             [attr.id]="
               card.illustration === 'toolbox'
                 ? 'services'
@@ -25,22 +25,22 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
                   : null
             "
           >
-            <div class="flex min-w-0 flex-1 flex-col">
+            <div class="flex min-w-0 flex-1 flex-row items-center gap-3 min-[1025px]:flex-col min-[1025px]:items-stretch min-[1025px]:gap-0">
               @if (card.iconSrc) {
                 <img
                   [src]="card.iconSrc"
                   [alt]="card.title"
-                  class="h-9 w-9 object-contain"
+                  class="h-9 w-9 shrink-0 object-contain"
                 />
               } @else {
-                <app-landing-icon [name]="card.icon" [svgClass]="'h-9 w-9 ' + card.iconClass" />
+                <app-landing-icon [name]="card.icon" [svgClass]="'h-9 w-9 shrink-0 ' + card.iconClass" />
               }
-              <h2 class="mt-3 text-xl font-extrabold {{ card.titleClass }}">{{ card.title }}</h2>
+              <h2 class="min-w-0 flex-1 truncate text-center text-lg font-extrabold min-[1025px]:mt-3 min-[1025px]:flex-none min-[1025px]:text-left min-[1025px]:text-xl {{ card.titleClass }}">{{ card.title }}</h2>
               <p class="mt-2 hidden max-w-[13.5rem] text-sm leading-relaxed text-slate-600 min-[1025px]:block">
                 {{ card.description }}
               </p>
               <span
-                class="mt-3 inline-flex w-fit items-center gap-1 rounded-lg px-4 py-2.5 text-sm font-semibold min-[1025px]:mt-5 {{ card.buttonClass }}"
+                class="inline-flex w-fit shrink-0 items-center gap-1 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold sm:px-4 sm:py-2.5 sm:text-sm min-[1025px]:mt-5 {{ card.buttonClass }}"
               >
                 {{ card.cta }}
                 <span aria-hidden="true">→</span>
