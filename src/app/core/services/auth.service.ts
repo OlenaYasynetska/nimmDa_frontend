@@ -106,9 +106,10 @@ export class AuthService {
     sessionStorage.removeItem(USER_KEY);
   }
 
-  async register(email: string, password: string): Promise<void> {
+  async register(email: string, password: string): Promise<boolean> {
     const result = await this.postMail('/auth/register', { email, password });
     this.rememberMail(email, 'verify', result);
+    return result.mailSent === true;
   }
 
   async login(email: string, password: string): Promise<void> {

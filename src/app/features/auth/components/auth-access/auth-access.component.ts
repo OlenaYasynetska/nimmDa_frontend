@@ -97,7 +97,7 @@ type AccountStatus = 'new' | 'existing';
         @if (error()) {
           <p class="text-sm text-red-600">{{ error() }}</p>
         }
-        <app-button type="submit" [disabled]="form.invalid || busy()">
+        <app-button type="submit" [disabled]="busy()">
           {{ status() === 'new' ? 'Konto erstellen' : 'Anmelden' }}
         </app-button>
       </form>
@@ -160,10 +160,16 @@ export class AuthAccessComponent implements OnInit {
     const password = this.form.controls.password.value;
     try {
       if (this.status() === 'new') {
-        await this.auth.register(email, password);
-        await this.router.navigate(['/check-email'], {
-          queryParams: { email, type: 'verify' },
-        });
+        const mailSent = await this.auth.register(email, password);
+        if (mailSent) {
+          await this.router.navigate(['/check-email'], {
+            queryParams: { email, type: 'verify' },
+          });
+          return;
+        }
+        await this.auth.login(email, password);
+        await this.activity.claimGuest();
+        await this.router.navigateByUrl(this.auth.afterAuthPath());
         return;
       }
       await this.auth.login(email, password);
@@ -172,6 +178,7 @@ export class AuthAccessComponent implements OnInit {
     } catch (error) {
       if (error instanceof AuthFlowException && error.code === 'notFound') {
         this.status.set('new');
+        this.error.set(AUTH_ERRORS.notFound);
         this.hint.set('Kein Konto gefunden. Bitte registriere dich.');
         return;
       }

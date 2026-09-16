@@ -11,12 +11,12 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
   imports: [LandingIconComponent, RouterLink],
   template: `
     <section id="aktionen" class="container px-4 md:px-8">
-      <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <div class="grid grid-cols-1 gap-5 min-[1025px]:grid-cols-3">
         @for (card of cards; track card.title) {
           <a
             [routerLink]="card.link"
             [queryParams]="standort.queryParams()"
-            class="flex min-h-[13.5rem] cursor-pointer overflow-hidden rounded-3xl p-5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] sm:min-h-[16.5rem] sm:p-6 {{ card.cardClass }}"
+            class="flex cursor-pointer overflow-hidden rounded-3xl p-5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] sm:p-6 min-[1025px]:min-h-[16.5rem] {{ card.cardClass }}"
             [attr.id]="
               card.illustration === 'toolbox'
                 ? 'services'
@@ -36,11 +36,11 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
                 <app-landing-icon [name]="card.icon" [svgClass]="'h-9 w-9 ' + card.iconClass" />
               }
               <h2 class="mt-3 text-xl font-extrabold {{ card.titleClass }}">{{ card.title }}</h2>
-              <p class="mt-2 max-w-[13.5rem] text-sm leading-relaxed text-slate-600">
+              <p class="mt-2 hidden max-w-[13.5rem] text-sm leading-relaxed text-slate-600 min-[1025px]:block">
                 {{ card.description }}
               </p>
               <span
-                class="mt-5 inline-flex w-fit items-center gap-1 rounded-lg px-4 py-2.5 text-sm font-semibold {{ card.buttonClass }}"
+                class="mt-3 inline-flex w-fit items-center gap-1 rounded-lg px-4 py-2.5 text-sm font-semibold min-[1025px]:mt-5 {{ card.buttonClass }}"
               >
                 {{ card.cta }}
                 <span aria-hidden="true">→</span>
