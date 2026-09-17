@@ -152,6 +152,9 @@ export class StandortPickerComponent {
   openPanel(): void {
     this.draft.set(this.value());
     this.open.set(true);
+    setTimeout(() => {
+      this.host.nativeElement.querySelector('input')?.focus();
+    }, 0);
   }
 
   onInput(event: Event): void {

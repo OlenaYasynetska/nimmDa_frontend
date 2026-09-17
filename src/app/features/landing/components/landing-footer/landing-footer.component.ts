@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
   FOOTER_ABOUT_LINKS,
   FOOTER_BUSINESS_LINKS,
   FOOTER_SERVICE_LINKS,
 } from '../../data/landing.content';
+import { FOOTER_DOCS, type FooterDocId } from '../../data/footer-docs.content';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
 import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 
@@ -11,6 +13,9 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
   selector: 'app-landing-footer',
   standalone: true,
   imports: [BrandMarkComponent, LandingIconComponent],
+  host: {
+    '(document:keydown.escape)': 'onEscape()',
+  },
   template: `
     <footer class="border-t border-slate-200 bg-white">
       <div
@@ -40,9 +45,13 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <ul class="mt-3 space-y-2">
             @for (link of serviceLinks; track link.label) {
               <li>
-                <a [href]="link.href" class="text-sm text-slate-600 hover:text-slate-900">
+                <button
+                  type="button"
+                  class="text-left text-sm text-slate-600 hover:text-slate-900"
+                  (click)="openDoc(link.doc)"
+                >
                   {{ link.label }}
-                </a>
+                </button>
               </li>
             }
           </ul>
@@ -53,9 +62,13 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <ul class="mt-3 space-y-2">
             @for (link of businessLinks; track link.label) {
               <li>
-                <a [href]="link.href" class="text-sm text-slate-600 hover:text-slate-900">
+                <button
+                  type="button"
+                  class="text-left text-sm text-slate-600 hover:text-slate-900"
+                  (click)="openDoc(link.doc)"
+                >
                   {{ link.label }}
-                </a>
+                </button>
               </li>
             }
           </ul>
@@ -66,9 +79,13 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <ul class="mt-3 space-y-2">
             @for (link of aboutLinks; track link.label) {
               <li>
-                <a [href]="link.href" class="text-sm text-slate-600 hover:text-slate-900">
+                <button
+                  type="button"
+                  class="text-left text-sm text-slate-600 hover:text-slate-900"
+                  (click)="openDoc(link.doc)"
+                >
                   {{ link.label }}
-                </a>
+                </button>
               </li>
             }
           </ul>
@@ -107,11 +124,102 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         </p>
       </div>
     </footer>
+
+    @if (activeDoc(); as doc) {
+      <div
+        class="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="footer-doc-title"
+      >
+        <button
+          type="button"
+          class="absolute inset-0 bg-slate-900/50"
+          [attr.aria-label]="doc.title + ' schließen'"
+          (click)="closeDoc()"
+        ></button>
+        <div
+          class="relative z-10 m-0 flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-2xl bg-white shadow-xl sm:m-4 sm:rounded-2xl"
+        >
+          <div class="flex items-start justify-between gap-4 px-6 pt-6">
+            <h2 id="footer-doc-title" class="text-xl font-extrabold text-[#1b3a5f]">
+              {{ doc.title }}
+            </h2>
+            <button
+              type="button"
+              class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              [attr.aria-label]="doc.title + ' schließen'"
+              (click)="closeDoc()"
+            >
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="mt-4 space-y-5 overflow-y-auto px-6 pb-6 text-sm leading-relaxed text-slate-700">
+            @for (section of doc.sections; track $index) {
+              <section>
+                @if (section.heading) {
+                  <h3 class="mb-1.5 font-semibold text-slate-900">{{ section.heading }}</h3>
+                }
+                @for (paragraph of section.paragraphs ?? []; track $index) {
+                  <p class="whitespace-pre-line" [class.mt-2]="$index > 0">{{ paragraph }}</p>
+                }
+                @if (section.items?.length) {
+                  <ul class="mt-2 list-disc space-y-1 pl-5">
+                    @for (item of section.items; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                }
+                @if (section.email) {
+                  <p class="mt-2">
+                    @if (section.emailLabel) {
+                      {{ section.emailLabel }}
+                    }
+                    <a class="text-[#2f6fb2] hover:underline" [href]="'mailto:' + section.email">
+                      {{ section.email }}
+                    </a>
+                  </p>
+                }
+              </section>
+            }
+          </div>
+        </div>
+      </div>
+    }
   `,
 })
 export class LandingFooterComponent {
+  private readonly document = inject(DOCUMENT);
   readonly year = new Date().getFullYear();
   readonly serviceLinks = FOOTER_SERVICE_LINKS;
   readonly businessLinks = FOOTER_BUSINESS_LINKS;
   readonly aboutLinks = FOOTER_ABOUT_LINKS;
+  private readonly openId = signal<FooterDocId | null>(null);
+  readonly activeDoc = computed(() => {
+    const id = this.openId();
+    return id ? FOOTER_DOCS[id] : null;
+  });
+
+  constructor() {
+    effect((onCleanup) => {
+      this.document.body.classList.toggle('overflow-hidden', this.openId() !== null);
+      onCleanup(() => this.document.body.classList.remove('overflow-hidden'));
+    });
+  }
+
+  openDoc(id: FooterDocId): void {
+    this.openId.set(id);
+  }
+
+  closeDoc(): void {
+    this.openId.set(null);
+  }
+
+  onEscape(): void {
+    if (this.openId()) {
+      this.closeDoc();
+    }
+  }
 }

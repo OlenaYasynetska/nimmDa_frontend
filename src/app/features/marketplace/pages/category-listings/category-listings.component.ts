@@ -14,6 +14,7 @@ import {
 } from '../../data/standort';
 import { useListingPageSize } from '../../hooks/use-listing-page-size.hook';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
+import { StandortService } from '../../services/standort.service';
 import type { MarketplaceListing } from '../../data/marketplace.content';
 
 @Component({
@@ -106,6 +107,7 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
 export class CategoryListingsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly marketplace = inject(MarketplaceListingsService);
+  private readonly standortService = inject(StandortService);
   private readonly viewport = inject(ViewportScroller);
 
   readonly pageSize = useListingPageSize();
@@ -145,7 +147,7 @@ export class CategoryListingsComponent {
     { initialValue: parseBound(this.route.snapshot.queryParamMap.get('km')) }
   );
 
-  readonly standort = computed(() => this.ortParam());
+  readonly standort = computed(() => this.ortParam() || this.standortService.selected());
 
   readonly priceFrom = toSignal(
     this.route.queryParamMap.pipe(map((params) => parseBound(params.get('von')))),

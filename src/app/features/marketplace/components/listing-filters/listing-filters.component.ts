@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +13,7 @@ import {
   SORT_OPTIONS,
   UMKREIS_OPTIONS,
   parseStandort,
+  parseUmkreis,
 } from '../../data/standort';
 import { StandortPickerComponent } from '../standort-picker/standort-picker.component';
 import { StandortService } from '../../services/standort.service';
@@ -36,7 +37,7 @@ import { StandortService } from '../../services/standort.service';
           />
         </label>
 
-        <label class="block">
+        <div class="block">
           <span class="mb-1.5 block text-sm font-medium text-slate-600">Standort</span>
           <app-standort-picker
             [value]="ort()"
@@ -45,27 +46,28 @@ import { StandortService } from '../../services/standort.service';
             placeholder="Stadt wählen"
             (valueChange)="setOrt($event)"
           />
-        </label>
+        </div>
 
         <fieldset class="block">
           <legend class="mb-1.5 text-sm font-medium text-slate-600">Umkreis</legend>
-          <div class="flex flex-wrap gap-3 pt-1">
+          <div class="flex flex-wrap gap-2 pt-1">
             @for (km of umkreisOptions; track km) {
-              <label class="inline-flex items-center gap-1.5 text-sm text-slate-700">
-                <input
-                  type="radio"
-                  name="km"
-                  [value]="km"
-                  [ngModel]="umkreis()"
-                  (ngModelChange)="setUmkreis($event)"
-                  [disabled]="!canUseUmkreis()"
-                />
+              <button
+                type="button"
+                class="rounded-full px-3 py-1.5 text-sm font-medium ring-1 transition"
+                [class]="
+                  umkreis() === km
+                    ? 'bg-[#1b3a5f] text-white ring-[#1b3a5f]'
+                    : 'bg-slate-100 text-slate-700 ring-transparent hover:bg-slate-200'
+                "
+                (click)="setUmkreis(km, $event)"
+              >
                 {{ km }} km
-              </label>
+              </button>
             }
           </div>
-          @if (!canUseUmkreis()) {
-            <p class="mt-1 text-xs text-slate-400">Zuerst einen Standort wählen.</p>
+          @if (!ort()) {
+            <p class="mt-1 text-xs text-slate-400">Umkreis antippen — dann die Stadt wählen.</p>
           }
         </fieldset>
 
@@ -130,6 +132,8 @@ export class ListingFiltersComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly standortService = inject(StandortService);
+  private readonly ortPicker = viewChild(StandortPickerComponent);
+  private readonly pendingKm = signal<number | null>(null);
 
   readonly umkreisOptions = UMKREIS_OPTIONS;
   readonly sortOptions = SORT_OPTIONS;
@@ -150,12 +154,11 @@ export class ListingFiltersComponent {
   vonDraft: number | null = parsePrice(this.route.snapshot.queryParamMap.get('von'));
   bisDraft: number | null = parsePrice(this.route.snapshot.queryParamMap.get('bis'));
 
-  readonly ort = computed(() => parseStandort(this.query()?.get('ort')));
+  readonly ort = computed(
+    () => parseStandort(this.query()?.get('ort')) || this.standortService.selected()
+  );
 
-  readonly umkreis = computed(() => {
-    const km = Number(this.query()?.get('km'));
-    return UMKREIS_OPTIONS.includes(km as (typeof UMKREIS_OPTIONS)[number]) ? km : null;
-  });
+  readonly umkreis = computed(() => parseUmkreis(this.query()?.get('km')) ?? this.pendingKm());
 
   readonly sort = computed(() => this.query()?.get('sort') || 'neueste');
 
@@ -170,14 +173,17 @@ export class ListingFiltersComponent {
     return this.query()?.get('kat') ?? '';
   });
 
-  readonly canUseUmkreis = computed(() => !!this.ort());
-
   constructor() {
     this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
       this.searchDraft = params.get('q') ?? '';
       this.vonDraft = parsePrice(params.get('von'));
       this.bisDraft = parsePrice(params.get('bis'));
     });
+    const urlOrt = parseStandort(this.route.snapshot.queryParamMap.get('ort'));
+    const stored = this.standortService.selected();
+    if (!urlOrt && stored) {
+      this.patch({ ort: stored });
+    }
   }
 
   applySearch(): void {
@@ -187,17 +193,34 @@ export class ListingFiltersComponent {
   setOrt(value: string): void {
     const ort = parseStandort(value);
     this.standortService.set(ort);
+    const km = ort ? this.query()?.get('km') || kmParam(this.pendingKm()) : null;
+    if (!ort) {
+      this.pendingKm.set(null);
+    }
     this.patch({
       ort: ort || null,
-      km: ort ? this.query()?.get('km') || null : null,
+      km,
     });
   }
 
-  setUmkreis(km: number | string): void {
-    if (!this.canUseUmkreis()) {
+  setUmkreis(km: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const selected = this.umkreis();
+    if (selected === km && this.ort()) {
+      this.pendingKm.set(null);
+      this.patch({ km: null });
       return;
     }
-    this.patch({ km: String(km) });
+    this.pendingKm.set(km);
+    if (!this.ort()) {
+      setTimeout(() => this.ortPicker()?.openPanel(), 0);
+      return;
+    }
+    this.patch({
+      ort: this.ort(),
+      km: String(km),
+    });
   }
 
   setCategory(slug: string): void {
@@ -252,4 +275,8 @@ function priceParam(value: number | null): string | null {
     return null;
   }
   return String(value);
+}
+
+function kmParam(value: number | null): string | null {
+  return value === null ? null : String(value);
 }

@@ -462,8 +462,9 @@ export class LandingHeaderComponent {
   private syncFromUrl(url: string): void {
     const params = this.router.parseUrl(url).queryParams;
     this.query = params['q'] ?? '';
-    if (this.isListingsView()) {
-      this.standort.set(parseStandort(params['ort']));
+    const fromUrl = parseStandort(params['ort']);
+    if (fromUrl) {
+      this.standort.set(fromUrl);
     }
   }
 }

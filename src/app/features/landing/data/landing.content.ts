@@ -229,22 +229,22 @@ export const HOW_STEPS: HowStep[] = [
 ];
 
 export const FOOTER_SERVICE_LINKS = [
-  { label: 'Hilfe / FAQ', href: '#' },
-  { label: 'Sicherheitstipps', href: '#' },
-  { label: 'AGB', href: '#' },
-  { label: 'Datenschutz', href: '#' },
-  { label: 'Impressum', href: '#' },
+  { label: 'Hilfe / FAQ', doc: 'faq' as const },
+  { label: 'Sicherheitstipps', doc: 'sicherheit' as const },
+  { label: 'AGB', doc: 'agb' as const },
+  { label: 'Datenschutz', doc: 'datenschutz' as const },
+  { label: 'Impressum', doc: 'impressum' as const },
 ];
 
 export const FOOTER_BUSINESS_LINKS = [
-  { label: 'Werbung schalten', href: '#' },
-  { label: 'Profi-Profil', href: '#' },
-  { label: 'Kooperationen', href: '#' },
+  { label: 'Werbung schalten', doc: 'werbung' as const },
+  { label: 'Profi-Profil', doc: 'profi' as const },
+  { label: 'Kooperationen', doc: 'kooperationen' as const },
 ];
 
 export const FOOTER_ABOUT_LINKS = [
-  { label: 'Über NimmDa', href: '#' },
-  { label: 'Team', href: '#' },
-  { label: 'Presse', href: '#' },
-  { label: 'Kontakt', href: '#' },
+  { label: 'Über NimmDa', doc: 'about' as const },
+  { label: 'Team', doc: 'team' as const },
+  { label: 'Presse', doc: 'presse' as const },
+  { label: 'Kontakt', doc: 'kontakt' as const },
 ];
