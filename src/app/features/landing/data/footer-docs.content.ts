@@ -1,7 +1,7 @@
 export const SITE_OPERATOR = {
   name: 'Olena Yasynetska',
   addressLines: ['Arbeiterstraße 26/3', '4400 Steyr', 'Österreich'],
-  email: 'hello@nimmda.org',
+  email: 'contact@ugs-info.at',
   region: 'Oberösterreich',
 };
 
