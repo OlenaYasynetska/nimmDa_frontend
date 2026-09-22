@@ -24,19 +24,19 @@ export function provideGoogleAnalytics() {
     if (!MEASUREMENT_ID.test(measurementId)) return;
 
     const router = inject(Router);
-    installGtag(measurementId);
+    if (typeof window.gtag !== 'function') {
+      installGtag(measurementId);
+    }
 
-    let lastPath = '';
-    const send = (path: string) => {
-      if (!path || path === lastPath) return;
-      lastPath = path;
-      trackPageView(measurementId, path);
-    };
-
-    send(`${window.location.pathname}${window.location.search}`);
+    let lastPath = `${window.location.pathname}${window.location.search}`;
     router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe((event) => send(event.urlAfterRedirects));
+      .subscribe((event) => {
+        const path = event.urlAfterRedirects;
+        if (!path || path === lastPath) return;
+        lastPath = path;
+        trackPageView(measurementId, path);
+      });
   });
 }
 
