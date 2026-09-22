@@ -8,5 +8,5 @@ import type { AppEnvironment } from './environment.types';
 export const environment: AppEnvironment = {
   production: false,
   apiUrl: '/api',
-  gaMeasurementId: 'G-VL2NH31D9P',
+  gaMeasurementId: 'G-JL2HNG2SKY',
 };

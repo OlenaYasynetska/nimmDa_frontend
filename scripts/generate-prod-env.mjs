@@ -88,7 +88,7 @@ function readMeasurementId(raw) {
 const mobile = process.argv.includes('--mobile');
 const apiUrl = normalizeApiUrl(process.env.NG_APP_API_URL);
 const gaMeasurementId = readMeasurementId(
-  process.env.NG_APP_GA_MEASUREMENT_ID || 'G-VL2NH31D9P'
+  process.env.NG_APP_GA_MEASUREMENT_ID || 'G-JL2HNG2SKY'
 );
 
 if (mobile && !/^https?:\/\//i.test(apiUrl)) {
