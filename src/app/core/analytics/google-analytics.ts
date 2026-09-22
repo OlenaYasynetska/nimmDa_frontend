@@ -45,6 +45,12 @@ function installGtag(measurementId: string): void {
   window.gtag = function gtag() {
     window.dataLayer?.push(arguments);
   };
+  window.gtag('consent', 'default', {
+    analytics_storage: 'granted',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+  });
   window.gtag('js', new Date());
   window.gtag('config', measurementId, { send_page_view: false });
 
