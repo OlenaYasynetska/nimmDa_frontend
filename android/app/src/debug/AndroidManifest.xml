@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Debug only: emulator and a phone on Wi-Fi can call a local http:// API. Release stays HTTPS-only. -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>
