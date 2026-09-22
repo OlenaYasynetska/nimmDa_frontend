@@ -25,20 +25,28 @@ export function provideGoogleAnalytics() {
 
     const router = inject(Router);
     installGtag(measurementId);
+
+    let lastPath = '';
+    const send = (path: string) => {
+      if (!path || path === lastPath) return;
+      lastPath = path;
+      trackPageView(measurementId, path);
+    };
+
+    send(`${window.location.pathname}${window.location.search}`);
     router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe((event) => trackPageView(measurementId, event.urlAfterRedirects));
+      .subscribe((event) => send(event.urlAfterRedirects));
   });
 }
 
 function installGtag(measurementId: string): void {
-  const dataLayer = (window.dataLayer = window.dataLayer ?? []);
-  const gtag: GtagFn = (...args) => {
-    dataLayer.push(args);
+  window.dataLayer = window.dataLayer ?? [];
+  window.gtag = function gtag() {
+    window.dataLayer?.push(arguments);
   };
-  window.gtag = gtag;
-  gtag('js', new Date());
-  gtag('config', measurementId, { send_page_view: false });
+  window.gtag('js', new Date());
+  window.gtag('config', measurementId, { send_page_view: false });
 
   const script = document.createElement('script');
   script.async = true;
