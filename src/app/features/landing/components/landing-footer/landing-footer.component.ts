@@ -19,7 +19,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
   template: `
     <footer class="border-t border-slate-200 bg-white">
       <div
-        class="container grid grid-cols-1 gap-4 px-4 py-12 sm:grid-cols-2 sm:gap-10 md:px-8 lg:grid-cols-5"
+        class="container grid grid-cols-1 gap-4 px-20 py-12 sm:grid-cols-2 sm:gap-10 md:px-8 lg:grid-cols-5"
       >
         <div class="lg:col-span-1">
           <app-brand-mark />
