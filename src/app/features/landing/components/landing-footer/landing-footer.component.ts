@@ -19,7 +19,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
   template: `
     <footer class="border-t border-slate-200 bg-white">
       <div
-        class="container grid grid-cols-1 gap-10 px-4 py-12 sm:grid-cols-2 md:px-8 lg:grid-cols-5"
+        class="container grid grid-cols-1 gap-4 px-4 py-12 sm:grid-cols-2 sm:gap-10 md:px-8 lg:grid-cols-5"
       >
         <div class="lg:col-span-1">
           <app-brand-mark />
@@ -41,8 +41,26 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         </div>
 
         <div>
-          <h3 class="text-sm font-bold text-[#1b3a5f]">Service</h3>
-          <ul class="mt-3 space-y-2">
+          <h3 class="hidden text-sm font-bold text-[#1b3a5f] sm:block">Service</h3>
+          <button
+            type="button"
+            class="flex w-full items-center justify-between text-sm font-bold text-[#1b3a5f] sm:hidden"
+            [attr.aria-expanded]="isOpen('service')"
+            (click)="toggle('service')"
+          >
+            Service
+            <svg
+              class="h-4 w-4 transition-transform"
+              [class.rotate-180]="isOpen('service')"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <ul class="mt-3 space-y-2 sm:block" [class.hidden]="!isOpen('service')">
             @for (link of serviceLinks; track link.label) {
               <li>
                 <button
@@ -58,8 +76,26 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         </div>
 
         <div>
-          <h3 class="text-sm font-bold text-[#1b3a5f]">Für Unternehmen</h3>
-          <ul class="mt-3 space-y-2">
+          <h3 class="hidden text-sm font-bold text-[#1b3a5f] sm:block">Für Unternehmen</h3>
+          <button
+            type="button"
+            class="flex w-full items-center justify-between text-sm font-bold text-[#1b3a5f] sm:hidden"
+            [attr.aria-expanded]="isOpen('business')"
+            (click)="toggle('business')"
+          >
+            Für Unternehmen
+            <svg
+              class="h-4 w-4 transition-transform"
+              [class.rotate-180]="isOpen('business')"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <ul class="mt-3 space-y-2 sm:block" [class.hidden]="!isOpen('business')">
             @for (link of businessLinks; track link.label) {
               <li>
                 <button
@@ -75,8 +111,26 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
         </div>
 
         <div>
-          <h3 class="text-sm font-bold text-[#1b3a5f]">Über uns</h3>
-          <ul class="mt-3 space-y-2">
+          <h3 class="hidden text-sm font-bold text-[#1b3a5f] sm:block">Über uns</h3>
+          <button
+            type="button"
+            class="flex w-full items-center justify-between text-sm font-bold text-[#1b3a5f] sm:hidden"
+            [attr.aria-expanded]="isOpen('about')"
+            (click)="toggle('about')"
+          >
+            Über uns
+            <svg
+              class="h-4 w-4 transition-transform"
+              [class.rotate-180]="isOpen('about')"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <ul class="mt-3 space-y-2 sm:block" [class.hidden]="!isOpen('about')">
             @for (link of aboutLinks; track link.label) {
               <li>
                 <button
@@ -197,6 +251,7 @@ export class LandingFooterComponent {
   readonly businessLinks = FOOTER_BUSINESS_LINKS;
   readonly aboutLinks = FOOTER_ABOUT_LINKS;
   private readonly openId = signal<FooterDocId | null>(null);
+  private readonly openSections = signal({ service: false, business: false, about: false });
   readonly activeDoc = computed(() => {
     const id = this.openId();
     return id ? FOOTER_DOCS[id] : null;
@@ -207,6 +262,14 @@ export class LandingFooterComponent {
       this.document.body.classList.toggle('overflow-hidden', this.openId() !== null);
       onCleanup(() => this.document.body.classList.remove('overflow-hidden'));
     });
+  }
+
+  isOpen(id: 'service' | 'business' | 'about'): boolean {
+    return this.openSections()[id];
+  }
+
+  toggle(id: 'service' | 'business' | 'about'): void {
+    this.openSections.update((sections) => ({ ...sections, [id]: !sections[id] }));
   }
 
   openDoc(id: FooterDocId): void {
