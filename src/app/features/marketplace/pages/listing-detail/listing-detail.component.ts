@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, signal, untracked } from '@angular
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { DisplayAdComponent } from '../../../../core/ads/display-ad.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { BuyerActivityService } from '../../../buyer/services/buyer-activity.service';
 import { LandingFooterComponent } from '../../../landing/components/landing-footer/landing-footer.component';
@@ -13,7 +14,13 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
 @Component({
   selector: 'app-listing-detail',
   standalone: true,
-  imports: [RouterLink, LandingHeaderComponent, LandingFooterComponent, LandingIconComponent],
+  imports: [
+    RouterLink,
+    LandingHeaderComponent,
+    LandingFooterComponent,
+    LandingIconComponent,
+    DisplayAdComponent,
+  ],
   host: {
     class: 'block min-h-full w-full bg-[#f3f5f8]',
   },
@@ -25,6 +32,9 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
         <article class="mt-5 overflow-hidden rounded-2xl bg-white shadow-sm md:grid md:grid-cols-2">
           <img [src]="item.imageSrc" [alt]="item.title" class="h-64 w-full bg-slate-100 object-cover md:h-full" />
           <div class="p-6">
+            @if (item.promoted) {
+              <p class="mb-2 inline-flex rounded-full bg-[#f5c400] px-2 py-0.5 text-[11px] font-bold text-[#1b3a5f]">Top · Anzeige</p>
+            }
             <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ item.category }}</p>
             <h1 class="mt-1 text-2xl font-extrabold text-[#1b3a5f]">{{ item.title }}</h1>
             <p class="mt-3 text-2xl font-extrabold text-[#2f9e57]">
@@ -83,6 +93,7 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
             }
           </div>
         </article>
+        <app-display-ad />
       } @else {
         <p class="mt-10 rounded-2xl bg-white p-8 text-center text-slate-500 shadow-sm">
           Anzeige nicht gefunden.

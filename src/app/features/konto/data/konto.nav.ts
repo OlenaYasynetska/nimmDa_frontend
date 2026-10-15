@@ -3,6 +3,7 @@ export const KONTO_NAV = [
   { label: 'Nachrichten', path: '/konto/nachrichten', exact: false },
   { label: 'Meine Anzeigen', path: '/konto/meine-anzeigen', exact: false },
   { label: 'Favoriten', path: '/konto/favoriten', exact: false },
+  { label: 'Profi-Profil', path: '/konto/profi', exact: false },
   { label: 'Profil', path: '/konto/profil', exact: false },
   { label: 'Einstellungen', path: '/konto/einstellungen', exact: false },
 ] as const;

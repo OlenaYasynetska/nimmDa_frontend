@@ -5,6 +5,8 @@
  * Variables:
  *   NG_APP_API_URL — optional full https://…/api, or /api (same-origin proxy).
  *   NG_APP_GA_MEASUREMENT_ID — optional GA4 stream ID (G-XXXXXXXXXX).
+ *   NG_APP_ADSENSE_CLIENT — optional AdSense publisher id (ca-pub-…).
+ *   NG_APP_ADSENSE_SLOT — optional display-ad slot id. Both must be set together.
  *
  * Flags:
  *   --mobile       reject a relative /api URL (Capacitor has no dev proxy)
@@ -72,6 +74,30 @@ function normalizeApiUrl(raw) {
   return '/api';
 }
 
+function readAdSenseClient(raw) {
+  const id = (raw ?? '').trim();
+  if (!id) return '';
+  if (!/^ca-pub-\d+$/.test(id)) {
+    console.error('');
+    console.error('NG_APP_ADSENSE_CLIENT must look like ca-pub-1234567890123.');
+    console.error('');
+    process.exit(1);
+  }
+  return id;
+}
+
+function readAdSenseSlot(raw) {
+  const id = (raw ?? '').trim();
+  if (!id) return '';
+  if (!/^\d{6,}$/.test(id)) {
+    console.error('');
+    console.error('NG_APP_ADSENSE_SLOT must be the numeric slot id from AdSense.');
+    console.error('');
+    process.exit(1);
+  }
+  return id;
+}
+
 function readMeasurementId(raw) {
   const id = (raw ?? '').trim();
   if (!id) return '';
@@ -90,6 +116,14 @@ const apiUrl = normalizeApiUrl(process.env.NG_APP_API_URL);
 const gaMeasurementId = readMeasurementId(
   process.env.NG_APP_GA_MEASUREMENT_ID || 'G-JL2HHG2SKY'
 );
+const adsenseClient = readAdSenseClient(process.env.NG_APP_ADSENSE_CLIENT);
+const adsenseSlot = readAdSenseSlot(process.env.NG_APP_ADSENSE_SLOT);
+if (Boolean(adsenseClient) !== Boolean(adsenseSlot)) {
+  console.error('');
+  console.error('Set both NG_APP_ADSENSE_CLIENT and NG_APP_ADSENSE_SLOT, or leave both empty.');
+  console.error('');
+  process.exit(1);
+}
 
 if (mobile && !/^https?:\/\//i.test(apiUrl)) {
   console.error('');
@@ -110,6 +144,8 @@ export const environment: AppEnvironment = {
   production: true,
   apiUrl: ${JSON.stringify(apiUrl)},
   gaMeasurementId: ${JSON.stringify(gaMeasurementId)},
+  adsenseClient: ${JSON.stringify(adsenseClient)},
+  adsenseSlot: ${JSON.stringify(adsenseSlot)},
 };
 `;
 
@@ -118,3 +154,4 @@ fs.writeFileSync(target, out, 'utf8');
 console.log('Wrote', path.relative(root, target));
 console.log('  apiUrl:', apiUrl);
 console.log('  gaMeasurementId:', gaMeasurementId || '(off)');
+console.log('  adsense:', adsenseClient && adsenseSlot ? 'on' : '(off)');

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
@@ -15,6 +15,8 @@ interface ListingDto {
   imageSrc: string;
   category: string;
   location?: string;
+  promoted?: boolean;
+  promotedUntil?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -115,6 +117,45 @@ export class SellerListingsService {
     const mapped = toSellerListing(row);
     this.listingsSignal.update((items) => items.map((item) => (item.id === id ? mapped : item)));
   }
+
+  async promote(id: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ checkoutUrl: string }>(`${environment.apiUrl}/listings/${id}/promotion-checkout`, {})
+      );
+      if (!response.checkoutUrl) {
+        throw new Error('Zahlung konnte nicht gestartet werden.');
+      }
+      window.location.assign(response.checkoutUrl);
+    } catch (error) {
+      throw new Error(readError(error));
+    }
+  }
+
+  async confirmPromotion(sessionId: string): Promise<'paid' | 'pending'> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ status: string }>(`${environment.apiUrl}/promotions/checkout-session`, { sessionId })
+      );
+      await this.refresh();
+      return response.status === 'paid' ? 'paid' : 'pending';
+    } catch (error) {
+      throw new Error(readError(error));
+    }
+  }
+}
+
+function readError(error: unknown): string {
+  if (error instanceof HttpErrorResponse) {
+    const message = (error.error as { message?: string } | null)?.message;
+    if (message) {
+      return message;
+    }
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return 'Zahlung konnte nicht gestartet werden.';
 }
 
 function toSellerListing(row: ListingDto): SellerListing {
@@ -128,5 +169,7 @@ function toSellerListing(row: ListingDto): SellerListing {
     imageSrc: row.imageSrc,
     category: row.category,
     location: row.location,
+    promoted: row.promoted === true,
+    promotedUntil: row.promotedUntil ?? null,
   };
 }

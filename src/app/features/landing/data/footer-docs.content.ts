@@ -187,7 +187,11 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
       {
         heading: '6. Entgelt',
         paragraphs: [
-          'Die Nutzung von NimmDa ist derzeit unentgeltlich. Kostenpflichtige Zusatzleistungen (z. B. Werbung) können später angeboten werden; sie werden dann klar gekennzeichnet.',
+          'Eine Anzeige aufzugeben und Nachrichten zu schreiben ist kostenlos.',
+          'Die Zusatzleistung „Top“ hebt eine Anzeige für 7 Tage über die kostenlosen Anzeigen. Sie kostet 4,99 €. Es wird keine Umsatzsteuer ausgewiesen (Kleinunternehmerin gemäß § 6 Abs. 1 Z 27 UStG). Die Kennzeichnung „Top · Anzeige“ macht die Werbung erkennbar. Danach reiht sich die Anzeige wieder unter die kostenlosen ein. Der Preis steht vor der Zahlung.',
+          'Das Profi-Profil kostet 19,99 € für 30 Tage. Es zeigt Firma, Branche, Ort, Telefon und die eigenen Anzeigen und steht in dieser Zeit über privaten Anzeigen in Services, gekennzeichnet als Firma. Danach bleibt die Seite erreichbar, erscheint aber nicht mehr in diesem Block.',
+          'Ein Platz auf der Startseite kostet 99 € für 30 Tage, fest und nicht pro Klick. Er ist als Anzeige gekennzeichnet. Vertrag, Rechnung und Bannerbild werden direkt vereinbart.',
+          'Top-Anzeige und Profi-Profil starten erst, wenn die Zahlung erfolgreich war. Der Zahlungsbeleg geht an die E-Mail-Adresse des Kontos. Läuft die bezahlte Zeit ab, entfällt die Kennzeichnung automatisch.',
         ],
       },
       {
@@ -228,7 +232,7 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
     title: 'Datenschutzerklärung',
     sections: [
       {
-        paragraphs: ['Stand: September 2026'],
+        paragraphs: ['Stand: Oktober 2026'],
       },
       {
         heading: '1. Verantwortliche',
@@ -260,7 +264,7 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
         paragraphs: [
           'Die Anwendung und Datenbanken werden bei technischen Dienstleistern betrieben (derzeit u. a. Hosting der Website und der API). Transaktionsmails (Bestätigung, Passwort) versenden wir über einen E-Mail-Dienstleister.',
           'Zur Ortsuche können Koordinaten über einen Kartendienst (OpenStreetMap Nominatim) ermittelt werden, wenn ein Ort noch nicht in unserer Ortsliste liegt.',
-          'Eine Weitergabe zu Werbezwecken an Dritte findet nicht statt.',
+          'Reichweitenmessung läuft über Google Analytics. Fremde Display-Werbung (Google AdSense) erscheint nur auf Anzeigenseiten und nur, wenn du Werbe-Cookies erlaubst.',
         ],
       },
       {
@@ -273,7 +277,8 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
       {
         heading: '6. Cookies und Browser-Speicher',
         paragraphs: [
-          'NimmDa setzt derzeit keine Tracking-Cookies zu Werbezwecken. Für die Anmeldung speichert der Browser ein Login-Token (localStorage/sessionStorage). Ohne diesen Speicher funktioniert der Login nicht.',
+          'Für die Anmeldung speichert der Browser ein Login-Token (localStorage/sessionStorage). Ohne diesen Speicher funktioniert der Login nicht.',
+          'Werbe-Cookies sind standardmäßig aus. Erst nach „Erlauben“ darf Google AdSense auf den Seiten der Anzeigen Werbung einblenden. Die Entscheidung bleibt in diesem Browser gespeichert. Löschst du die Daten dieser Website, fragen wir erneut. Die Reichweitenmessung schaltet keine Werbe-Cookies frei.',
         ],
       },
       {
@@ -306,7 +311,9 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
       {
         paragraphs: [
           'Kleinunternehmerin gemäß § 6 Abs. 1 Z 27 UStG.',
-          'Es wird keine Umsatzsteuer berechnet.',
+          'Es wird keine Umsatzsteuer berechnet. Der angegebene Preis ist der Endbetrag.',
+          'Kostenpflichtig sind nur diese Zusatzleistungen: Top-Anzeige 4,99 € für 7 Tage, Profi-Profil 19,99 € für 30 Tage, Startseiten-Anzeige 99 € für 30 Tage.',
+          'Top und Profi-Profil werden auf der Website bezahlt und beginnen erst nach erfolgreicher Zahlung. Ein Zahlungsbeleg geht an die E-Mail-Adresse des Kontos. Die Startseiten-Anzeige wird direkt verrechnet. Nach Ablauf des Zeitraums endet die Leistung automatisch.',
         ],
       },
     ],
@@ -316,8 +323,8 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
     sections: [
       {
         paragraphs: [
-          'Hervorgehobene Anzeigen und regionale Werbung sind in Vorbereitung.',
-          'Wenn du NimmDa schon jetzt als Werbefläche in Oberösterreich nutzen möchtest, schreib uns kurz, was du planst.',
+          'Eine Top-Anzeige steht 7 Tage über den kostenlosen Anzeigen und kostet 4,99 €. Sie ist mit „Top · Anzeige“ als Werbung gekennzeichnet.',
+          'Die Zahlung startest du im Konto unter Meine Anzeigen mit „Nach oben“. Es wird keine Umsatzsteuer ausgewiesen.',
         ],
         email: SITE_OPERATOR.email,
         emailLabel: 'E-Mail:',
@@ -329,8 +336,8 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
     sections: [
       {
         paragraphs: [
-          'Ein Profil für Gewerbe und Selbstständige (Firma, Kontakt, mehrere Anzeigen) kommt als nächster Schritt.',
-          'Bis dahin kannst du dich ganz normal registrieren und Anzeigen mit deinem Standort aufgeben.',
+          'Ein Profi-Profil zeigt Firma, Branche, Ort, Telefon und die eigenen Anzeigen. Es kostet 19,99 € für 30 Tage und steht in Services über privaten Anzeigen, gekennzeichnet als Firma.',
+          'Anlegen und bezahlen kannst du es im Konto unter Profi-Profil. Einzelne Anzeigen bleiben kostenlos. Es wird keine Umsatzsteuer ausgewiesen.',
         ],
         email: SITE_OPERATOR.email,
         emailLabel: 'E-Mail:',
@@ -342,8 +349,8 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
     sections: [
       {
         paragraphs: [
-          'NimmDa sucht lokale Partnerinnen und Partner: Vereine, Gemeinden, Märkte und kleine Betriebe in Oberösterreich.',
-          'Du hast eine Idee für eine Zusammenarbeit? Wir freuen uns auf eine Nachricht.',
+          'Ein Platz auf der Startseite für Oberösterreich kostet 99 € für 30 Tage. Der Preis ist fest, nicht pro Klick. Der Platz ist als Anzeige gekennzeichnet.',
+          'Schreib uns, welches Angebot du zeigen möchtest. Vertrag, Rechnung und Bannerbild klären wir direkt. Es wird keine Umsatzsteuer ausgewiesen.',
         ],
         email: SITE_OPERATOR.email,
         emailLabel: 'E-Mail:',

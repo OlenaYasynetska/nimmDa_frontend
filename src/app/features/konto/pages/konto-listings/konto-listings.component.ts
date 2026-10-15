@@ -1,6 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { map } from 'rxjs';
 import { SellerListingsService } from '../../../seller/services/seller-listings.service';
 import { LISTING_FILTERS } from '../../data/konto.nav';
@@ -37,6 +37,10 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
         }
       </nav>
 
+      @if (notice()) {
+        <p class="mb-4 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{{ notice() }}</p>
+      }
+
       @if (filter() === 'entwuerfe') {
         <p class="py-8 text-sm text-slate-400">Noch keine Entwürfe. Veröffentliche eine Anzeige, dann erscheint sie unter Aktiv.</p>
       } @else if (visible().length === 0) {
@@ -52,9 +56,22 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
                 <div class="min-w-0 flex-1">
                   <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
                   <p class="text-sm text-slate-500">€ {{ item.price }} · {{ item.views }} Aufrufe</p>
+                  @if (item.promoted && item.promotedUntil) {
+                    <p class="text-xs font-semibold text-[#1b3a5f]">Top bis {{ until(item.promotedUntil) }}</p>
+                  }
                 </div>
               </a>
               <div class="flex flex-wrap gap-2">
+              @if (item.status === 'aktiv') {
+                <button
+                  type="button"
+                  class="rounded-md bg-[#f5c400] px-3 py-1.5 text-sm font-bold text-[#1b3a5f] hover:bg-[#e6b700] disabled:opacity-50"
+                  [disabled]="busyId() === item.id"
+                  (click)="promote(item.id)"
+                >
+                  {{ item.promoted ? 'Verlängern · 4,99 €' : 'Nach oben · 4,99 €' }}
+                </button>
+              }
               <a
                 [routerLink]="['/konto/meine-anzeigen', item.id, 'bearbeiten']"
                 class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -86,7 +103,15 @@ import { LISTING_FILTERS } from '../../data/konto.nav';
 export class KontoListingsComponent {
   readonly listings = inject(SellerListingsService);
   readonly filters = LISTING_FILTERS;
+  readonly busyId = signal<string | null>(null);
+  readonly notice = signal<string | null>(null);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private confirmedSession = '';
+
+  private readonly query = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
 
   readonly filter = toSignal(
     this.route.paramMap.pipe(
@@ -109,11 +134,74 @@ export class KontoListingsComponent {
     return this.listings.listings().filter((item) => item.status === 'aktiv');
   });
 
+  constructor() {
+    effect(() => {
+      const params = this.query();
+      const top = params.get('top');
+      const sessionId = params.get('session_id');
+      if (top === 'cancel') {
+        this.notice.set('Zahlung abgebrochen. Es wurde nichts berechnet.');
+        void this.clearQuery();
+        return;
+      }
+      if (top === 'success' && sessionId && sessionId !== this.confirmedSession) {
+        this.confirmedSession = sessionId;
+        void this.finish(sessionId);
+      }
+    });
+  }
+
+  async promote(id: string): Promise<void> {
+    this.notice.set(null);
+    this.busyId.set(id);
+    try {
+      await this.listings.promote(id);
+    } catch (error) {
+      this.notice.set(error instanceof Error ? error.message : 'Zahlung konnte nicht gestartet werden.');
+      this.busyId.set(null);
+    }
+  }
+
+  until(value: string | null | undefined): string {
+    if (!value) {
+      return '';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+    return date.toLocaleDateString('de-AT');
+  }
+
   async toggleStatus(id: string, status: 'aktiv' | 'pausiert'): Promise<void> {
     await this.listings.setStatus(id, status === 'aktiv' ? 'pausiert' : 'aktiv');
   }
 
   async remove(id: string): Promise<void> {
     await this.listings.remove(id);
+  }
+
+  private async finish(sessionId: string): Promise<void> {
+    try {
+      const status = await this.listings.confirmPromotion(sessionId);
+      this.notice.set(
+        status === 'paid'
+          ? 'Bezahlt. Die Anzeige steht 7 Tage oben und ist als Top gekennzeichnet.'
+          : 'Die Zahlung wird noch bestätigt.'
+      );
+    } catch (error) {
+      this.notice.set(error instanceof Error ? error.message : 'Zahlung konnte nicht bestätigt werden.');
+    } finally {
+      await this.clearQuery();
+    }
+  }
+
+  private async clearQuery(): Promise<void> {
+    await this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { top: null, session_id: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }

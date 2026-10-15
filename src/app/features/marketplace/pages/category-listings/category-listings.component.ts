@@ -6,6 +6,7 @@ import { map } from 'rxjs';
 import { categoryBySlug } from '../../../landing/data/landing.content';
 import { LandingFooterComponent } from '../../../landing/components/landing-footer/landing-footer.component';
 import { LandingHeaderComponent } from '../../../landing/components/landing-header/landing-header.component';
+import { DisplayAdComponent } from '../../../../core/ads/display-ad.component';
 import { ListingFiltersComponent } from '../../components/listing-filters/listing-filters.component';
 import {
   parseSort,
@@ -13,6 +14,7 @@ import {
   standortLabel,
 } from '../../data/standort';
 import { useListingPageSize } from '../../hooks/use-listing-page-size.hook';
+import { BusinessCard, BusinessProfileService } from '../../../business/services/business-profile.service';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 import { StandortService } from '../../services/standort.service';
 import type { MarketplaceListing } from '../../data/marketplace.content';
@@ -20,7 +22,13 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
 @Component({
   selector: 'app-category-listings',
   standalone: true,
-  imports: [RouterLink, LandingHeaderComponent, LandingFooterComponent, ListingFiltersComponent],
+  imports: [
+    RouterLink,
+    LandingHeaderComponent,
+    LandingFooterComponent,
+    ListingFiltersComponent,
+    DisplayAdComponent,
+  ],
   host: {
     class: 'block min-h-full w-full bg-[#f3f5f8]',
   },
@@ -38,6 +46,24 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
 
       <app-listing-filters />
 
+      @if (services() && firms().length > 0) {
+        <section class="mt-6">
+          <h2 class="text-lg font-extrabold text-[#1b3a5f]">Firmen</h2>
+          <ul class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @for (firm of firms(); track firm.userId) {
+              <li>
+                <a [routerLink]="['/profi', firm.userId]" class="block rounded-2xl bg-white p-4 shadow-sm hover:shadow-md">
+                  <span class="inline-flex rounded-full bg-[#f5c400] px-2 py-0.5 text-[11px] font-bold text-[#1b3a5f]">Firma</span>
+                  <p class="mt-2 truncate font-semibold text-slate-800">{{ firm.companyName }}</p>
+                  <p class="truncate text-sm text-slate-600">{{ firm.trade }}</p>
+                  <p class="mt-1 text-xs text-slate-400">{{ firm.location }}</p>
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
       @if (totalElements() === 0) {
         <p class="mt-10 rounded-2xl bg-white p-8 text-center text-slate-500 shadow-sm">
           {{ emptyMessage() }}
@@ -46,7 +72,10 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
         <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             @for (item of listings(); track item.id) {
               <li class="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                <a [routerLink]="['/anzeigen', item.id]" class="block cursor-pointer text-left">
+                <a [routerLink]="['/anzeigen', item.id]" class="relative block cursor-pointer text-left">
+                  @if (item.promoted) {
+                    <span class="absolute left-3 top-3 z-10 rounded-full bg-[#f5c400] px-2 py-0.5 text-[11px] font-bold text-[#1b3a5f]">Top · Anzeige</span>
+                  }
                   <img [src]="item.imageSrc" [alt]="item.title" class="h-44 w-full bg-slate-100 object-cover" />
                   <div class="p-4">
                     <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
@@ -100,6 +129,9 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
           </nav>
         }
       }
+      @if (totalElements() > 0) {
+        <app-display-ad />
+      }
     </main>
     <app-landing-footer />
   `,
@@ -107,6 +139,7 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
 export class CategoryListingsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly marketplace = inject(MarketplaceListingsService);
+  private readonly businessProfiles = inject(BusinessProfileService);
   private readonly standortService = inject(StandortService);
   private readonly viewport = inject(ViewportScroller);
 
@@ -186,6 +219,7 @@ export class CategoryListingsComponent {
   });
 
   private readonly results = signal<MarketplaceListing[]>([]);
+  readonly firms = signal<BusinessCard[]>([]);
   private readonly totalCount = signal(0);
   private readonly pageCount = signal(0);
   private searchSeq = 0;
@@ -268,7 +302,8 @@ export class CategoryListingsComponent {
         : slug && slug !== 'weitere'
           ? slug
           : this.categoryQuery() || null;
-    const rows = await this.marketplace.search({
+    const [rows, firmRows] = await Promise.all([
+      this.marketplace.search({
       q: this.search() || null,
       kat,
       ort: this.standort() || null,
@@ -279,11 +314,14 @@ export class CategoryListingsComponent {
       kostenlos: this.freeOnly(),
       page: Math.max(0, this.page() - 1),
       size: this.pageSize(),
-    });
+    }),
+      this.services() ? this.businessProfiles.active(this.standort() || null) : Promise.resolve([]),
+    ]);
     if (seq !== this.searchSeq) {
       return;
     }
     this.results.set(rows.content);
+    this.firms.set(firmRows);
     this.totalCount.set(rows.totalElements);
     this.pageCount.set(rows.totalPages);
   }

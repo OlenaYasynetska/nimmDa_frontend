@@ -14,6 +14,7 @@ interface ListingDto {
   imageSrc: string;
   createdAt?: string;
   sellerId?: string;
+  promoted?: boolean;
 }
 
 interface ListingsPageDto {
@@ -130,5 +131,6 @@ function toMarketplaceListing(row: ListingDto): MarketplaceListing {
     location: row.location,
     createdAt: row.createdAt,
     sellerId: row.sellerId,
+    promoted: row.promoted === true,
   };
 }

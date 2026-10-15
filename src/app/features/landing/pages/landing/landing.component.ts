@@ -5,6 +5,7 @@ import { LandingHeroComponent } from '../../components/landing-hero/landing-hero
 import { ActionCardsComponent } from '../../components/action-cards/action-cards.component';
 import { PopularCategoriesComponent } from '../../components/popular-categories/popular-categories.component';
 import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
+import { HomepageBannerComponent } from '../../components/homepage-banner/homepage-banner.component';
 import { LandingFooterComponent } from '../../components/landing-footer/landing-footer.component';
 
 @Component({
@@ -24,6 +25,7 @@ export class EmptyOutletComponent {}
     ActionCardsComponent,
     PopularCategoriesComponent,
     HowItWorksComponent,
+    HomepageBannerComponent,
     LandingFooterComponent,
   ],
   host: {
@@ -42,6 +44,7 @@ export class EmptyOutletComponent {}
     <div class="pt-64 sm:pt-64 md:pt-72">
       <app-popular-categories />
     </div>
+    <app-homepage-banner />
     <app-how-it-works />
     <app-landing-footer />
     <router-outlet />

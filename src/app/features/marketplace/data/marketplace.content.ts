@@ -7,4 +7,5 @@ export interface MarketplaceListing {
   location: string;
   createdAt?: string;
   sellerId?: string;
+  promoted?: boolean;
 }

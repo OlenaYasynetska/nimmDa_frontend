@@ -138,6 +138,13 @@ export const routes: Routes = [
         redirectTo: 'meine-anzeigen/neu',
       },
       {
+        path: 'profi',
+        loadComponent: () =>
+          import('./features/konto/pages/konto-profi/konto-profi.component').then(
+            (m) => m.KontoProfiComponent
+          ),
+      },
+      {
         path: 'profil',
         loadComponent: () =>
           import('./features/konto/pages/konto-profile/konto-profile.component').then(
@@ -152,6 +159,13 @@ export const routes: Routes = [
           ),
       },
     ],
+  },
+  {
+    path: 'profi/:userId',
+    loadComponent: () =>
+      import('./features/business/pages/business-profile/business-profile.component').then(
+        (m) => m.BusinessProfileComponent
+      ),
   },
   {
     path: 'seller/listings/new',

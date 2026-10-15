@@ -69,9 +69,36 @@ import { AdminDirectoryService } from '../../services/admin-directory.service';
 
       <section class="rounded-2xl bg-white p-5 shadow-sm">
         <h2 class="text-lg font-bold text-slate-800">Zahlungsverlauf</h2>
-        <p class="mt-6 py-6 text-center text-sm text-slate-400">
-          Noch keine Zahlungen. Zahlungen erscheinen hier nach dem Checkout.
-        </p>
+        @if (directory.payments().length === 0) {
+          <p class="mt-6 py-6 text-center text-sm text-slate-400">
+            Noch keine Zahlungen. Zahlungen erscheinen hier nach dem Checkout.
+          </p>
+        } @else {
+          <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full text-left text-sm">
+              <thead class="text-xs uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th class="px-2 py-2 font-semibold">E-Mail</th>
+                  <th class="px-2 py-2 font-semibold">Anzeige</th>
+                  <th class="px-2 py-2 font-semibold">Betrag</th>
+                  <th class="px-2 py-2 font-semibold">Bezahlt</th>
+                  <th class="px-2 py-2 font-semibold">Top bis</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                @for (payment of directory.payments(); track payment.id) {
+                  <tr>
+                    <td class="px-2 py-2 text-slate-700">{{ payment.sellerEmail }}</td>
+                    <td class="px-2 py-2 font-medium text-slate-800">{{ payment.listingTitle }}</td>
+                    <td class="px-2 py-2 text-slate-700">{{ money(payment.amountCents) }}</td>
+                    <td class="px-2 py-2 text-slate-500">{{ formatDate(payment.paidAt) }}</td>
+                    <td class="px-2 py-2 text-slate-500">{{ formatDate(payment.promotedUntil) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       </section>
     </div>
   `,
@@ -95,5 +122,9 @@ export class AdminDashboardComponent implements OnInit {
       return value;
     }
     return date.toLocaleDateString('de-AT');
+  }
+
+  money(cents: number): string {
+    return (cents / 100).toLocaleString('de-AT', { style: 'currency', currency: 'EUR' });
   }
 }

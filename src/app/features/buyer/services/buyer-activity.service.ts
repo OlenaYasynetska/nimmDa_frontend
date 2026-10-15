@@ -28,6 +28,7 @@ interface FavoriteDto {
   imageSrc: string;
   createdAt?: string;
   sellerId?: string;
+  promoted?: boolean;
 }
 
 const STORAGE_KEY = 'nimmda.buyer.activity';
@@ -216,5 +217,6 @@ function toListing(row: FavoriteDto): MarketplaceListing {
     location: row.location,
     createdAt: row.createdAt,
     sellerId: row.sellerId,
+    promoted: row.promoted === true,
   };
 }

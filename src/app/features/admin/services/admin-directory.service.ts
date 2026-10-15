@@ -12,6 +12,28 @@ export interface AdminOverview {
   subscriptionCount: number;
 }
 
+export interface AdminSubscription {
+  id: string;
+  userId: string;
+  companyName: string;
+  sellerEmail: string;
+  amountCents: number;
+  currency: string;
+  paidAt: string;
+  activeUntil: string;
+}
+
+export interface AdminPayment {
+  id: string;
+  listingId: string;
+  listingTitle: string;
+  sellerEmail: string;
+  amountCents: number;
+  currency: string;
+  paidAt: string;
+  promotedUntil: string;
+}
+
 export interface AdminUser {
   id: string;
   email: string;
@@ -34,18 +56,26 @@ export class AdminDirectoryService {
     subscriptionCount: 0,
   });
   private readonly usersSignal = signal<AdminUser[]>([]);
+  private readonly paymentsSignal = signal<AdminPayment[]>([]);
+  private readonly subscriptionsSignal = signal<AdminSubscription[]>([]);
 
   readonly overview = this.overviewSignal.asReadonly();
   readonly users = this.usersSignal.asReadonly();
+  readonly payments = this.paymentsSignal.asReadonly();
+  readonly subscriptions = this.subscriptionsSignal.asReadonly();
 
   async refresh(): Promise<void> {
     try {
-      const [overview, users] = await Promise.all([
+      const [overview, users, payments, subscriptions] = await Promise.all([
         firstValueFrom(this.http.get<AdminOverview>(`${environment.apiUrl}/admin/overview`)),
         firstValueFrom(this.http.get<AdminUser[]>(`${environment.apiUrl}/admin/users`)),
+        firstValueFrom(this.http.get<AdminPayment[]>(`${environment.apiUrl}/admin/advertisers`)),
+        firstValueFrom(this.http.get<AdminSubscription[]>(`${environment.apiUrl}/admin/subscriptions`)),
       ]);
       this.overviewSignal.set(overview);
       this.usersSignal.set(users);
+      this.paymentsSignal.set(payments);
+      this.subscriptionsSignal.set(subscriptions);
     } catch {
       this.overviewSignal.set({
         buyerCount: 0,
@@ -56,6 +86,8 @@ export class AdminDirectoryService {
         subscriptionCount: 0,
       });
       this.usersSignal.set([]);
+      this.paymentsSignal.set([]);
+      this.subscriptionsSignal.set([]);
     }
   }
 

@@ -10,6 +10,8 @@ export interface SellerListing {
   imageSrc: string;
   category?: string;
   location?: string;
+  promoted?: boolean;
+  promotedUntil?: string | null;
 }
 
 export interface SellerChatLine {
