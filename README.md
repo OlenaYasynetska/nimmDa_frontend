@@ -105,8 +105,8 @@ npm run build
 | --- | --- | --- |
 | `NG_APP_API_URL` | `/api` | База API. Относительный `/api` годится, только если хост сам проксирует `/api` на Java. |
 | `NG_APP_GA_MEASUREMENT_ID` | `G-JL2HHG2SKY` | GA4. Пустое значение выключает ID в бандле; сниппет в `index.html` при этом остаётся. |
-| `NG_APP_ADSENSE_CLIENT` | пусто | Издатель AdSense (`ca-pub-…`). Вместе со слотом включает чужие баннеры. |
-| `NG_APP_ADSENSE_SLOT` | пусто | Числовой id блока AdSense. Оба поля пустые — реклама за показы выключена. |
+| `NG_APP_ADSENSE_CLIENT` | `ca-pub-7335564704542106` | Издатель AdSense. Тот же номер стоит в проверочном теге в `index.html`. |
+| `NG_APP_ADSENSE_SLOT` | пусто | Числовой id блока. Пока пусто, видимого баннера нет. |
 
 `https://nimmda.org/api` — это само Angular-приложение, не Java API. Чтобы прод-сборка ходила в бэкенд, нужен абсолютный URL (`https://<backend-host>/api`) либо прокси на хостинге.
 

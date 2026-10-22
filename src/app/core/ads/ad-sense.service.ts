@@ -17,9 +17,8 @@ declare global {
 }
 
 /**
- * Google display ads. Off until both AdSense ids are set.
- * The tag may load on listing pages, but ad cookies and the visible unit
- * stay off until the visitor allows advertising cookies.
+ * Google display ads. The publisher tag is in index.html so AdSense can see the site.
+ * A visible unit still needs a slot id and the visitor's permission for ad cookies.
  */
 @Injectable({ providedIn: 'root' })
 export class AdSenseService {
@@ -57,7 +56,11 @@ export class AdSenseService {
    * so the tag does not store ad cookies on its own.
    */
   loadScript(): void {
-    if (!this.configured || this.scriptRequested || typeof document === 'undefined') return;
+    if (!/^ca-pub-\d+$/.test(this.clientId) || this.scriptRequested || typeof document === 'undefined') return;
+    if (document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')) {
+      this.scriptRequested = true;
+      return;
+    }
     this.scriptRequested = true;
     const script = document.createElement('script');
     script.async = true;

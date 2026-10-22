@@ -5,8 +5,8 @@
  * Variables:
  *   NG_APP_API_URL — optional full https://…/api, or /api (same-origin proxy).
  *   NG_APP_GA_MEASUREMENT_ID — optional GA4 stream ID (G-XXXXXXXXXX).
- *   NG_APP_ADSENSE_CLIENT — optional AdSense publisher id (ca-pub-…).
- *   NG_APP_ADSENSE_SLOT — optional display-ad slot id. Both must be set together.
+ *   NG_APP_ADSENSE_CLIENT — AdSense publisher id (ca-pub-…). Defaults to the NimmDa account.
+ *   NG_APP_ADSENSE_SLOT — optional display-ad slot id. Empty keeps the visible ad unit off.
  *
  * Flags:
  *   --mobile       reject a relative /api URL (Capacitor has no dev proxy)
@@ -116,14 +116,10 @@ const apiUrl = normalizeApiUrl(process.env.NG_APP_API_URL);
 const gaMeasurementId = readMeasurementId(
   process.env.NG_APP_GA_MEASUREMENT_ID || 'G-JL2HHG2SKY'
 );
-const adsenseClient = readAdSenseClient(process.env.NG_APP_ADSENSE_CLIENT);
+const adsenseClient = readAdSenseClient(
+  process.env.NG_APP_ADSENSE_CLIENT || 'ca-pub-7335564704542106'
+);
 const adsenseSlot = readAdSenseSlot(process.env.NG_APP_ADSENSE_SLOT);
-if (Boolean(adsenseClient) !== Boolean(adsenseSlot)) {
-  console.error('');
-  console.error('Set both NG_APP_ADSENSE_CLIENT and NG_APP_ADSENSE_SLOT, or leave both empty.');
-  console.error('');
-  process.exit(1);
-}
 
 if (mobile && !/^https?:\/\//i.test(apiUrl)) {
   console.error('');

@@ -9,6 +9,6 @@ export const environment: AppEnvironment = {
   production: false,
   apiUrl: '/api',
   gaMeasurementId: 'G-JL2HHG2SKY',
-  adsenseClient: '',
+  adsenseClient: 'ca-pub-7335564704542106',
   adsenseSlot: '',
 };
