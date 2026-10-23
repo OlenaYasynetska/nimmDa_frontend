@@ -245,6 +245,13 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'datenschutz',
+    loadComponent: () =>
+      import('./features/landing/pages/datenschutz/datenschutz.component').then(
+        (m) => m.DatenschutzComponent
+      ),
+  },
+  {
     path: '404',
     loadComponent: () =>
       import('./features/errors/pages/not-found/not-found.component').then(
