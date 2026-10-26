@@ -110,6 +110,10 @@ npm run build
 
 `https://nimmda.org/api` — это само Angular-приложение, не Java API. Java API: `https://api.nimmda.org/api`.
 
+## PWA
+
+Сайт ставится на экран телефона без магазина. Манифест и иконки лежат в `public/`, регистрация service worker — в `PwaInstallService`. В подвале кнопка «App installieren» (Android/Chrome) или подсказка для iPhone. Пустые ссылки App Store и Google Play убраны.
+
 ## Android
 
 ```powershell

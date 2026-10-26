@@ -6,6 +6,7 @@ import {
   FOOTER_SERVICE_LINKS,
 } from '../../data/landing.content';
 import { FOOTER_DOCS, type FooterDocId } from '../../data/footer-docs.content';
+import { PwaInstallService } from '../../../../core/pwa/pwa-install.service';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
 import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 
@@ -147,21 +148,37 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 
         <div>
           <h3 class="text-sm font-bold text-[#1b3a5f]">NimmDa App</h3>
-          <p class="mt-3 text-sm text-slate-600">Bald für iOS und Android.</p>
-          <div class="mt-4 flex flex-col gap-2">
-            <a
-              href="#"
-              class="inline-flex w-fit items-center rounded-md bg-slate-900 px-3 py-2 text-xs font-medium text-white"
-            >
-              App Store
-            </a>
-            <a
-              href="#"
-              class="inline-flex w-fit items-center rounded-md bg-slate-900 px-3 py-2 text-xs font-medium text-white"
-            >
-              Google Play
-            </a>
-          </div>
+          @if (pwa.installed()) {
+            <p class="mt-3 text-sm text-slate-600">NimmDa ist auf diesem Gerät installiert.</p>
+          } @else {
+            <p class="mt-3 text-sm text-slate-600">Lege NimmDa auf den Home-Bildschirm.</p>
+            @if (pwa.canInstall()) {
+              <button
+                type="button"
+                class="mt-4 inline-flex w-fit items-center rounded-md bg-[#1b3a5f] px-3 py-2 text-xs font-medium text-white"
+                (click)="pwa.install()"
+              >
+                App installieren
+              </button>
+            } @else if (pwa.ios()) {
+              <button
+                type="button"
+                class="mt-4 inline-flex w-fit items-center rounded-md bg-[#1b3a5f] px-3 py-2 text-xs font-medium text-white"
+                (click)="pwa.showIosHelp()"
+              >
+                Zum Home-Bildschirm
+              </button>
+              @if (pwa.iosHelp()) {
+                <p class="mt-2 max-w-xs text-xs leading-relaxed text-slate-500">
+                  Tippe in Safari auf das Teilen-Symbol und dann auf „Zum Home-Bildschirm“.
+                </p>
+              }
+            } @else {
+              <p class="mt-2 max-w-xs text-xs leading-relaxed text-slate-500">
+                Auf dem Handy bietet der Browser „App installieren“ oder „Zum Home-Bildschirm“ an.
+              </p>
+            }
+          }
         </div>
       </div>
       <div
@@ -246,6 +263,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 })
 export class LandingFooterComponent {
   private readonly document = inject(DOCUMENT);
+  readonly pwa = inject(PwaInstallService);
   readonly year = new Date().getFullYear();
   readonly serviceLinks = FOOTER_SERVICE_LINKS;
   readonly businessLinks = FOOTER_BUSINESS_LINKS;
