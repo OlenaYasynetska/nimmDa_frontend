@@ -78,9 +78,9 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
         ],
       },
       {
-        heading: 'Passwort vergessen',
+        heading: 'Passwort ändern',
         paragraphs: [
-          'Auf der Anmeldeseite Passwort vergessen wählen. Wir schicken einen Link zum Zurücksetzen an deine E-Mail-Adresse.',
+          'Angemeldet: Einstellungen öffnen und Link senden wählen. Wir schicken den Link an die E-Mail deines Kontos. Ohne Anmeldung: auf der Anmeldeseite Passwort vergessen wählen. Der Link gilt eine Stunde.',
         ],
       },
       {

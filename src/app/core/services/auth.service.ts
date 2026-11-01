@@ -138,6 +138,15 @@ export class AuthService {
     this.rememberMail(email, 'reset', result);
   }
 
+  async requestOwnPasswordChange(): Promise<void> {
+    const email = this.currentUserSignal()?.email ?? '';
+    const result = await this.postMail('/auth/password-change', {});
+    this.rememberMail(email, 'reset', result);
+    if (result.mailSent !== true) {
+      throw new AuthFlowException('mailFailed');
+    }
+  }
+
   async resetPassword(token: string, password: string): Promise<void> {
     await this.postVoid('/auth/reset-password', { token, password });
     this.logout();

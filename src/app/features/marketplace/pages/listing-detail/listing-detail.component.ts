@@ -93,7 +93,13 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
             }
           </div>
         </article>
-        <app-display-ad />
+        @if (item.description) {
+          <section class="mt-4 rounded-2xl bg-white p-6 shadow-sm">
+            <h2 class="text-lg font-extrabold text-[#1b3a5f]">Beschreibung</h2>
+            <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-700">{{ item.description }}</p>
+          </section>
+          <app-display-ad />
+        }
       } @else {
         <p class="mt-10 rounded-2xl bg-white p-8 text-center text-slate-500 shadow-sm">
           Anzeige nicht gefunden.

@@ -17,7 +17,8 @@ declare global {
 }
 
 /**
- * Google display ads. The publisher tag is in index.html so AdSense can see the site.
+ * Google display ads. The publisher tag is loaded only by the ad unit,
+ * and that unit is rendered only on listing pages that already have content.
  * A visible unit still needs a slot id and the visitor's permission for ad cookies.
  */
 @Injectable({ providedIn: 'root' })

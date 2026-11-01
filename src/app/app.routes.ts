@@ -26,6 +26,9 @@ const loadCreateListing = () =>
     (m) => m.CreateListingComponent
   );
 
+const loadSiteDoc = () =>
+  import('./features/landing/pages/site-doc/site-doc.component').then((m) => m.SiteDocComponent);
+
 export const routes: Routes = [
   {
     path: 'anzeigen/artikel/:id',
@@ -246,10 +249,23 @@ export const routes: Routes = [
   },
   {
     path: 'datenschutz',
-    loadComponent: () =>
-      import('./features/landing/pages/datenschutz/datenschutz.component').then(
-        (m) => m.DatenschutzComponent
-      ),
+    loadComponent: loadSiteDoc,
+    data: { doc: 'datenschutz' },
+  },
+  {
+    path: 'impressum',
+    loadComponent: loadSiteDoc,
+    data: { doc: 'impressum' },
+  },
+  {
+    path: 'kontakt',
+    loadComponent: loadSiteDoc,
+    data: { doc: 'kontakt' },
+  },
+  {
+    path: 'ueber-uns',
+    loadComponent: loadSiteDoc,
+    data: { doc: 'about' },
   },
   {
     path: '404',

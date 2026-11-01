@@ -103,12 +103,12 @@ npm run build
 
 | Переменная | По умолчанию | Смысл |
 | --- | --- | --- |
-| `NG_APP_API_URL` | `/api` | База API сайта. Для Android без этой переменной берётся `https://api.nimmda.org/api`. |
+| `NG_APP_API_URL` | `https://api.nimmda.org/api` | База API продакшен-сборки. Относительный `/api` тоже заменяется на этот адрес: на nimmda.org нет прокси к Java API. |
 | `NG_APP_GA_MEASUREMENT_ID` | `G-JL2HHG2SKY` | GA4. Пустое значение выключает ID в бандле; сниппет в `index.html` при этом остаётся. |
-| `NG_APP_ADSENSE_CLIENT` | `ca-pub-7335564704542106` | Издатель AdSense. Тот же номер стоит в проверочном теге в `index.html`. |
+| `NG_APP_ADSENSE_CLIENT` | `ca-pub-7335564704542106` | Издатель AdSense. Скрипт рекламы не лежит в `index.html`: он подключается только на страницах объявлений, где уже есть содержание. |
 | `NG_APP_ADSENSE_SLOT` | пусто | Числовой id блока. Пока пусто, видимого баннера нет. |
 
-`https://nimmda.org/api` — это само Angular-приложение, не Java API. Java API: `https://api.nimmda.org/api`.
+`https://nimmda.org/api` — это само Angular-приложение, не Java API. Продакшен-сборка сайта ходит на `https://api.nimmda.org/api`.
 
 ## PWA
 
@@ -121,7 +121,7 @@ npm run build:mobile
 npm run android
 ```
 
-`build:mobile` подставляет `https://api.nimmda.org/api`, если `NG_APP_API_URL` относительный. На телефоне нет dev-proxy.
+`build:mobile` использует тот же адрес API, что и сайт. На телефоне нет dev-proxy. Явный `NG_APP_API_URL=http://…` по-прежнему перекрывает адрес.
 
 Страница для Google Play: `https://www.nimmda.org/datenschutz`. Она появится на сайте после выкладки фронтенда.
 

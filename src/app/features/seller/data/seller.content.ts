@@ -10,6 +10,7 @@ export interface SellerListing {
   imageSrc: string;
   category?: string;
   location?: string;
+  description?: string;
   promoted?: boolean;
   promotedUntil?: string | null;
 }

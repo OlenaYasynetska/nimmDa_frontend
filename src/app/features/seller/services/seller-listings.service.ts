@@ -15,6 +15,7 @@ interface ListingDto {
   imageSrc: string;
   category: string;
   location?: string;
+  description?: string;
   promoted?: boolean;
   promotedUntil?: string | null;
 }
@@ -70,6 +71,7 @@ export class SellerListingsService {
     imageSrc?: string;
     category?: string;
     location?: string;
+    description?: string;
   }): Promise<void> {
     await firstValueFrom(
       this.http.post(`${environment.apiUrl}/listings`, {
@@ -78,6 +80,7 @@ export class SellerListingsService {
         category: input.category || 'Möbel & Haushalt',
         location: input.location,
         imageSrc: input.imageSrc,
+        description: input.description,
       })
     );
     await this.refresh();
@@ -91,6 +94,7 @@ export class SellerListingsService {
       imageSrc?: string;
       category?: string;
       location?: string;
+      description?: string;
     }
   ): Promise<void> {
     await firstValueFrom(
@@ -100,6 +104,7 @@ export class SellerListingsService {
         category: input.category || 'Möbel & Haushalt',
         location: input.location,
         imageSrc: input.imageSrc,
+        description: input.description,
       })
     );
     await this.refresh();
@@ -169,6 +174,7 @@ function toSellerListing(row: ListingDto): SellerListing {
     imageSrc: row.imageSrc,
     category: row.category,
     location: row.location,
+    description: row.description?.trim() || undefined,
     promoted: row.promoted === true,
     promotedUntil: row.promotedUntil ?? null,
   };

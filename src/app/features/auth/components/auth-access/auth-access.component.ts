@@ -97,7 +97,7 @@ type AccountStatus = 'new' | 'existing';
         @if (error()) {
           <p class="text-sm text-red-600">{{ error() }}</p>
         }
-        <app-button type="submit" [disabled]="busy()">
+        <app-button class="block" type="submit" [disabled]="busy()">
           {{ status() === 'new' ? 'Konto erstellen' : 'Anmelden' }}
         </app-button>
       </form>

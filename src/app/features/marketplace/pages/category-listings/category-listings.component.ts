@@ -87,6 +87,9 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
                       }
                     </p>
                     <p class="mt-1 text-xs text-slate-400">{{ item.location }} · {{ item.category }}</p>
+                    @if (item.description) {
+                      <p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ item.description }}</p>
+                    }
                   </div>
                 </a>
               </li>
@@ -129,7 +132,7 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
           </nav>
         }
       }
-      @if (totalElements() > 0) {
+      @if (showAd()) {
         <app-display-ad />
       }
     </main>
@@ -270,6 +273,7 @@ export class CategoryListingsComponent {
   });
 
   readonly listings = computed(() => this.results());
+  readonly showAd = computed(() => this.listings().some((item) => !!item.description?.trim()));
 
   readonly totalElements = this.totalCount.asReadonly();
 

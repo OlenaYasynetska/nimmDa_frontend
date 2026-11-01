@@ -11,6 +11,7 @@ interface ListingDto {
   price: number;
   category: string;
   location: string;
+  description?: string;
   imageSrc: string;
   createdAt?: string;
   sellerId?: string;
@@ -129,6 +130,7 @@ function toMarketplaceListing(row: ListingDto): MarketplaceListing {
     imageSrc: row.imageSrc,
     category: row.category,
     location: row.location,
+    description: row.description?.trim() || undefined,
     createdAt: row.createdAt,
     sellerId: row.sellerId,
     promoted: row.promoted === true,

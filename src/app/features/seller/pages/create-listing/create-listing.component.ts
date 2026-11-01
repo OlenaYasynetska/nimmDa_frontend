@@ -63,10 +63,11 @@ import { SellerListingsService } from '../../services/seller-listings.service';
           <label class="mb-1.5 block text-sm font-medium text-slate-600" for="listing-description">Beschreibung</label>
           <textarea
             id="listing-description"
-            rows="4"
+            rows="5"
             formControlName="description"
             class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
           ></textarea>
+          <p class="mt-1 text-xs text-slate-400">Zustand, Maße und Abholung. Der Text steht auf der Anzeige.</p>
         </div>
         <div>
           <p class="mb-1.5 text-sm font-medium text-slate-600">Foto</p>
@@ -154,7 +155,7 @@ export class CreateListingComponent {
     price: [0, [Validators.required, Validators.min(0)]],
     category: [this.categories[0]?.name ?? '', Validators.required],
     location: ['', Validators.required],
-    description: [''],
+    description: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(4000)]],
   });
 
   constructor() {
@@ -226,6 +227,7 @@ export class CreateListingComponent {
           imageSrc: this.photoPreview() ?? undefined,
           category: value.category,
           location,
+          description: value.description.trim(),
         });
       } else {
         await this.listings.add({
@@ -234,6 +236,7 @@ export class CreateListingComponent {
           imageSrc: this.photoPreview() ?? undefined,
           category: value.category,
           location,
+          description: value.description.trim(),
         });
       }
       void this.router.navigateByUrl('/konto/meine-anzeigen');
@@ -289,7 +292,8 @@ export class CreateListingComponent {
       title: item?.title || own?.title || '',
       price: item?.price ?? own?.price ?? 0,
       category: item?.category || own?.category || this.form.controls.category.value,
-                    location: item?.location || own?.location || '',
+      location: item?.location || own?.location || '',
+      description: item?.description || own?.description || '',
     });
     const image = item?.imageSrc || own?.imageSrc;
     if (image) {

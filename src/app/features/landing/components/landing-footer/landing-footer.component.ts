@@ -1,4 +1,5 @@
 import { DOCUMENT } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
   FOOTER_ABOUT_LINKS,
@@ -13,7 +14,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
 @Component({
   selector: 'app-landing-footer',
   standalone: true,
-  imports: [BrandMarkComponent, LandingIconComponent],
+  imports: [BrandMarkComponent, LandingIconComponent, RouterLink],
   host: {
     '(document:keydown.escape)': 'onEscape()',
   },
@@ -64,13 +65,19 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <ul class="mt-3 space-y-2 sm:block" [class.hidden]="!isOpen('service')">
             @for (link of serviceLinks; track link.label) {
               <li>
-                <button
-                  type="button"
-                  class="text-left text-sm text-slate-600 hover:text-slate-900"
-                  (click)="openDoc(link.doc)"
-                >
-                  {{ link.label }}
-                </button>
+                @if (link.path) {
+                  <a [routerLink]="link.path" class="text-sm text-slate-600 hover:text-slate-900">
+                    {{ link.label }}
+                  </a>
+                } @else {
+                  <button
+                    type="button"
+                    class="text-left text-sm text-slate-600 hover:text-slate-900"
+                    (click)="openDoc(link.doc)"
+                  >
+                    {{ link.label }}
+                  </button>
+                }
               </li>
             }
           </ul>
@@ -99,13 +106,19 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <ul class="mt-3 space-y-2 sm:block" [class.hidden]="!isOpen('business')">
             @for (link of businessLinks; track link.label) {
               <li>
-                <button
-                  type="button"
-                  class="text-left text-sm text-slate-600 hover:text-slate-900"
-                  (click)="openDoc(link.doc)"
-                >
-                  {{ link.label }}
-                </button>
+                @if (link.path) {
+                  <a [routerLink]="link.path" class="text-sm text-slate-600 hover:text-slate-900">
+                    {{ link.label }}
+                  </a>
+                } @else {
+                  <button
+                    type="button"
+                    class="text-left text-sm text-slate-600 hover:text-slate-900"
+                    (click)="openDoc(link.doc)"
+                  >
+                    {{ link.label }}
+                  </button>
+                }
               </li>
             }
           </ul>
@@ -134,13 +147,19 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
           <ul class="mt-3 space-y-2 sm:block" [class.hidden]="!isOpen('about')">
             @for (link of aboutLinks; track link.label) {
               <li>
-                <button
-                  type="button"
-                  class="text-left text-sm text-slate-600 hover:text-slate-900"
-                  (click)="openDoc(link.doc)"
-                >
-                  {{ link.label }}
-                </button>
+                @if (link.path) {
+                  <a [routerLink]="link.path" class="text-sm text-slate-600 hover:text-slate-900">
+                    {{ link.label }}
+                  </a>
+                } @else {
+                  <button
+                    type="button"
+                    class="text-left text-sm text-slate-600 hover:text-slate-900"
+                    (click)="openDoc(link.doc)"
+                  >
+                    {{ link.label }}
+                  </button>
+                }
               </li>
             }
           </ul>
@@ -290,7 +309,10 @@ export class LandingFooterComponent {
     this.openSections.update((sections) => ({ ...sections, [id]: !sections[id] }));
   }
 
-  openDoc(id: FooterDocId): void {
+  openDoc(id: FooterDocId | undefined): void {
+    if (!id) {
+      return;
+    }
     this.openId.set(id);
   }
 

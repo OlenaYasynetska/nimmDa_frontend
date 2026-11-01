@@ -1,3 +1,5 @@
+import type { FooterDocId } from './footer-docs.content';
+
 export const LANDING_BRAND = 'NimmDa';
 export const LANDING_TAGLINE = 'Dein lokaler Marktplatz.';
 
@@ -228,23 +230,29 @@ export const HOW_STEPS: HowStep[] = [
   },
 ];
 
-export const FOOTER_SERVICE_LINKS = [
-  { label: 'Hilfe / FAQ', doc: 'faq' as const },
-  { label: 'Sicherheitstipps', doc: 'sicherheit' as const },
-  { label: 'AGB', doc: 'agb' as const },
-  { label: 'Datenschutz', doc: 'datenschutz' as const },
-  { label: 'Impressum', doc: 'impressum' as const },
+export interface FooterNavLink {
+  label: string;
+  doc?: FooterDocId;
+  path?: string;
+}
+
+export const FOOTER_SERVICE_LINKS: readonly FooterNavLink[] = [
+  { label: 'Hilfe / FAQ', doc: 'faq' },
+  { label: 'Sicherheitstipps', doc: 'sicherheit' },
+  { label: 'AGB', doc: 'agb' },
+  { label: 'Datenschutz', path: '/datenschutz' },
+  { label: 'Impressum', path: '/impressum' },
 ];
 
-export const FOOTER_BUSINESS_LINKS = [
-  { label: 'Werbung schalten', doc: 'werbung' as const },
-  { label: 'Profi-Profil', doc: 'profi' as const },
-  { label: 'Kooperationen', doc: 'kooperationen' as const },
+export const FOOTER_BUSINESS_LINKS: readonly FooterNavLink[] = [
+  { label: 'Werbung schalten', doc: 'werbung' },
+  { label: 'Profi-Profil', doc: 'profi' },
+  { label: 'Kooperationen', doc: 'kooperationen' },
 ];
 
-export const FOOTER_ABOUT_LINKS = [
-  { label: 'Über NimmDa', doc: 'about' as const },
-  { label: 'Team', doc: 'team' as const },
-  { label: 'Presse', doc: 'presse' as const },
-  { label: 'Kontakt', doc: 'kontakt' as const },
+export const FOOTER_ABOUT_LINKS: readonly FooterNavLink[] = [
+  { label: 'Über NimmDa', path: '/ueber-uns' },
+  { label: 'Team', doc: 'team' },
+  { label: 'Presse', doc: 'presse' },
+  { label: 'Kontakt', path: '/kontakt' },
 ];

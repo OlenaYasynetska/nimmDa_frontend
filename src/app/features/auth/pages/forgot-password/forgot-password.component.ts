@@ -30,7 +30,7 @@ import { AuthModalComponent } from '../../components/auth-modal/auth-modal.compo
             class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
           />
         </div>
-        <app-button type="submit" [disabled]="form.invalid || busy()">Link senden</app-button>
+        <app-button class="block" type="submit" [disabled]="form.invalid || busy()">Link senden</app-button>
       </form>
       <p class="mt-4 text-center text-sm">
         <a routerLink="/login" class="text-primary hover:underline">Zurück zur Anmeldung</a>

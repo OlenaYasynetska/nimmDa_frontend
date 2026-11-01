@@ -5,6 +5,7 @@ export interface MarketplaceListing {
   imageSrc: string;
   category: string;
   location: string;
+  description?: string;
   createdAt?: string;
   sellerId?: string;
   promoted?: boolean;

@@ -3,13 +3,14 @@
  * Reads a root .env in the frontend directory if present.
  *
  * Variables:
- *   NG_APP_API_URL — optional full https://…/api, or /api (same-origin proxy).
+ *   NG_APP_API_URL — full https://…/api. A relative /api becomes https://api.nimmda.org/api,
+ *     because the public site does not proxy /api to the Java API.
  *   NG_APP_GA_MEASUREMENT_ID — optional GA4 stream ID (G-XXXXXXXXXX).
  *   NG_APP_ADSENSE_CLIENT — AdSense publisher id (ca-pub-…). Defaults to the NimmDa account.
  *   NG_APP_ADSENSE_SLOT — optional display-ad slot id. Empty keeps the visible ad unit off.
  *
  * Flags:
- *   --mobile       use https://api.nimmda.org/api when NG_APP_API_URL is relative
+ *   --mobile       kept for the Android build; relative API URLs already use the public API
  *   --api <url>    override NG_APP_API_URL for this run
  *
  * Direct `ng build` without npm will skip this script — use `npm run build`.
@@ -111,10 +112,9 @@ function readMeasurementId(raw) {
   return id;
 }
 
-const mobile = process.argv.includes('--mobile');
 const PRODUCTION_API = 'https://api.nimmda.org/api';
 let apiUrl = normalizeApiUrl(process.env.NG_APP_API_URL);
-if (mobile && !/^https?:\/\//i.test(apiUrl)) {
+if (!/^https?:\/\//i.test(apiUrl)) {
   apiUrl = PRODUCTION_API;
 }
 const gaMeasurementId = readMeasurementId(

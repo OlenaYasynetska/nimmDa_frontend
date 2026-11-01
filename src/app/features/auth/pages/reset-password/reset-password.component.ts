@@ -62,7 +62,7 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
         @if (error()) {
           <p class="text-sm text-red-600">{{ error() }}</p>
         }
-        <app-button type="submit" [disabled]="form.invalid || busy() || !token">
+        <app-button class="block" type="submit" [disabled]="form.invalid || busy() || !token">
           Passwort speichern
         </app-button>
       </form>
