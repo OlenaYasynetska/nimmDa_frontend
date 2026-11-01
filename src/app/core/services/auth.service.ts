@@ -133,9 +133,10 @@ export class AuthService {
     }
   }
 
-  async requestPasswordReset(email: string): Promise<void> {
+  async requestPasswordReset(email: string): Promise<boolean> {
     const result = await this.postMail('/auth/forgot-password', { email });
     this.rememberMail(email, 'reset', result);
+    return result.mailSent === true;
   }
 
   async requestOwnPasswordChange(): Promise<void> {
@@ -152,9 +153,10 @@ export class AuthService {
     this.logout();
   }
 
-  async resendVerification(email: string): Promise<void> {
+  async resendVerification(email: string): Promise<boolean> {
     const result = await this.postMail('/auth/resend-verification', { email });
     this.rememberMail(email, 'verify', result);
+    return result.mailSent === true;
   }
 
   async resendLastMail(): Promise<void> {

@@ -161,15 +161,9 @@ export class AuthAccessComponent implements OnInit {
     try {
       if (this.status() === 'new') {
         const mailSent = await this.auth.register(email, password);
-        if (mailSent) {
-          await this.router.navigate(['/check-email'], {
-            queryParams: { email, type: 'verify' },
-          });
-          return;
-        }
-        await this.auth.login(email, password);
-        await this.activity.claimGuest();
-        await this.router.navigateByUrl(this.auth.afterAuthPath());
+        await this.router.navigate(['/check-email'], {
+          queryParams: { email, type: 'verify', sent: mailSent ? '1' : '0' },
+        });
         return;
       }
       await this.auth.login(email, password);

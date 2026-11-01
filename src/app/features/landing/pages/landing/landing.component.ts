@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { LandingHeaderComponent } from '../../components/landing-header/landing-header.component';
 import { LandingHeroComponent } from '../../components/landing-hero/landing-hero.component';
 import { ActionCardsComponent } from '../../components/action-cards/action-cards.component';
+import { LatestListingsComponent } from '../../components/latest-listings/latest-listings.component';
 import { PopularCategoriesComponent } from '../../components/popular-categories/popular-categories.component';
 import { HowItWorksComponent } from '../../components/how-it-works/how-it-works.component';
 import { HomepageBannerComponent } from '../../components/homepage-banner/homepage-banner.component';
@@ -23,6 +24,7 @@ export class EmptyOutletComponent {}
     LandingHeaderComponent,
     LandingHeroComponent,
     ActionCardsComponent,
+    LatestListingsComponent,
     PopularCategoriesComponent,
     HowItWorksComponent,
     HomepageBannerComponent,
@@ -42,6 +44,7 @@ export class EmptyOutletComponent {}
       </div>
     </div>
     <div class="pt-64 sm:pt-64 md:pt-72">
+      <app-latest-listings />
       <app-popular-categories />
     </div>
     <app-homepage-banner />

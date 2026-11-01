@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { POPULAR_CATEGORIES } from '../../../landing/data/landing.content';
+import { listingDescriptionHtml } from '../../../marketplace/data/listing-text';
 import { StandortPickerComponent } from '../../../marketplace/components/standort-picker/standort-picker.component';
 import { MarketplaceListingsService } from '../../../marketplace/services/marketplace-listings.service';
 import { SellerListingsService } from '../../services/seller-listings.service';
@@ -67,7 +68,15 @@ import { SellerListingsService } from '../../services/seller-listings.service';
             formControlName="description"
             class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
           ></textarea>
-          <p class="mt-1 text-xs text-slate-400">Zustand, Maße und Abholung. Der Text steht auf der Anzeige.</p>
+          <p class="mt-1 text-xs text-slate-400">
+            Zeilenumbrüche bleiben erhalten. **so** wird fett, eine Zeile mit - wird eine Liste.
+          </p>
+          @if (form.controls.description.value.trim()) {
+            <div
+              class="listing-copy mt-3 rounded-xl bg-white px-3 py-3 text-sm leading-relaxed text-slate-700"
+              [innerHTML]="descriptionPreview()"
+            ></div>
+          }
         </div>
         <div>
           <p class="mb-1.5 text-sm font-medium text-slate-600">Foto</p>
@@ -166,6 +175,10 @@ export class CreateListingComponent {
       }
       untracked(() => void this.prefill(id));
     });
+  }
+
+  descriptionPreview(): string {
+    return listingDescriptionHtml(this.form.controls.description.value);
   }
 
   async onPhotoSelected(event: Event): Promise<void> {

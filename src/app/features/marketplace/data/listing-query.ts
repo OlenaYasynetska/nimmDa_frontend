@@ -82,6 +82,9 @@ function toApiSort(sort?: string | null): string | null {
   if (sort === 'newest' || sort === 'neueste') {
     return 'newest';
   }
+  if (sort === 'posted') {
+    return 'posted';
+  }
   if (sort === 'naehe' || sort === 'distance') {
     return 'distance';
   }

@@ -17,6 +17,7 @@ import { useListingPageSize } from '../../hooks/use-listing-page-size.hook';
 import { BusinessCard, BusinessProfileService } from '../../../business/services/business-profile.service';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 import { StandortService } from '../../services/standort.service';
+import { listingDescriptionPreview } from '../../data/listing-text';
 import type { MarketplaceListing } from '../../data/marketplace.content';
 
 @Component({
@@ -88,7 +89,7 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
                     </p>
                     <p class="mt-1 text-xs text-slate-400">{{ item.location }} · {{ item.category }}</p>
                     @if (item.description) {
-                      <p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ item.description }}</p>
+                      <p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ preview(item.description) }}</p>
                     }
                   </div>
                 </a>
@@ -290,6 +291,10 @@ export class CategoryListingsComponent {
   readonly pageNumbers = computed(() =>
     Array.from({ length: this.totalPages() }, (_, index) => index + 1)
   );
+
+  preview(text: string): string {
+    return listingDescriptionPreview(text);
+  }
 
   goTo(page: number): void {
     const next = Math.min(Math.max(1, page), this.totalPages());

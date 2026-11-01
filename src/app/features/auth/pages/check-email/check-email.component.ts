@@ -51,6 +51,7 @@ export class CheckEmailComponent {
       map((query) => ({
         email: query.get('email') ?? '',
         type: (query.get('type') === 'reset' ? 'reset' : 'verify') as AuthMailType,
+        sent: sentFlag(query.get('sent')),
       }))
     ),
     {
@@ -59,13 +60,14 @@ export class CheckEmailComponent {
         type: (this.route.snapshot.queryParamMap.get('type') === 'reset'
           ? 'reset'
           : 'verify') as AuthMailType,
+        sent: sentFlag(this.route.snapshot.queryParamMap.get('sent')),
       },
     }
   );
 
   readonly email = computed(() => this.params().email);
   readonly type = computed(() => this.params().type);
-  readonly copy = computed(() => checkEmailCopy(this.type()));
+  readonly copy = computed(() => checkEmailCopy(this.type(), this.params().sent));
   readonly busy = signal(false);
   readonly resent = signal(false);
   readonly error = signal<string | null>(null);
@@ -74,12 +76,14 @@ export class CheckEmailComponent {
     this.busy.set(true);
     this.error.set(null);
     try {
-      if (this.type() === 'reset') {
-        await this.auth.requestPasswordReset(this.email());
-      } else {
-        await this.auth.resendVerification(this.email());
+      const sent =
+        this.type() === 'reset'
+          ? await this.auth.requestPasswordReset(this.email())
+          : await this.auth.resendVerification(this.email());
+      this.resent.set(sent);
+      if (!sent) {
+        this.error.set(AUTH_ERRORS.mailFailed);
       }
-      this.resent.set(true);
     } catch (err) {
       const code = err instanceof AuthFlowException ? err.code : 'mailFailed';
       this.error.set(AUTH_ERRORS[code] ?? AUTH_ERRORS.mailFailed);
@@ -87,4 +91,14 @@ export class CheckEmailComponent {
       this.busy.set(false);
     }
   }
+}
+
+function sentFlag(value: string | null): boolean | null {
+  if (value === '1') {
+    return true;
+  }
+  if (value === '0') {
+    return false;
+  }
+  return null;
 }

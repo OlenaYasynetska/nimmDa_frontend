@@ -17,6 +17,34 @@ body {
   overflow-x: hidden;
 }
 
+.listing-copy p {
+  margin: 0.75rem 0 0;
+}
+
+.listing-copy p:first-child {
+  margin-top: 0;
+}
+
+.listing-copy strong {
+  font-weight: 700;
+  color: #1b3a5f;
+}
+
+.listing-copy ul,
+.listing-copy ol {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.listing-copy li + li {
+  margin-top: 0.25rem;
+}
+
+.listing-copy a {
+  color: #2f6fb2;
+  text-decoration: underline;
+}
+
 @media (max-width: 767px) {
   body.has-mobile-tabbar {
     padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));

@@ -8,6 +8,7 @@ import { BuyerActivityService } from '../../../buyer/services/buyer-activity.ser
 import { LandingFooterComponent } from '../../../landing/components/landing-footer/landing-footer.component';
 import { LandingHeaderComponent } from '../../../landing/components/landing-header/landing-header.component';
 import { LandingIconComponent } from '../../../landing/components/landing-icon/landing-icon.component';
+import { listingDescriptionHtml } from '../../data/listing-text';
 import { listingDetailUrl } from '../../data/listing-route';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 
@@ -96,7 +97,10 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
         @if (item.description) {
           <section class="mt-4 rounded-2xl bg-white p-6 shadow-sm">
             <h2 class="text-lg font-extrabold text-[#1b3a5f]">Beschreibung</h2>
-            <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-700">{{ item.description }}</p>
+            <div
+              class="listing-copy mt-3 text-sm leading-relaxed text-slate-700"
+              [innerHTML]="descriptionHtml(item.description)"
+            ></div>
           </section>
           <app-display-ad />
         }
@@ -163,6 +167,10 @@ export class ListingDetailComponent {
         }
       });
     });
+  }
+
+  descriptionHtml(text: string): string {
+    return listingDescriptionHtml(text);
   }
 
   async toggleFavorite(): Promise<void> {
