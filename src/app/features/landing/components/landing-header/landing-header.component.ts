@@ -120,7 +120,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
                 class="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-sm font-semibold text-[#1b3a5f] hover:bg-slate-50"
                 (click)="toggleMenu($event)"
               >
-                {{ displayName }}
+                <span class="max-w-[9rem] truncate">{{ displayName }}</span>
                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
                 </svg>

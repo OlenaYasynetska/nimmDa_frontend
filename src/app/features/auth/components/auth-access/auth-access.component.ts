@@ -65,6 +65,20 @@ type AccountStatus = 'new' | 'existing';
           </div>
         </fieldset>
 
+        @if (status() === 'new') {
+          <div>
+            <label for="auth-name" class="mb-1.5 block text-sm font-medium text-slate-600">Name</label>
+            <input
+              id="auth-name"
+              type="text"
+              formControlName="name"
+              autocomplete="nickname"
+              maxlength="64"
+              class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            />
+            <p class="mt-1 text-xs text-slate-400">So begrüßen wir dich im Konto.</p>
+          </div>
+        }
         <div>
           <label for="auth-email" class="mb-1.5 block text-sm font-medium text-slate-600">E-Mail</label>
           <input
@@ -158,9 +172,14 @@ export class AuthAccessComponent implements OnInit {
     this.error.set(null);
     const email = this.form.controls.email.value;
     const password = this.form.controls.password.value;
+    const name = this.form.controls.name.value.trim().replace(/\s+/g, ' ');
+    if (this.status() === 'new' && !name) {
+      this.error.set('Bitte gib an, wie wir dich nennen sollen.');
+      return;
+    }
     try {
       if (this.status() === 'new') {
-        const mailSent = await this.auth.register(email, password);
+        const mailSent = await this.auth.register(email, password, name);
         await this.router.navigate(['/check-email'], {
           queryParams: { email, type: 'verify', sent: mailSent ? '1' : '0' },
         });
