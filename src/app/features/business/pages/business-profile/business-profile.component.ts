@@ -4,12 +4,14 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { LandingFooterComponent } from '../../../landing/components/landing-footer/landing-footer.component';
 import { LandingHeaderComponent } from '../../../landing/components/landing-header/landing-header.component';
+import { PhotoSliderComponent } from '../../../marketplace/components/photo-slider/photo-slider.component';
+import { listingPhotos } from '../../../marketplace/data/listing-photos';
 import { BusinessProfile, BusinessProfileService } from '../../services/business-profile.service';
 
 @Component({
   selector: 'app-business-profile',
   standalone: true,
-  imports: [RouterLink, LandingHeaderComponent, LandingFooterComponent],
+  imports: [RouterLink, LandingHeaderComponent, LandingFooterComponent, PhotoSliderComponent],
   host: { class: 'block min-h-full w-full bg-[#f3f5f8]' },
   template: `
     <app-landing-header />
@@ -33,8 +35,13 @@ import { BusinessProfile, BusinessProfileService } from '../../services/business
             <ul class="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               @for (item of firm.listings; track item.id) {
                 <li class="overflow-hidden rounded-2xl bg-white shadow-sm">
+                  <app-photo-slider
+                    [photos]="photos(item)"
+                    [alt]="item.title"
+                    [link]="['/anzeigen', item.id]"
+                    imageClass="h-40 w-full object-cover"
+                  />
                   <a [routerLink]="['/anzeigen', item.id]" class="block">
-                    <img [src]="item.imageSrc" [alt]="item.title" class="h-40 w-full bg-slate-100 object-cover" />
                     <span class="block p-4">
                       <span class="block truncate font-semibold text-slate-800">{{ item.title }}</span>
                       <span class="mt-1 block font-extrabold text-[#2f9e57]">{{ price(item.price) }}</span>
@@ -72,6 +79,10 @@ export class BusinessProfileComponent {
       }
       void this.load(userId);
     });
+  }
+
+  photos(item: { imageSrc?: string; images?: string[] | null }): string[] {
+    return listingPhotos(item);
   }
 
   price(value: number): string {

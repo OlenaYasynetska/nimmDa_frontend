@@ -79,46 +79,43 @@ import { SellerListingsService } from '../../services/seller-listings.service';
           }
         </div>
         <div>
-          <p class="mb-1.5 text-sm font-medium text-slate-600">Foto</p>
+          <div class="mb-1.5 flex items-center justify-between gap-3">
+            <p class="text-sm font-medium text-slate-600">Fotos</p>
+            <p class="text-xs text-slate-400">{{ photos().length }} / 5</p>
+          </div>
           <input
             #photoInput
             id="listing-photo"
             type="file"
             accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
             class="sr-only"
             (change)="onPhotoSelected($event)"
           />
-          @if (photoPreview()) {
-            <div class="overflow-hidden rounded-xl bg-slate-100">
-              <img [src]="photoPreview()" [alt]="photoName() || 'Foto'" class="h-48 w-full object-cover" />
-              <div class="flex items-center justify-between gap-2 px-3 py-2">
-                <p class="truncate text-xs text-slate-500">{{ photoName() }}</p>
-                <div class="flex shrink-0 gap-2">
+          @if (photos().length > 0) {
+            <ul class="grid grid-cols-3 gap-2">
+              @for (photo of photos(); track $index) {
+                <li class="relative overflow-hidden rounded-xl bg-slate-100">
+                  <img [src]="photo.src" [alt]="photo.name" class="h-24 w-full object-cover" />
                   <button
                     type="button"
-                    class="text-xs font-medium text-[#2f6fb2] hover:underline"
-                    (click)="photoInput.click()"
-                  >
-                    Ändern
-                  </button>
-                  <button
-                    type="button"
-                    class="text-xs font-medium text-slate-500 hover:text-slate-800"
-                    (click)="clearPhoto(photoInput)"
+                    class="absolute right-1 top-1 rounded-full bg-white/95 px-2 py-0.5 text-xs font-semibold text-slate-600 shadow"
+                    (click)="removePhoto($index)"
                   >
                     Entfernen
                   </button>
-                </div>
-              </div>
-            </div>
-          } @else {
+                </li>
+              }
+            </ul>
+          }
+          @if (photos().length < 5) {
             <button
               type="button"
-              class="flex w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-slate-500 hover:border-[#2f9e57] hover:bg-[#eaf8ef] hover:text-[#2f9e57]"
+              class="mt-2 flex w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-slate-500 hover:border-[#2f9e57] hover:bg-[#eaf8ef] hover:text-[#2f9e57]"
               (click)="photoInput.click()"
             >
               <span class="text-sm font-semibold">Foto hinzufügen</span>
-              <span class="text-xs">JPG, PNG oder WEBP</span>
+              <span class="text-xs">Bis zu 5 Fotos · JPG, PNG oder WEBP</span>
             </button>
           }
           @if (photoError()) {
@@ -152,8 +149,7 @@ export class CreateListingComponent {
   );
 
   readonly categories = POPULAR_CATEGORIES.filter((item) => item.name !== 'Weitere Kategorien');
-  readonly photoPreview = signal<string | null>(null);
-  readonly photoName = signal<string | null>(null);
+  readonly photos = signal<{ src: string; name: string }[]>([]);
   readonly photoError = signal<string | null>(null);
   readonly photoBusy = signal(false);
   readonly saving = signal(false);
@@ -183,38 +179,42 @@ export class CreateListingComponent {
 
   async onPhotoSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) {
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    if (files.length === 0) {
       return;
     }
-    if (!file.type.startsWith('image/')) {
-      this.photoError.set('Bitte wähle eine Bilddatei.');
-      input.value = '';
+    const room = 5 - this.photos().length;
+    if (room <= 0) {
+      this.photoError.set('Höchstens 5 Fotos.');
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      this.photoError.set('Das Foto darf höchstens 8 MB groß sein.');
-      input.value = '';
-      return;
-    }
+    const accepted = files.slice(0, room);
+    this.photoError.set(files.length > room ? 'Höchstens 5 Fotos.' : null);
     this.photoBusy.set(true);
-    this.photoError.set(null);
     try {
-      this.photoPreview.set(await this.compressImage(file));
-      this.photoName.set(file.name);
+      const next = [...this.photos()];
+      for (const file of accepted) {
+        if (!file.type.startsWith('image/')) {
+          this.photoError.set('Bitte wähle eine Bilddatei.');
+          continue;
+        }
+        if (file.size > 8 * 1024 * 1024) {
+          this.photoError.set('Das Foto darf höchstens 8 MB groß sein.');
+          continue;
+        }
+        next.push({ src: await this.compressImage(file), name: file.name });
+      }
+      this.photos.set(next.slice(0, 5));
     } catch {
       this.photoError.set('Das Foto konnte nicht geladen werden.');
-      this.photoPreview.set(null);
-      this.photoName.set(null);
     } finally {
       this.photoBusy.set(false);
     }
   }
 
-  clearPhoto(input: HTMLInputElement): void {
-    input.value = '';
-    this.photoPreview.set(null);
-    this.photoName.set(null);
+  removePhoto(index: number): void {
+    this.photos.update((items) => items.filter((_, itemIndex) => itemIndex !== index));
     this.photoError.set(null);
   }
 
@@ -230,27 +230,23 @@ export class CreateListingComponent {
       this.saveError.set('Bitte gib eine Stadt ein.');
       return;
     }
+    const images = this.photos().map((photo) => photo.src);
     this.saving.set(true);
     this.saveError.set(null);
     try {
+      const payload = {
+        title: value.title,
+        price: value.price,
+        imageSrc: images[0],
+        images,
+        category: value.category,
+        location,
+        description: value.description.trim(),
+      };
       if (this.listingId()) {
-        await this.listings.update(this.listingId() as string, {
-          title: value.title,
-          price: value.price,
-          imageSrc: this.photoPreview() ?? undefined,
-          category: value.category,
-          location,
-          description: value.description.trim(),
-        });
+        await this.listings.update(this.listingId() as string, payload);
       } else {
-        await this.listings.add({
-          title: value.title,
-          price: value.price,
-          imageSrc: this.photoPreview() ?? undefined,
-          category: value.category,
-          location,
-          description: value.description.trim(),
-        });
+        await this.listings.add(payload);
       }
       void this.router.navigateByUrl('/konto/meine-anzeigen');
     } catch (error) {
@@ -308,10 +304,10 @@ export class CreateListingComponent {
       location: item?.location || own?.location || '',
       description: item?.description || own?.description || '',
     });
-    const image = item?.imageSrc || own?.imageSrc;
-    if (image) {
-      this.photoPreview.set(image);
-    }
+    const stored = item?.images?.length ? item.images : own?.images;
+    const cover = item?.imageSrc || own?.imageSrc;
+    const sources = stored?.length ? stored : cover ? [cover] : [];
+    this.photos.set(sources.slice(0, 5).map((src, index) => ({ src, name: `Foto ${index + 1}` })));
   }
 }
 

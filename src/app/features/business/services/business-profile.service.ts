@@ -15,6 +15,7 @@ export interface BusinessListing {
   title: string;
   price: number;
   imageSrc: string;
+  images?: string[];
   category: string;
 }
 

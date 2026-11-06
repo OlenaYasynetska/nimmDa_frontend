@@ -8,6 +8,8 @@ import { BuyerActivityService } from '../../../buyer/services/buyer-activity.ser
 import { LandingFooterComponent } from '../../../landing/components/landing-footer/landing-footer.component';
 import { LandingHeaderComponent } from '../../../landing/components/landing-header/landing-header.component';
 import { LandingIconComponent } from '../../../landing/components/landing-icon/landing-icon.component';
+import { PhotoSliderComponent } from '../../components/photo-slider/photo-slider.component';
+import { listingPhotos } from '../../data/listing-photos';
 import { listingDescriptionHtml } from '../../data/listing-text';
 import { listingDetailUrl } from '../../data/listing-route';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
@@ -21,6 +23,7 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
     LandingFooterComponent,
     LandingIconComponent,
     DisplayAdComponent,
+    PhotoSliderComponent,
   ],
   host: {
     class: 'block min-h-full w-full bg-[#f3f5f8]',
@@ -31,7 +34,7 @@ import { MarketplaceListingsService } from '../../services/marketplace-listings.
       <a routerLink="/anzeigen" class="text-sm font-medium text-[#2f6fb2] hover:underline">← Alle Anzeigen</a>
       @if (listing(); as item) {
         <article class="mt-5 overflow-hidden rounded-2xl bg-white shadow-sm md:grid md:grid-cols-2">
-          <img [src]="item.imageSrc" [alt]="item.title" class="h-64 w-full bg-slate-100 object-cover md:h-full" />
+          <app-photo-slider [photos]="photos(item)" [alt]="item.title" imageClass="h-64 w-full object-cover md:h-full md:min-h-80" />
           <div class="p-6">
             @if (item.promoted) {
               <p class="mb-2 inline-flex rounded-full bg-[#f5c400] px-2 py-0.5 text-[11px] font-bold text-[#1b3a5f]">Top · Anzeige</p>
@@ -167,6 +170,10 @@ export class ListingDetailComponent {
         }
       });
     });
+  }
+
+  photos(item: { imageSrc?: string; images?: string[] | null }): string[] {
+    return listingPhotos(item);
   }
 
   descriptionHtml(text: string): string {

@@ -3,6 +3,7 @@ export interface MarketplaceListing {
   title: string;
   price: number;
   imageSrc: string;
+  images?: string[];
   category: string;
   location: string;
   description?: string;

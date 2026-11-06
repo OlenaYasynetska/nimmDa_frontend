@@ -17,6 +17,8 @@ import { useListingPageSize } from '../../hooks/use-listing-page-size.hook';
 import { BusinessCard, BusinessProfileService } from '../../../business/services/business-profile.service';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
 import { StandortService } from '../../services/standort.service';
+import { PhotoSliderComponent } from '../../components/photo-slider/photo-slider.component';
+import { listingPhotos } from '../../data/listing-photos';
 import { listingDescriptionPreview } from '../../data/listing-text';
 import type { MarketplaceListing } from '../../data/marketplace.content';
 
@@ -29,6 +31,7 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
     LandingFooterComponent,
     ListingFiltersComponent,
     DisplayAdComponent,
+    PhotoSliderComponent,
   ],
   host: {
     class: 'block min-h-full w-full bg-[#f3f5f8]',
@@ -73,11 +76,18 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
         <ul class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             @for (item of listings(); track item.id) {
               <li class="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                <a [routerLink]="['/anzeigen', item.id]" class="relative block cursor-pointer text-left">
+                <div class="relative">
                   @if (item.promoted) {
                     <span class="absolute left-3 top-3 z-10 rounded-full bg-[#f5c400] px-2 py-0.5 text-[11px] font-bold text-[#1b3a5f]">Top · Anzeige</span>
                   }
-                  <img [src]="item.imageSrc" [alt]="item.title" class="h-44 w-full bg-slate-100 object-cover" />
+                  <app-photo-slider
+                    [photos]="photos(item)"
+                    [alt]="item.title"
+                    [link]="['/anzeigen', item.id]"
+                    imageClass="h-44 w-full object-cover"
+                  />
+                </div>
+                <a [routerLink]="['/anzeigen', item.id]" class="relative block cursor-pointer text-left">
                   <div class="p-4">
                     <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
                     <p class="mt-1 text-lg font-extrabold text-[#2f9e57]">
@@ -291,6 +301,10 @@ export class CategoryListingsComponent {
   readonly pageNumbers = computed(() =>
     Array.from({ length: this.totalPages() }, (_, index) => index + 1)
   );
+
+  photos(item: { imageSrc?: string; images?: string[] | null }): string[] {
+    return listingPhotos(item);
+  }
 
   preview(text: string): string {
     return listingDescriptionPreview(text);

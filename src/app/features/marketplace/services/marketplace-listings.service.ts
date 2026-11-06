@@ -13,6 +13,7 @@ interface ListingDto {
   location: string;
   description?: string;
   imageSrc: string;
+  images?: string[];
   createdAt?: string;
   sellerId?: string;
   promoted?: boolean;
@@ -128,6 +129,7 @@ function toMarketplaceListing(row: ListingDto): MarketplaceListing {
     title: row.title,
     price: Number(row.price),
     imageSrc: row.imageSrc,
+    images: (row.images ?? []).filter((src) => !!src?.trim()).slice(0, 5),
     category: row.category,
     location: row.location,
     description: row.description?.trim() || undefined,

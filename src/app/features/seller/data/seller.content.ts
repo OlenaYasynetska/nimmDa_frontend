@@ -8,6 +8,7 @@ export interface SellerListing {
   chats: number;
   status: ListingStatus;
   imageSrc: string;
+  images?: string[];
   category?: string;
   location?: string;
   description?: string;

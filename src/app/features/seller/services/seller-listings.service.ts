@@ -13,6 +13,7 @@ interface ListingDto {
   chats: number;
   status: string;
   imageSrc: string;
+  images?: string[];
   category: string;
   location?: string;
   description?: string;
@@ -69,6 +70,7 @@ export class SellerListingsService {
     title: string;
     price: number;
     imageSrc?: string;
+    images?: string[];
     category?: string;
     location?: string;
     description?: string;
@@ -80,6 +82,7 @@ export class SellerListingsService {
         category: input.category || 'Möbel & Haushalt',
         location: input.location,
         imageSrc: input.imageSrc,
+        images: input.images,
         description: input.description,
       })
     );
@@ -92,6 +95,7 @@ export class SellerListingsService {
       title: string;
       price: number;
       imageSrc?: string;
+      images?: string[];
       category?: string;
       location?: string;
       description?: string;
@@ -104,6 +108,7 @@ export class SellerListingsService {
         category: input.category || 'Möbel & Haushalt',
         location: input.location,
         imageSrc: input.imageSrc,
+        images: input.images,
         description: input.description,
       })
     );
@@ -172,6 +177,7 @@ function toSellerListing(row: ListingDto): SellerListing {
     chats: row.chats ?? 0,
     status: row.status === 'PAUSED' ? 'pausiert' : 'aktiv',
     imageSrc: row.imageSrc,
+    images: (row.images ?? []).filter((src) => !!src?.trim()).slice(0, 5),
     category: row.category,
     location: row.location,
     description: row.description?.trim() || undefined,

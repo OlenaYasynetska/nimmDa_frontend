@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { PhotoSliderComponent } from '../../../marketplace/components/photo-slider/photo-slider.component';
+import { listingPhotos } from '../../../marketplace/data/listing-photos';
 import { categoryByName, categoryListingsPath } from '../../data/landing.content';
 import { listingDescriptionPreview } from '../../../marketplace/data/listing-text';
 import type { MarketplaceListing } from '../../../marketplace/data/marketplace.content';
@@ -9,7 +11,7 @@ import { StandortService } from '../../../marketplace/services/standort.service'
 @Component({
   selector: 'app-latest-listings',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, PhotoSliderComponent],
   template: `
     @if (listings().length > 0) {
       <section class="container px-4 pb-12 md:px-8" aria-labelledby="neueste-anzeigen">
@@ -17,8 +19,13 @@ import { StandortService } from '../../../marketplace/services/standort.service'
         <ul class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
           @for (item of listings(); track item.id) {
             <li class="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-md">
+              <app-photo-slider
+                [photos]="photos(item)"
+                [alt]="item.title"
+                [link]="['/anzeigen', item.id]"
+                imageClass="h-36 w-full object-cover sm:h-44"
+              />
               <a [routerLink]="['/anzeigen', item.id]" class="block min-w-0">
-                <img [src]="item.imageSrc" [alt]="item.title" class="h-36 w-full bg-slate-100 object-cover sm:h-44" />
                 <div class="p-3 sm:p-4">
                   <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
                   <p class="mt-1 text-base font-extrabold text-[#2f9e57] sm:text-lg">
@@ -59,6 +66,10 @@ export class LatestListingsComponent {
 
   constructor() {
     void this.load();
+  }
+
+  photos(item: { imageSrc?: string; images?: string[] | null }): string[] {
+    return listingPhotos(item);
   }
 
   preview(text: string): string {
