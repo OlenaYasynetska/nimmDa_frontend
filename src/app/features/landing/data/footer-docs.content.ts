@@ -191,7 +191,7 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
           'Die Zusatzleistung „Top“ hebt eine Anzeige für 7 Tage über die kostenlosen Anzeigen. Sie kostet 4,99 €. Es wird keine Umsatzsteuer ausgewiesen (Kleinunternehmerin gemäß § 6 Abs. 1 Z 27 UStG). Die Kennzeichnung „Top · Anzeige“ macht die Werbung erkennbar. Danach reiht sich die Anzeige wieder unter die kostenlosen ein. Der Preis steht vor der Zahlung.',
           'Das Profi-Profil kostet 19,99 € für 30 Tage. Es zeigt Firma, Branche, Ort, Telefon und die eigenen Anzeigen und steht in dieser Zeit über privaten Anzeigen in Services, gekennzeichnet als Firma. Danach bleibt die Seite erreichbar, erscheint aber nicht mehr in diesem Block.',
           'Ein Platz auf der Startseite kostet 99 € für 30 Tage, fest und nicht pro Klick. Er ist als Anzeige gekennzeichnet. Vertrag, Rechnung und Bannerbild werden direkt vereinbart.',
-          'Top-Anzeige und Profi-Profil starten erst, wenn die Zahlung erfolgreich war. Der Zahlungsbeleg geht an die E-Mail-Adresse des Kontos. Läuft die bezahlte Zeit ab, entfällt die Kennzeichnung automatisch.',
+          'Top-Anzeige und Profi-Profil starten erst, wenn die Zahlung erfolgreich war. Die Rechnung geht an die E-Mail-Adresse des Kontos. Läuft die bezahlte Zeit ab, entfällt die Kennzeichnung automatisch.',
         ],
       },
       {

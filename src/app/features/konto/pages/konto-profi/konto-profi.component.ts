@@ -15,7 +15,7 @@ import {
     <section class="rounded-2xl bg-white p-4 shadow-sm sm:p-5">
       <h2 class="text-lg font-bold text-slate-800">Profi-Profil</h2>
       <p class="mt-1 text-sm text-slate-500">
-        Firma, Branche, Ort und Telefon. Einzelne Anzeigen bleiben kostenlos.
+        Firma, Branche, Telefon und die Rechnungsadresse. Einzelne Anzeigen bleiben kostenlos.
       </p>
 
       @if (notice()) {
@@ -38,8 +38,18 @@ import {
           <input id="profi-trade" formControlName="trade" class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200" />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-600" for="profi-location">Ort</label>
-          <input id="profi-location" formControlName="location" class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200" />
+          <label class="mb-1.5 block text-sm font-medium text-slate-600" for="profi-street">Straße und Hausnummer</label>
+          <input id="profi-street" formControlName="street" autocomplete="street-address" class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200" />
+        </div>
+        <div class="grid gap-4 sm:grid-cols-[8rem_1fr]">
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-600" for="profi-postal">PLZ</label>
+            <input id="profi-postal" formControlName="postalCode" inputmode="numeric" autocomplete="postal-code" class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200" />
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-600" for="profi-location">Ort</label>
+            <input id="profi-location" formControlName="location" autocomplete="address-level2" class="block w-full rounded-xl border-0 bg-slate-100 px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-200" />
+          </div>
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-600" for="profi-phone">Telefon</label>
@@ -63,7 +73,7 @@ import {
           </button>
         </div>
         <p class="text-xs text-slate-500">
-          30 Tage über privaten Anzeigen in Services, gekennzeichnet als Firma. Kein Umsatzsteuerausweis.
+          30 Tage über privaten Anzeigen in Services, gekennzeichnet als Firma. Die Adresse steht auf der Rechnung. Keine Umsatzsteuer.
           @if (profileId()) {
             <a class="text-[#2f6fb2] hover:underline" [routerLink]="['/profi', profileId()]">Öffentliche Seite</a>
           }
@@ -82,6 +92,8 @@ export class KontoProfiComponent {
   readonly form = this.formBuilder.nonNullable.group({
     companyName: ['', [Validators.required, Validators.maxLength(160)]],
     trade: ['', [Validators.required, Validators.maxLength(160)]],
+    street: ['', [Validators.required, Validators.maxLength(160)]],
+    postalCode: ['', [Validators.required, Validators.pattern(/^[0-9]{4}$/)]],
     location: ['', [Validators.required, Validators.maxLength(128)]],
     phone: ['', [Validators.required, Validators.pattern(/^[0-9+()/\-\s]{5,40}$/)]],
   });
@@ -118,7 +130,7 @@ export class KontoProfiComponent {
   async save(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.notice.set('Bitte Firmenname, Branche, Ort und Telefon ausfüllen.');
+      this.notice.set('Bitte Firma, Branche, Straße, PLZ, Ort und Telefon ausfüllen.');
       return;
     }
     this.saving.set(true);
@@ -180,6 +192,8 @@ export class KontoProfiComponent {
     this.form.setValue({
       companyName: profile.companyName,
       trade: profile.trade,
+      street: profile.street ?? '',
+      postalCode: profile.postalCode ?? '',
       location: profile.location,
       phone: profile.phone,
     });
