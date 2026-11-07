@@ -313,7 +313,7 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
           'Kleinunternehmerin gemäß § 6 Abs. 1 Z 27 UStG.',
           'Es wird keine Umsatzsteuer berechnet. Der angegebene Preis ist der Endbetrag.',
           'Kostenpflichtig sind nur diese Zusatzleistungen: Top-Anzeige 4,99 € für 7 Tage, Profi-Profil 19,99 € für 30 Tage, Startseiten-Anzeige 99 € für 30 Tage.',
-          'Top und Profi-Profil werden auf der Website bezahlt und beginnen erst nach erfolgreicher Zahlung. Ein Zahlungsbeleg geht an die E-Mail-Adresse des Kontos. Die Startseiten-Anzeige wird direkt verrechnet. Nach Ablauf des Zeitraums endet die Leistung automatisch.',
+          'Top und Profi-Profil werden auf der Website bezahlt und beginnen erst nach erfolgreicher Zahlung. Eine Rechnung geht an die E-Mail-Adresse des Kontos. Die Startseiten-Anzeige wird direkt verrechnet. Nach Ablauf des Zeitraums endet die Leistung automatisch.',
         ],
       },
     ],
