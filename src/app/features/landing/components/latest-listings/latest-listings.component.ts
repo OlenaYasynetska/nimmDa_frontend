@@ -19,12 +19,17 @@ import { StandortService } from '../../../marketplace/services/standort.service'
         <ul class="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
           @for (item of listings(); track item.id) {
             <li class="flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-md">
-              <app-photo-slider
-                [photos]="photos(item)"
-                [alt]="item.title"
-                [link]="['/anzeigen', item.id]"
-                imageClass="h-36 w-full object-cover sm:h-44"
-              />
+              <div class="relative">
+                @if (item.promoted) {
+                  <span class="absolute left-3 top-3 z-10 rounded-full bg-[#f5c400] px-2 py-0.5 text-[11px] font-bold text-[#1b3a5f]">Top · Anzeige</span>
+                }
+                <app-photo-slider
+                  [photos]="photos(item)"
+                  [alt]="item.title"
+                  [link]="['/anzeigen', item.id]"
+                  imageClass="h-36 w-full object-cover sm:h-44"
+                />
+              </div>
               <a [routerLink]="['/anzeigen', item.id]" class="block min-w-0">
                 <div class="p-3 sm:p-4">
                   <p class="truncate font-semibold text-slate-800">{{ item.title }}</p>
@@ -83,16 +88,10 @@ export class LatestListingsComponent {
 
   private async load(): Promise<void> {
     const page = await this.marketplace.search({
-      sort: 'posted',
+      sort: 'newest',
       page: 0,
       size: 12,
     });
-    const ordered = [...page.content].sort((left, right) => postedAt(right) - postedAt(left));
-    this.listings.set(ordered.slice(0, 12));
+    this.listings.set(page.content.slice(0, 12));
   }
-}
-
-function postedAt(item: MarketplaceListing): number {
-  const value = item.createdAt ? Date.parse(item.createdAt) : Number.NaN;
-  return Number.isFinite(value) ? value : 0;
 }
