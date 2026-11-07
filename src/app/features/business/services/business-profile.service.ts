@@ -24,8 +24,6 @@ export interface BusinessProfile {
   companyName: string;
   trade: string;
   location: string;
-  street: string;
-  postalCode: string;
   phone: string;
   active: boolean;
   activeUntil: string | null;
@@ -36,8 +34,6 @@ export interface BusinessProfileInput {
   companyName: string;
   trade: string;
   location: string;
-  street: string;
-  postalCode: string;
   phone: string;
 }
 
