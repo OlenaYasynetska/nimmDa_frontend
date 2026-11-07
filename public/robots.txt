@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /konto
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://www.nimmda.org/sitemap.xml
