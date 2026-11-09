@@ -5,6 +5,7 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
+import { get as httpsGet } from 'node:https';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { POPULAR_CATEGORIES, categoryListingsPath } from './app/features/landing/data/landing.content';
@@ -72,6 +73,9 @@ async function sitemapXml(): Promise<string> {
     return sitemapCache.xml;
   }
   const listings = await publishedListings();
+  if (!listings) {
+    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${siteOrigin}/</loc></url>\n</urlset>\n`;
+  }
   const paths = new Set<string>(['/', '/anzeigen', '/impressum', '/datenschutz', '/kontakt', '/ueber-uns']);
   const usedCategories = new Set(listings.map((item) => item.category).filter((name): name is string => !!name));
   for (const category of POPULAR_CATEGORIES) {
@@ -96,15 +100,29 @@ async function sitemapXml(): Promise<string> {
   return xml;
 }
 
-async function publishedListings(): Promise<PublishedListing[]> {
-  try {
-    const response = await fetch(`${apiBase}/listings?page=0&size=100`);
-    if (!response.ok) {
-      return [];
-    }
-    const body = (await response.json()) as { content?: PublishedListing[] };
-    return body.content ?? [];
-  } catch {
-    return [];
-  }
+async function publishedListings(): Promise<PublishedListing[] | null> {
+  const url = `${apiBase}/listings?page=0&size=100`;
+  return new Promise((resolve) => {
+    const request = httpsGet(
+      url,
+      { headers: { Accept: 'application/json', 'User-Agent': 'NimmDa/1.0 (https://nimmda.org)' } },
+      (response) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk: Buffer) => chunks.push(chunk));
+        response.on('end', () => {
+          if (response.statusCode !== 200) {
+            resolve(null);
+            return;
+          }
+          try {
+            const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { content?: PublishedListing[] };
+            resolve(body.content ?? []);
+          } catch {
+            resolve(null);
+          }
+        });
+      }
+    );
+    request.on('error', () => resolve(null));
+  });
 }
