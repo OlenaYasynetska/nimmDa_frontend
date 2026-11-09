@@ -97,7 +97,7 @@ npm run lint
 npm run build
 ```
 
-`npm run build` собирает браузер и сервер в `dist/nimmda-frontend` и копию статики без `index.html` в `dist/vercel-static`. На Vercel страницы без файла отдаёт `api/ssr.mjs`: в HTML уже есть тексты объявлений, а `sitemap.xml` собирается из активных объявлений. Выкладывать одну папку `browser` нельзя — главная останется пустой, а `/anzeigen` ответит 404.
+`npm run build` собирает браузер и сервер в `dist/nimmda-frontend` и копию статики без `index.html` в `dist/vercel-static`. На Vercel страницы без расширения файла отдаёт `api/page.mjs`: в HTML уже есть тексты объявлений, а `sitemap.xml` собирается из активных объявлений. Выкладывать одну папку `browser` нельзя — главная останется пустой, а `/anzeigen` ответит 404.
 
 Локально тот же сервер:
 

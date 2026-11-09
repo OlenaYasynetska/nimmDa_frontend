@@ -1,17 +1,15 @@
 {
-  "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist/vercel-static",
   "functions": {
-    "api/ssr.mjs": {
+    "api/page.mjs": {
       "includeFiles": "dist/nimmda-frontend/**",
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     }
   },
-  "rewrites": [
-    { "source": "/", "destination": "/api/ssr" },
-    { "source": "/sitemap.xml", "destination": "/api/ssr/sitemap.xml" },
-    { "source": "/((?!api/).*)", "destination": "/api/ssr/$1" }
+  "routes": [
+    { "src": "^/sitemap\\.xml$", "dest": "/api/page?p=/sitemap.xml" },
+    { "src": "^/(?!api(?:/|$))((?:[^.]*))$", "dest": "/api/page?p=/$1" },
+    { "handle": "filesystem" }
   ]
 }

@@ -6,20 +6,14 @@ const serverModule = pathToFileURL(
 ).href;
 const { reqHandler } = await import(serverModule);
 
-const PREFIX = '/api/ssr';
-
 export default function handler(req, res) {
-  const url = req.url || '/';
-  const queryIndex = url.indexOf('?');
-  const path = queryIndex === -1 ? url : url.slice(0, queryIndex);
-  const query = queryIndex === -1 ? '' : url.slice(queryIndex);
-  let nextPath = path;
-  if (path === PREFIX) {
-    nextPath = '/';
-  } else if (path.startsWith(`${PREFIX}/`)) {
-    nextPath = path.slice(PREFIX.length) || '/';
+  const url = new URL(req.url || '/', 'http://nimmda.local');
+  const page = url.searchParams.get('p');
+  if (page && page.startsWith('/') && !page.startsWith('//') && !page.includes('\\')) {
+    url.searchParams.delete('p');
+    const rest = url.searchParams.toString();
+    req.url = page + (rest ? `?${rest}` : '');
   }
-  req.url = `${nextPath}${query}`;
   req.originalUrl = req.url;
   return reqHandler(req, res, (error) => {
     if (error) {
