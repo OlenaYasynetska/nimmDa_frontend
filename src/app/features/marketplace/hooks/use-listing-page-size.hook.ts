@@ -1,4 +1,4 @@
-import { DestroyRef, computed, inject, signal } from '@angular/core';
+import { DestroyRef, afterNextRender, computed, inject, signal } from '@angular/core';
 
 const LISTING_ROWS_PER_PAGE = 3;
 
@@ -16,24 +16,27 @@ function columnsForWidth(width: number): number {
 }
 
 export function useListingPageSize() {
-  const columns = signal(columnsForWidth(window.innerWidth));
+  const columns = signal(4);
   const destroyRef = inject(DestroyRef);
-  let frame = 0;
 
-  const onResize = (): void => {
-    cancelAnimationFrame(frame);
-    frame = requestAnimationFrame(() => {
+  afterNextRender(() => {
+    const apply = (): void => {
       const next = columnsForWidth(window.innerWidth);
       if (next !== columns()) {
         columns.set(next);
       }
+    };
+    apply();
+    let frame = 0;
+    const onResize = (): void => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(apply);
+    };
+    window.addEventListener('resize', onResize);
+    destroyRef.onDestroy(() => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', onResize);
     });
-  };
-
-  window.addEventListener('resize', onResize);
-  destroyRef.onDestroy(() => {
-    cancelAnimationFrame(frame);
-    window.removeEventListener('resize', onResize);
   });
 
   return computed(() => columns() * LISTING_ROWS_PER_PAGE);

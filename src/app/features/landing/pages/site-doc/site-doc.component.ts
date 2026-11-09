@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { PageMetaService } from '../../../../core/seo/page-meta.service';
 import { map } from 'rxjs';
 import { LandingFooterComponent } from '../../components/landing-footer/landing-footer.component';
 import { LandingHeaderComponent } from '../../components/landing-header/landing-header.component';
@@ -54,7 +54,8 @@ import { FOOTER_DOCS, type FooterDocId } from '../../data/footer-docs.content';
 })
 export class SiteDocComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly title = inject(Title);
+  private readonly router = inject(Router);
+  private readonly pageMeta = inject(PageMetaService);
 
   private readonly docId = toSignal(
     this.route.data.pipe(map((data) => data['doc'] as FooterDocId)),
@@ -65,7 +66,13 @@ export class SiteDocComponent {
 
   constructor() {
     effect(() => {
-      this.title.setTitle(`${this.doc().title} – NimmDa`);
+      const doc = this.doc();
+      const description = doc.sections[0]?.paragraphs?.[0] ?? doc.title;
+      this.pageMeta.apply({
+        title: `${doc.title} – NimmDa`,
+        description,
+        path: this.router.url.split('?')[0] || '/',
+      });
     });
   }
 }

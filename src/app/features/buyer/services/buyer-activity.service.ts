@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Injectable, afterNextRender, computed, effect, inject, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
@@ -37,7 +37,7 @@ const STORAGE_KEY = 'nimmda.buyer.activity';
 export class BuyerActivityService {
   private readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
-  private readonly storeSignal = signal<Record<string, BuyerBucket>>(this.readStore());
+  private readonly storeSignal = signal<Record<string, BuyerBucket>>({});
   private readonly accountFavorites = signal<MarketplaceListing[]>([]);
 
   readonly viewed = computed(() => this.bucket().viewed);
@@ -47,6 +47,9 @@ export class BuyerActivityService {
   readonly inquiries = computed(() => this.bucket().inquiries);
 
   constructor() {
+    afterNextRender(() => {
+      this.storeSignal.set(this.readStore());
+    });
     effect(() => {
       const authed = this.auth.isAuthenticated();
       untracked(() => {
@@ -179,6 +182,9 @@ export class BuyerActivityService {
   }
 
   private persist(store: Record<string, BuyerBucket>): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
 

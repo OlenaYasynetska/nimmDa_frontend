@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, afterNextRender, computed, signal } from '@angular/core';
 import {
   parseStandort,
   standortLabel,
@@ -9,7 +9,16 @@ const STORAGE_KEY = 'nimmda.standort';
 
 @Injectable({ providedIn: 'root' })
 export class StandortService {
-  private readonly selectedSignal = signal<StandortValue>(readStored());
+  private readonly selectedSignal = signal<StandortValue>('');
+
+  constructor() {
+    afterNextRender(() => {
+      const stored = readStored();
+      if (stored && !this.selectedSignal()) {
+        this.selectedSignal.set(stored);
+      }
+    });
+  }
 
   readonly selected = this.selectedSignal.asReadonly();
   readonly label = computed(() => standortLabel(this.selectedSignal()));

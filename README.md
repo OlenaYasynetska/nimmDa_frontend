@@ -97,6 +97,17 @@ npm run lint
 npm run build
 ```
 
+`npm run build` собирает браузер и сервер в `dist/nimmda-frontend`. Продакшен нужно запускать процессом Node, а не как папку статических файлов: иначе Google снова получит пустой `<app-root>`.
+
+```powershell
+npm run build
+npm run serve:ssr
+```
+
+Сервер слушает `PORT` (по умолчанию 4000) на `0.0.0.0`. В HTML ответа уже есть заголовки, цены и описания объявлений. `sitemap.xml` на этом сервере строится из активных объявлений и не включает пустые категории. Хосты, с которых разрешён рендер: `www.nimmda.org`, `nimmda.org`, `localhost`. Дополнительный хост прокси задаётся через `NG_ALLOWED_HOSTS`.
+
+Локальный `npm start` тоже рендерит страницы на сервере. Запросы `/api` с сервера идут на `SSR_API_ORIGIN` (по умолчанию `http://127.0.0.1:8080`), потому что прокси `ng serve` их не видит.
+
 `prebuild` запускает `scripts/generate-prod-env.mjs` и пишет gitignored `src/environments/environment.prod.generated.ts`. Angular подменяет им `environment.ts` только в configuration `production`.
 
 Переменные (из `.env` или CI, если переменная уже задана в окружении — она важнее файла):

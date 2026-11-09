@@ -1,8 +1,9 @@
 import { Component, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
 import { ViewportScroller } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
+import { PageMetaService } from '../../../../core/seo/page-meta.service';
 import { categoryBySlug } from '../../../landing/data/landing.content';
 import { LandingFooterComponent } from '../../../landing/components/landing-footer/landing-footer.component';
 import { LandingHeaderComponent } from '../../../landing/components/landing-header/landing-header.component';
@@ -152,6 +153,8 @@ import type { MarketplaceListing } from '../../data/marketplace.content';
 })
 export class CategoryListingsComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly pageMeta = inject(PageMetaService);
   private readonly marketplace = inject(MarketplaceListingsService);
   private readonly businessProfiles = inject(BusinessProfileService);
   private readonly standortService = inject(StandortService);
@@ -236,6 +239,7 @@ export class CategoryListingsComponent {
   readonly firms = signal<BusinessCard[]>([]);
   private readonly totalCount = signal(0);
   private readonly pageCount = signal(0);
+  private readonly resultsReady = signal(false);
   private searchSeq = 0;
 
   constructor() {
@@ -244,6 +248,21 @@ export class CategoryListingsComponent {
       this.page();
       this.pageSize();
       untracked(() => void this.reload());
+    });
+    effect(() => {
+      if (!this.resultsReady()) {
+        return;
+      }
+      const path = this.router.url.split('?')[0] || '/anzeigen';
+      this.pageMeta.apply({
+        title: `${this.title()} – NimmDa`,
+        description:
+          this.totalElements() === 0
+            ? this.emptyMessage()
+            : `${this.countLabel()} auf NimmDa in Oberösterreich.`,
+        path,
+        robots: this.totalElements() === 0 ? 'noindex, follow' : 'index, follow',
+      });
     });
   }
 
@@ -347,6 +366,7 @@ export class CategoryListingsComponent {
     this.firms.set(firmRows);
     this.totalCount.set(rows.totalElements);
     this.pageCount.set(rows.totalPages);
+    this.resultsReady.set(true);
   }
 }
 

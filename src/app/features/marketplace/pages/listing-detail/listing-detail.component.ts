@@ -10,9 +10,10 @@ import { LandingHeaderComponent } from '../../../landing/components/landing-head
 import { LandingIconComponent } from '../../../landing/components/landing-icon/landing-icon.component';
 import { PhotoSliderComponent } from '../../components/photo-slider/photo-slider.component';
 import { listingPhotos } from '../../data/listing-photos';
-import { listingDescriptionHtml } from '../../data/listing-text';
+import { listingDescriptionHtml, listingDescriptionPreview } from '../../data/listing-text';
 import { listingDetailUrl } from '../../data/listing-route';
 import { MarketplaceListingsService } from '../../services/marketplace-listings.service';
+import { PageMetaService } from '../../../../core/seo/page-meta.service';
 
 @Component({
   selector: 'app-listing-detail',
@@ -120,6 +121,7 @@ export class ListingDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly marketplace = inject(MarketplaceListingsService);
+  private readonly pageMeta = inject(PageMetaService);
   private readonly auth = inject(AuthService);
   readonly activity = inject(BuyerActivityService);
 
@@ -149,7 +151,17 @@ export class ListingDetailComponent {
     effect(() => {
       const item = this.listing();
       if (item) {
-        untracked(() => this.activity.trackView(item));
+        untracked(() => {
+          this.activity.trackView(item);
+          const description = item.description
+            ? listingDescriptionPreview(item.description)
+            : `${item.title} in ${item.location}, Oberösterreich`;
+          this.pageMeta.apply({
+            title: `${item.title} in ${item.location} – NimmDa`,
+            description,
+            path: `/anzeigen/${item.id}`,
+          });
+        });
       }
     });
     effect(() => {

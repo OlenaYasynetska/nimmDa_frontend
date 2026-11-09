@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, afterNextRender, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
@@ -44,8 +44,15 @@ export class AuthFlowException extends Error {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly currentUserSignal = signal<AuthUser | null>(this.readJson(USER_KEY));
-  private readonly lastMailSignal = signal<LastAuthMail | null>(this.readJson(LAST_MAIL_KEY, 'session'));
+  private readonly currentUserSignal = signal<AuthUser | null>(null);
+  private readonly lastMailSignal = signal<LastAuthMail | null>(null);
+
+  constructor() {
+    afterNextRender(() => {
+      this.currentUserSignal.set(this.readJson(USER_KEY));
+      this.lastMailSignal.set(this.readJson(LAST_MAIL_KEY, 'session'));
+    });
+  }
 
   readonly currentUser = this.currentUserSignal.asReadonly();
   readonly lastMail = this.lastMailSignal.asReadonly();

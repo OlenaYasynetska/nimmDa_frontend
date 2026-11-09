@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { PageMetaService } from '../../../../core/seo/page-meta.service';
+import { Router, RouterOutlet } from '@angular/router';
 import { LandingHeaderComponent } from '../../components/landing-header/landing-header.component';
 import { LandingHeroComponent } from '../../components/landing-hero/landing-hero.component';
 import { ActionCardsComponent } from '../../components/action-cards/action-cards.component';
@@ -53,4 +54,17 @@ export class EmptyOutletComponent {}
     <router-outlet />
   `,
 })
-export class LandingComponent {}
+export class LandingComponent {
+  constructor() {
+    const path = inject(Router).url.split('?')[0];
+    if (path !== '/' && path !== '') {
+      return;
+    }
+    inject(PageMetaService).apply({
+      title: 'NimmDa – Suchen, Kaufen, Verkaufen in Oberösterreich',
+      description:
+        'Lokaler Marktplatz in Oberösterreich: Anzeigen suchen, kaufen, verkaufen, verschenken und mieten.',
+      path: '/',
+    });
+  }
+}
