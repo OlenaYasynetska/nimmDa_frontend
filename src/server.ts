@@ -13,7 +13,14 @@ import { POPULAR_CATEGORIES, categoryListingsPath } from './app/features/landing
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
 const siteOrigin = 'https://www.nimmda.org';
-const apiBase = (process.env['NG_APP_API_URL'] || 'https://api.nimmda.org/api').replace(/\/$/, '');
+const productionApi = 'https://api.nimmda.org/api';
+const configuredApi = (process.env['NG_APP_API_URL'] || '').trim().replace(/\/$/, '');
+const apiBase =
+  configuredApi.startsWith('http://') || configuredApi.startsWith('https://')
+    ? /\/api$/i.test(configuredApi)
+      ? configuredApi
+      : `${configuredApi}/api`
+    : productionApi;
 const extraHosts = (process.env['NG_ALLOWED_HOSTS'] || '')
   .split(',')
   .map((host) => host.trim())
