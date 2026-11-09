@@ -20,7 +20,8 @@ const extraHosts = (process.env['NG_ALLOWED_HOSTS'] || '')
 
 const app = express();
 const angularApp = new AngularNodeAppEngine({
-  allowedHosts: ['www.nimmda.org', 'nimmda.org', 'localhost', '127.0.0.1', ...extraHosts],
+  allowedHosts: ['www.nimmda.org', 'nimmda.org', 'localhost', '127.0.0.1', '*.vercel.app', ...extraHosts],
+  trustProxyHeaders: true,
 });
 
 let sitemapCache: { xml: string; expires: number } | null = null;

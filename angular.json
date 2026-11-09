@@ -27,7 +27,7 @@
             },
             "outputMode": "server",
             "security": {
-              "allowedHosts": ["www.nimmda.org", "nimmda.org", "localhost", "127.0.0.1"]
+              "allowedHosts": ["www.nimmda.org", "nimmda.org", "localhost", "127.0.0.1", "*.vercel.app"]
             },
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",

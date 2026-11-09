@@ -1,0 +1,17 @@
+{
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/vercel-static",
+  "functions": {
+    "api/ssr.mjs": {
+      "includeFiles": "dist/nimmda-frontend/**",
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api/ssr" },
+    { "source": "/sitemap.xml", "destination": "/api/ssr/sitemap.xml" },
+    { "source": "/((?!api/).*)", "destination": "/api/ssr/$1" }
+  ]
+}
