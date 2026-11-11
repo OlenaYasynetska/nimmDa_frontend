@@ -105,7 +105,11 @@ export class AuthService {
   }
 
   getAccessToken(): string | null {
-    return this.currentUserSignal()?.accessToken ?? null;
+    return this.currentUserSignal()?.accessToken ?? this.readStoredUser()?.accessToken ?? null;
+  }
+
+  hasStoredSession(): boolean {
+    return this.readStoredUser() !== null;
   }
 
   logout(): void {
@@ -276,6 +280,13 @@ export class AuthService {
       code === 'mailFailed' ||
       code === 'network'
     );
+  }
+
+  private readStoredUser(): AuthSessionDto | null {
+    if (typeof localStorage === 'undefined') {
+      return null;
+    }
+    return this.readJson<AuthSessionDto>(USER_KEY);
   }
 
   private readJson<T>(key: string, storage: 'local' | 'session' = 'session'): T | null {
