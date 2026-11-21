@@ -398,12 +398,16 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
     title: 'Kontakt',
     sections: [
       {
+        paragraphs: [
+          'Du hast Fragen? Wir sind für dich da!',
+          'Ob Fragen zu deinem Konto, zu Anzeigen, technische Probleme, Feedback oder Kooperationsanfragen – schreib uns gerne eine E-Mail.',
+          'Wir lesen jede Nachricht und antworten so bald wie möglich.',
+        ],
+      },
+      {
         paragraphs: [SITE_OPERATOR.name, SITE_OPERATOR.addressLines.join('\n')],
         email: SITE_OPERATOR.email,
         emailLabel: 'E-Mail:',
-      },
-      {
-        paragraphs: ['Wir lesen jede Nachricht und antworten so bald wie möglich.'],
       },
     ],
   },
