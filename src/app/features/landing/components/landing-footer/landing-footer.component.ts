@@ -203,7 +203,7 @@ import { LandingIconComponent } from '../landing-icon/landing-icon.component';
       <div
         class="container flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 px-4 py-4 md:px-8"
       >
-        <p class="text-xs text-slate-500">© {{ year }} NimmDa.at</p>
+        <p class="text-xs text-slate-500">© {{ year }} NimmDa</p>
         <p class="inline-flex items-center gap-1 text-xs text-slate-500">
           Dein lokaler Marktplatz
           <svg class="h-3.5 w-3.5 text-[#f5c400]" viewBox="0 0 24 24" fill="currentColor">
