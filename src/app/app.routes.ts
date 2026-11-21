@@ -264,8 +264,8 @@ export const routes: Routes = [
   },
   {
     path: 'ueber-uns',
-    loadComponent: loadSiteDoc,
-    data: { doc: 'about' },
+    loadComponent: () =>
+      import('./features/landing/pages/about/about.component').then((m) => m.AboutComponent),
   },
   {
     path: '404',

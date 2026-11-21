@@ -362,9 +362,8 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
     sections: [
       {
         paragraphs: [
-          'NimmDa ist ein lokaler Marktplatz für Oberösterreich. Ziel ist, dass Dinge und Hilfe in der Nähe bleiben: kaufen, verkaufen, verschenken, Dienstleistungen finden.',
-          'Die Plattform ist bewusst regional. Standort und Umkreis stehen im Mittelpunkt — nicht ein österreichweites Versandportal.',
-          'NimmDa wird von einer Kleinunternehmerin betrieben, ohne Umsatzsteuerausweis.',
+          'Willkommen bei NimmDa – deinem regionalen Online-Marktplatz mit besonderem Fokus auf Oberösterreich.',
+          'Unsere Idee ist es, Menschen aus der Region miteinander zu verbinden und das Kaufen, Verkaufen und Entdecken von Angeboten im eigenen Umfeld einfacher zu machen.',
         ],
       },
     ],
