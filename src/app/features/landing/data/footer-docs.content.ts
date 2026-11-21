@@ -25,6 +25,9 @@ export interface FooterDocSection {
   items?: string[];
   email?: string;
   emailLabel?: string;
+  linkBefore?: string;
+  linkHref?: string;
+  linkLabel?: string;
 }
 
 export interface FooterDoc {
@@ -309,9 +312,27 @@ export const FOOTER_DOCS: Record<FooterDocId, FooterDoc> = {
         emailLabel: 'E-Mail:',
       },
       {
+        heading: 'Angaben zum Unternehmen',
+        paragraphs: [
+          `Medieninhaberin und Betreiberin: ${SITE_OPERATOR.name}`,
+          'Gewerbe: Dienstleistungen in der automatischen Datenverarbeitung und Informationstechnik',
+          'GISA-Zahl: 40105932',
+          'Zuständige Gewerbebehörde: Magistrat der Stadt Steyr',
+          'Mitgliedschaft: Wirtschaftskammer Oberösterreich, Fachgruppe Unternehmensberatung, Buchhaltung und Informationstechnologie',
+          'Staat der Verleihung der Gewerbeberechtigung: Österreich',
+        ],
+        linkBefore: 'Anwendbare Rechtsvorschriften: Gewerbeordnung 1994 (GewO), abrufbar unter',
+        linkHref: 'https://www.ris.bka.gv.at/',
+        linkLabel: 'https://www.ris.bka.gv.at/',
+      },
+      {
         paragraphs: [
           'Kleinunternehmerin gemäß § 6 Abs. 1 Z 27 UStG.',
           'Es wird keine Umsatzsteuer berechnet. Der angegebene Preis ist der Endbetrag.',
+        ],
+      },
+      {
+        paragraphs: [
           'Kostenpflichtig sind nur diese Zusatzleistungen: Top-Anzeige 4,99 € für 7 Tage, Profi-Profil 19,99 € für 30 Tage, Startseiten-Anzeige 99 € für 30 Tage.',
           'Top und Profi-Profil werden auf der Website bezahlt und beginnen erst nach erfolgreicher Zahlung. Eine Rechnung geht an die E-Mail-Adresse des Kontos. Die Startseiten-Anzeige wird direkt verrechnet. Nach Ablauf des Zeitraums endet die Leistung automatisch.',
         ],

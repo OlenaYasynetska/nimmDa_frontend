@@ -44,6 +44,19 @@ import { FOOTER_DOCS, type FooterDocId } from '../../data/footer-docs.content';
                   <a class="text-[#2f6fb2] hover:underline" [href]="'mailto:' + section.email">{{ section.email }}</a>
                 </p>
               }
+              @if (section.linkHref) {
+                <p class="mt-2">
+                  @if (section.linkBefore) {
+                    {{ section.linkBefore }}
+                  }
+                  <a
+                    class="text-[#2f6fb2] hover:underline"
+                    [href]="section.linkHref"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >{{ section.linkLabel || section.linkHref }}</a>
+                </p>
+              }
             </section>
           }
         </div>
